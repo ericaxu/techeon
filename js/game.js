@@ -89,28 +89,36 @@ GameObject.prototype.Tick = function() {
 };
 
 /**
+ * ValueBase
+ */
+var ValueBase = function(game, name) {
+    GameObject.call(this, game, name);
+    this.value = 0.0;
+    this.maxValue = this.value;
+};
+ValueBase.prototype = inherit(GameObject.prototype, ValueBase);
+ValueBase.prototype.Add = function(value) {
+    this.value += value;
+    this.maxValue = Math.max(this.value, this.maxValue);
+    return this;
+};
+ValueBase.prototype.Remove = function(value) {
+    return this.Add(-value);
+};
+
+/**
  * Resource
  */
 var Resource = function(game, name) {
-    GameObject.call(this, game, name);
-    this.value = 0.0;
+    ValueBase.call(this, game, name);
 };
-Resource.prototype = inherit(GameObject.prototype, Resource);
-Resource.prototype.Add = function(value) {
-    this.value += value;
-    return this;
-};
-Resource.prototype.Remove = function(value) {
-    this.value -= value;
-    return this;
-};
+Resource.prototype = inherit(ValueBase.prototype, Resource);
 
 /**
  * Generator
  */
 var Generator = function(game, name, manual) {
-    GameObject.call(this, game, name);
-    this.count = 0;
+    ValueBase.call(this, game, name);
     this.manual = manual;
     this.rates = {};
     this.multipliers = {};
@@ -118,18 +126,10 @@ var Generator = function(game, name, manual) {
         game.events.off('tick', this.Tick);
     }
 };
-Generator.prototype = inherit(GameObject.prototype, Generator);
+Generator.prototype = inherit(ValueBase.prototype, Generator);
 Generator.prototype.SetBaseRate = function(resource, rate) {
     this.rates[resource] = rate;
     this.multipliers[resource] = 1;
-    return this;
-};
-Generator.prototype.Add = function(value) {
-    this.count += value;
-    return this;
-};
-Generator.prototype.Remove = function(value) {
-    this.count -= value;
     return this;
 };
 Generator.prototype.Tick = function() {
@@ -137,7 +137,7 @@ Generator.prototype.Tick = function() {
     for (var resource in this.rates) {
         var rate = this.rates[resource];
         var multiplier = this.multipliers[resource];
-        var result = this.count * rate * multiplier;
+        var result = this.value * rate * multiplier;
         this.events.trigger('generate_resource', this, resource, result);
         this.game.resources[resource].Add(result);
     }
