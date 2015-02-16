@@ -1,0 +1,26 @@
+html, body, .section {
+	height: 100%;
+}
+
+html {
+	position: relative;
+}
+
+body {
+	display: table;
+	width: 100%;
+}
+
+.section {
+	display: table-cell;
+	border-right: 1px solid black;
+}
+
+#feature-container, #team-container, #upgrade-container {
+	width: 300px;
+}
+
+#feature-container > div {
+	margin: 10px;
+	
+}
