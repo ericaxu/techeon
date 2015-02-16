@@ -6,11 +6,11 @@ var Game = function() {
     this.task = null;
     this.tick = 0;
     this.time = 0;
-    this.timePerTick = 1000 / 50;
     this.resources = {};
     this.generators = {};
     this.upgrades = {};
     this.achievements = {};
+    this.SetTicksPerSecond(50);
 };
 Game.prototype.Start = function() {
     this.events.trigger('game_start', this);
@@ -73,6 +73,13 @@ Game.prototype.Every = function(ticks) {
 Game.prototype.MSToTicks = function(ms) {
     return ms / this.timePerTick;
 };
+Game.prototype.SetTicksPerSecond = function(ticksPerSecond) {
+    this.tickPerSecond = ticksPerSecond;
+    this.timePerTick = 1000 / ticksPerSecond;
+};
+Game.prototype.GetTicksPerSecond = function() {
+    return this.tickPerSecond;
+};
 
 /**
  * Component
@@ -109,6 +116,27 @@ var Amount = function() {
 };
 
 /**
+ * Obtainable
+ */
+var Obtainable = function() {
+    Component.call(this);
+    this.obtained = false;
+    this.SetObtained = function(value) {
+        this.obtained = value;
+        return this;
+    };
+    this.Obtain = function() {
+        this.obtained = true;
+    };
+    this.UnObtain = function() {
+        this.obtained = false;
+    };
+    this.GetObtained = function() {
+        return this.obtained;
+    }
+};
+
+/**
  * Purchasable
  */
 var Purchasable = function() {
@@ -117,6 +145,9 @@ var Purchasable = function() {
     this.sellPrice = {};
     this.restrictions = {};
     this.AddBuyPrice = function(resource, price) {
+        if (!this.game.resources[resource]) {
+
+        }
         this.buyPrice[resource] = price;
         return this;
     };
@@ -131,7 +162,7 @@ var Purchasable = function() {
     this.Available = function() {
         for (var resource in this.restrictions) {
             var availability = this.restrictions[resource];
-            if (this.game.resources[resource].maxAmount < availability) {
+            if (this.game.resources[resource].GetMaxAmount() < availability) {
                 return false;
             }
         }
@@ -140,7 +171,7 @@ var Purchasable = function() {
     this.CanBuy = function() {
         for (var resource in this.buyPrice) {
             var cost = this.buyPrice[resource];
-            if (this.game.resources[resource].amount < cost) {
+            if (this.game.resources[resource].GetAmount() < cost) {
                 return false;
             }
         }
@@ -173,6 +204,45 @@ var Purchasable = function() {
 };
 
 /**
+ * AmountPurchasable
+ */
+var AmountPurchasable = function() {
+    Amount.call(this);
+
+    this.OnBuy = function() {
+        this.Add(1);
+    };
+    this.CanSell = function() {
+        return this.GetAmount() > 0;
+    };
+    this.OnSell = function() {
+        this.Remove(1);
+    };
+
+    Purchasable.call(this);
+};
+
+/**
+ * ObtainablePurchasable
+ */
+var ObtainablePurchasable = function() {
+    this.purchased = false;
+    Obtainable.call(this);
+
+    this.OnBuy = function() {
+        this.Obtain();
+    };
+    this.CanSell = function() {
+        return this.GetObtained();
+    };
+    this.OnSell = function() {
+        this.UnObtain();
+    };
+
+    Purchasable.call(this);
+};
+
+/**
  * Entity
  */
 var Entity = function(game, name) {
@@ -198,8 +268,7 @@ Resource.prototype = inherit(Entity.prototype, Resource);
  */
 var Generator = function(game, name, manual) {
     Entity.call(this, game, name);
-    Amount.call(this);
-    Purchasable.call(this);
+    AmountPurchasable.call(this);
     this.manual = manual;
     this.rates = {};
     this.multipliers = {};
@@ -208,9 +277,9 @@ var Generator = function(game, name, manual) {
     }
 };
 Generator.prototype = inherit(Entity.prototype, Generator);
-Generator.prototype.AddRate = function(resource, rate, multiplier) {
+Generator.prototype.AddRate = function(resource, rate) {
     this.rates[resource] = rate;
-    this.multipliers[resource] = multiplier;
+    this.multipliers[resource] = 1;
     return this;
 };
 Generator.prototype.Tick = function() {
@@ -222,34 +291,15 @@ Generator.prototype.Tick = function() {
         this.game.resources[resource].Add(result);
     }
 };
-Generator.prototype.OnBuy = function() {
-    this.Add(1);
-};
-Generator.prototype.CanSell = function() {
-    return this.GetAmount() > 0;
-};
-Generator.prototype.OnSell = function() {
-    this.Remove(1);
-};
 
 /**
  * Upgrade
  */
 var Upgrade = function(game, name) {
     Entity.call(this, game, name);
-    this.purchased = false;
-    Purchasable.call(this);
+    ObtainablePurchasable.call(this);
 };
 Upgrade.prototype = inherit(Entity.prototype, Upgrade);
-Upgrade.prototype.OnBuy = function() {
-    this.purchased = true;
-};
-Upgrade.prototype.CanSell = function() {
-    return true;
-};
-Upgrade.prototype.OnSell = function() {
-    this.purchased = false;
-};
 
 /**
  * Achievement
