@@ -35,9 +35,12 @@ h4 {
 	padding: 10px;
 }
 
+#main-stats-container {
+	font-family: "Consolas";
+}
+
 #codebase {
 	margin: 10px;
-	font-family: "Consolas";
 	font-size: 14px;
 	cursor: pointer;
 }
