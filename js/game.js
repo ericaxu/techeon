@@ -48,16 +48,24 @@ Game.prototype.Tick = function() {
     this.events.trigger('post_tick', this);
 };
 Game.prototype.CreateResource = function(name) {
-    this.resources[name] = new Resource(this, name);
+    var object = new Resource(this, name);
+    this.resources[name] = object;
+    return object;
 };
-Game.prototype.CreateGenerator = function(name, auto) {
-    this.generators[name] = new Generator(this, name, auto);
+Game.prototype.CreateGenerator = function(name, manual) {
+    var object = new Generator(this, name, manual);
+    this.generators[name] = object;
+    return object;
 };
 Game.prototype.CreateUpgrade = function(name) {
-    this.upgrades[name] = new Upgrade(this, name);
+    var object = new Upgrade(this, name);
+    this.upgrades[name] = object;
+    return object;
 };
 Game.prototype.CreateAchievement = function(name) {
-    this.achievements[name] = new Achievement(this, name);
+    var object = new Achievement(this, name);
+    this.achievements[name] = object;
+    return object;
 };
 
 //Helpers
@@ -100,13 +108,13 @@ Resource.prototype.Remove = function(value) {
 /**
  * Generator
  */
-var Generator = function(game, name, auto) {
+var Generator = function(game, name, manual) {
     GameObject.call(this, game, name);
     this.count = 0;
-    this.auto = auto;
+    this.manual = manual;
     this.rates = {};
     this.multipliers = {};
-    if (!this.auto) {
+    if (this.manual) {
         game.events.off('tick', this.Tick);
     }
 };
