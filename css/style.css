@@ -43,7 +43,7 @@ h4 {
 	margin: 60px 20px;
 }
 
-#num-lines-of-code, #num-dollars {
+.huge-stats {
 	font-size: 40px;
 }
 
