@@ -82,17 +82,9 @@ Game.prototype.GetTicksPerSecond = function() {
 };
 
 /**
- * Component
- */
-var Component = function() {
-    this.events = new Events();
-};
-
-/**
  * Amount
  */
 var Amount = function() {
-    Component.call(this);
     this.amount = 0.0;
     this.maxAmount = this.amount;
     this.SetAmount = function(value) {
@@ -119,7 +111,6 @@ var Amount = function() {
  * Obtainable
  */
 var Obtainable = function() {
-    Component.call(this);
     this.obtained = false;
     this.SetObtained = function(value) {
         this.obtained = value;
@@ -127,9 +118,11 @@ var Obtainable = function() {
     };
     this.Obtain = function() {
         this.obtained = true;
+        this.event.trigger('obtain', this);
     };
     this.UnObtain = function() {
         this.obtained = false;
+        this.event.trigger('unobtain', this);
     };
     this.GetObtained = function() {
         return this.obtained;
@@ -140,7 +133,6 @@ var Obtainable = function() {
  * Purchasable
  */
 var Purchasable = function() {
-    Component.call(this);
     this.buyPrice = {};
     this.sellPrice = {};
     this.restrictions = {};
@@ -161,8 +153,8 @@ var Purchasable = function() {
     };
     this.Available = function() {
         for (var resource in this.restrictions) {
-            var availability = this.restrictions[resource];
-            if (this.game.resources[resource].GetMaxAmount() < availability) {
+            var restriction = this.restrictions[resource];
+            if (this.game.resources[resource].GetMaxAmount() < restriction) {
                 return false;
             }
         }
@@ -184,17 +176,13 @@ var Purchasable = function() {
         for (var resource in this.buyPrice) {
             this.game.resources[resource].Remove(this.buyPrice[resource]);
         }
-        if (this.OnBuy) {
-            this.OnBuy();
-        }
+        this.event.trigger('buy', this);
     };
     this.Sell = function() {
         for (var resource in this.sellPrice) {
             this.game.resources[resource].Add(this.sellPrice[resource]);
         }
-        if (this.OnSell) {
-            this.OnSell();
-        }
+        this.event.trigger('sell', this);
     };
     if (!this.CanSell) {
         this.CanSell = function() {
@@ -209,15 +197,16 @@ var Purchasable = function() {
 var AmountPurchasable = function() {
     Amount.call(this);
 
-    this.OnBuy = function() {
-        this.Add(1);
-    };
     this.CanSell = function() {
         return this.GetAmount() > 0;
     };
-    this.OnSell = function() {
+
+    this.events.on('buy', function() {
+        this.Add(1);
+    }, this);
+    this.events.on('sell', function() {
         this.Remove(1);
-    };
+    }, this);
 
     Purchasable.call(this);
 };
@@ -228,18 +217,76 @@ var AmountPurchasable = function() {
 var ObtainablePurchasable = function() {
     this.purchased = false;
     Obtainable.call(this);
-
-    this.OnBuy = function() {
-        this.Obtain();
-    };
     this.CanSell = function() {
         return this.GetObtained();
     };
-    this.OnSell = function() {
+
+    this.events.on('buy', function() {
+        this.Obtain();
+    }, this);
+    this.events.on('sell', function() {
         this.UnObtain();
-    };
+    }, this);
 
     Purchasable.call(this);
+};
+
+/**
+ * Rewardable
+ */
+var Rewardable = function() {
+    this.rewards = [];
+
+    this.AddReward = function(reward) {
+        this.rewards.push(reward);
+    };
+
+    this.GiveRewards = function() {
+        for (var i = 0; i < this.rewards.length; i++) {
+            this.rewards[i].Reward();
+        }
+    };
+};
+
+/**
+ * Reward
+ */
+var Reward = function(game) {
+    this.game = game;
+};
+Reward.prototype.Reward = function() {
+
+};
+
+var ResourceReward = function(game, resource, amount) {
+    Reward.call(this, game);
+    this.resource = resource;
+    this.amount = amount;
+};
+ResourceReward.prototype = inherit(Reward.prototype, ResourceReward);
+ResourceReward.prototype.GetRewardAmount = function() {
+    return this.amount;
+};
+ResourceReward.prototype.Reward = function() {
+    var amount = this.GetRewardAmount();
+    this.events.trigger('reward_resource', this, this.resource, amount);
+    this.game.resources[this.resource].Add(amount);
+};
+
+var MultiplierReward = function(game, generator, multiplier_add, multiplier_multiply) {
+    Reward.call(this, game);
+    this.generator = generator;
+    this.multiplier_add = multiplier_add;
+    this.multiplier_multiply = multiplier_multiply;
+};
+MultiplierReward.prototype = inherit(Reward.prototype, MultiplierReward);
+MultiplierReward.prototype.GetRewardAmount = function() {
+    return this.amount;
+};
+MultiplierReward.prototype.Reward = function() {
+    var amount = this.GetRewardAmount();
+    this.events.trigger('reward_resource', this, this.resource, amount);
+    this.game.generators[this.generator].Add(amount);
 };
 
 /**
@@ -282,11 +329,14 @@ Generator.prototype.AddRate = function(resource, rate) {
     this.multipliers[resource] = 1;
     return this;
 };
+Generator.prototype.GetRate = function(resource) {
+    var rate = this.rates[resource];
+    var multiplier = this.multipliers[resource];
+    return this.amount * rate * multiplier;
+};
 Generator.prototype.Tick = function() {
     for (var resource in this.rates) {
-        var rate = this.rates[resource];
-        var multiplier = this.multipliers[resource];
-        var result = this.amount * rate * multiplier;
+        var result = this.GetRate(resource);
         this.events.trigger('generate_resource', this, resource, result);
         this.game.resources[resource].Add(result);
     }
@@ -298,8 +348,13 @@ Generator.prototype.Tick = function() {
 var Upgrade = function(game, name) {
     Entity.call(this, game, name);
     ObtainablePurchasable.call(this);
+    this.events.on('obtain', this.Obtained, this);
+    Rewardable.call(this);
 };
 Upgrade.prototype = inherit(Entity.prototype, Upgrade);
+Upgrade.prototype.Obtained = function() {
+    this.GiveRewards();
+};
 
 /**
  * Achievement

@@ -28,11 +28,11 @@ function ctxSetTimeout(func, timeout, context) {
 Events = function() {
     this.events = {};
 };
-Events.prototype.on = function(name, func, ctx) {
+Events.prototype.on = function(name, func, context) {
     if (!this.events[name]) {
         this.events[name] = [];
     }
-    this.events[name].push({func: func, ctx: ctx})
+    this.events[name].push({func: func, context: context})
 };
 Events.prototype.off = function(name, func) {
     if (!func || !this.events[name]) {
@@ -53,6 +53,6 @@ Events.prototype.trigger = function() {
         return;
     }
     for (var i = 0; i < list.length; i++) {
-        list[i].func.apply(list[i].ctx, args);
+        list[i].func.apply(list[i].context, args);
     }
 };
