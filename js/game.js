@@ -96,9 +96,11 @@ var Resource = function(game, name) {
 Resource.prototype = inherit(GameObject.prototype, Resource);
 Resource.prototype.Add = function(value) {
     this.value += value;
+    return this;
 };
 Resource.prototype.Remove = function(value) {
     this.value -= value;
+    return this;
 };
 
 /**
@@ -118,9 +120,11 @@ Generator.prototype.SetBaseRate = function(resource, rate) {
 };
 Generator.prototype.Add = function(value) {
     this.count += value;
+    return this;
 };
 Generator.prototype.Remove = function(value) {
     this.count -= value;
+    return this;
 };
 Generator.prototype.Tick = function() {
     GameObject.prototype.Tick.call(this);
