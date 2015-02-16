@@ -11,7 +11,6 @@ var Game = function() {
     this.generators = {};
     this.upgrades = {};
     this.achievements = {};
-    var self = this;
 };
 Game.prototype.Start = function() {
     this.events.trigger('game_start', this);
@@ -67,7 +66,6 @@ Game.prototype.CreateAchievement = function(name) {
     this.achievements[name] = object;
     return object;
 };
-
 //Helpers
 Game.prototype.Every = function(ticks) {
     return (this.tick % ticks == 0);
@@ -77,48 +75,131 @@ Game.prototype.MSToTicks = function(ms) {
 };
 
 /**
- * GameObject
+ * Component
  */
-var GameObject = function(game, name) {
+var Component = function() {
+    this.events = new Events();
+};
+
+/**
+ * Amount
+ */
+var Amount = function() {
+    Component.call(this);
+    this.amount = 0.0;
+    this.maxAmount = this.amount;
+    this.SetAmount = function(value) {
+        this.amount = value;
+        this.maxAmount = Math.max(this.amount, this.maxAmount);
+        return this;
+    };
+    this.Add = function(value) {
+        this.amount += value;
+        this.maxAmount = Math.max(this.amount, this.maxAmount);
+    };
+    this.Remove = function(value) {
+        this.Add(-value);
+    };
+    this.GetAmount = function() {
+        return this.amount;
+    };
+    this.GetMaxAmount = function() {
+        return this.maxAmount;
+    };
+};
+
+/**
+ * Purchasable
+ */
+var Purchasable = function() {
+    Component.call(this);
+    this.buyPrice = {};
+    this.sellPrice = {};
+    this.restrictions = {};
+    this.AddBuyPrice = function(resource, price) {
+        this.buyPrice[resource] = price;
+        return this;
+    };
+    this.AddSellPrice = function(resource, price) {
+        this.sellPrice[resource] = price;
+        return this;
+    };
+    this.AddRestriction = function(resource, restriction) {
+        this.restrictions[resource] = restriction;
+        return this;
+    };
+    this.Available = function() {
+        for (var resource in this.restrictions) {
+            var availability = this.restrictions[resource];
+            if (this.game.resources[resource].maxAmount < availability) {
+                return false;
+            }
+        }
+        return true;
+    };
+    this.CanBuy = function() {
+        for (var resource in this.buyPrice) {
+            var cost = this.buyPrice[resource];
+            if (this.game.resources[resource].amount < cost) {
+                return false;
+            }
+        }
+        return true;
+    };
+    this.Buy = function() {
+        if (!this.CanBuy()) {
+            return;
+        }
+        for (var resource in this.buyPrice) {
+            this.game.resources[resource].Remove(this.buyPrice[resource]);
+        }
+        if (this.OnBuy) {
+            this.OnBuy();
+        }
+    };
+    this.Sell = function() {
+        for (var resource in this.sellPrice) {
+            this.game.resources[resource].Add(this.sellPrice[resource]);
+        }
+        if (this.OnSell) {
+            this.OnSell();
+        }
+    };
+    if (!this.CanSell) {
+        this.CanSell = function() {
+            return true;
+        }
+    }
+};
+
+/**
+ * Entity
+ */
+var Entity = function(game, name) {
     this.events = new Events();
     this.game = game;
     this.name = name;
     game.events.on('tick', this.Tick, this);
 };
-GameObject.prototype.Tick = function() {
-};
-
-/**
- * ValueBase
- */
-var ValueBase = function(game, name) {
-    GameObject.call(this, game, name);
-    this.amount = 0.0;
-    this.maxAmount = this.amount;
-};
-ValueBase.prototype = inherit(GameObject.prototype, ValueBase);
-ValueBase.prototype.Add = function(value) {
-    this.amount += value;
-    this.maxAmount = Math.max(this.amount, this.maxAmount);
-    return this;
-};
-ValueBase.prototype.Remove = function(value) {
-    return this.Add(-value);
+Entity.prototype.Tick = function() {
 };
 
 /**
  * Resource
  */
 var Resource = function(game, name) {
-    ValueBase.call(this, game, name);
+    Entity.call(this, game, name);
+    Amount.call(this);
 };
-Resource.prototype = inherit(ValueBase.prototype, Resource);
+Resource.prototype = inherit(Entity.prototype, Resource);
 
 /**
  * Generator
  */
 var Generator = function(game, name, manual) {
-    ValueBase.call(this, game, name);
+    Entity.call(this, game, name);
+    Amount.call(this);
+    Purchasable.call(this);
     this.manual = manual;
     this.rates = {};
     this.multipliers = {};
@@ -126,14 +207,13 @@ var Generator = function(game, name, manual) {
         game.events.off('tick', this.Tick);
     }
 };
-Generator.prototype = inherit(ValueBase.prototype, Generator);
-Generator.prototype.SetBaseRate = function(resource, rate) {
+Generator.prototype = inherit(Entity.prototype, Generator);
+Generator.prototype.AddRate = function(resource, rate, multiplier) {
     this.rates[resource] = rate;
-    this.multipliers[resource] = 1;
+    this.multipliers[resource] = multiplier;
     return this;
 };
 Generator.prototype.Tick = function() {
-    GameObject.prototype.Tick.call(this);
     for (var resource in this.rates) {
         var rate = this.rates[resource];
         var multiplier = this.multipliers[resource];
@@ -142,40 +222,40 @@ Generator.prototype.Tick = function() {
         this.game.resources[resource].Add(result);
     }
 };
+Generator.prototype.OnBuy = function() {
+    this.Add(1);
+};
+Generator.prototype.CanSell = function() {
+    return this.GetAmount() > 0;
+};
+Generator.prototype.OnSell = function() {
+    this.Remove(1);
+};
 
 /**
  * Upgrade
  */
 var Upgrade = function(game, name) {
-    GameObject.call(this, game, name);
-    this.available = false;
+    Entity.call(this, game, name);
     this.purchased = false;
-    this.cost = {};
+    Purchasable.call(this);
 };
-Upgrade.prototype = inherit(GameObject.prototype, Upgrade);
-Upgrade.prototype.CanBuy = function() {
-    for (var resource in this.cost) {
-        var cost = this.cost[resource];
-        if (this.game.resources[resource].amount < cost) {
-            return false;
-        }
-    }
+Upgrade.prototype = inherit(Entity.prototype, Upgrade);
+Upgrade.prototype.OnBuy = function() {
+    this.purchased = true;
+};
+Upgrade.prototype.CanSell = function() {
     return true;
 };
-Upgrade.prototype.Buy = function() {
-    if (this.CanBuy()) {
-        for (var resource in this.cost) {
-            var cost = this.cost[resource];
-            this.game.resources[resource].Remove(cost);
-        }
-    }
+Upgrade.prototype.OnSell = function() {
+    this.purchased = false;
 };
 
 /**
  * Achievement
  */
 var Achievement = function(game, name) {
-    GameObject.call(this, game, name);
-    this.available = false;
+    Entity.call(this, game, name);
+    this.unlocked = false;
 };
-Achievement.prototype = inherit(GameObject.prototype, Achievement);
+Achievement.prototype = inherit(Entity.prototype, Achievement);
