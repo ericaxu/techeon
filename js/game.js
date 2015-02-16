@@ -7,7 +7,6 @@ var Game = function() {
     this.tick = 0;
     this.time = 0;
     this.timePerTick = 1000 / 50;
-    this.objects = [];
     this.resources = {};
     this.generators = {};
     this.upgrades = {};
@@ -45,26 +44,20 @@ Game.prototype.Loop = function() {
 Game.prototype.Tick = function() {
     this.events.trigger('pre_tick', this);
     this.tick++;
-    for (var i = 0; i < this.objects.length; i++) {
-        this.objects[i].Tick();
-    }
+    this.events.trigger('tick', this);
     this.events.trigger('post_tick', this);
 };
-Game.prototype.AddResource = function(object) {
-    this.resources[object.name] = object;
-    this.objects.push(object);
+Game.prototype.CreateResource = function(name) {
+    this.resources[name] = new Resource(this, name);
 };
-Game.prototype.AddGenerator = function(object) {
-    this.generators[object.name] = object;
-    this.objects.push(object);
+Game.prototype.CreateGenerator = function(name, auto) {
+    this.generators[name] = new Generator(this, name, auto);
 };
-Game.prototype.AddUpgrade = function(object) {
-    this.upgrades[object.name] = object;
-    this.objects.push(object);
+Game.prototype.CreateUpgrade = function(name) {
+    this.upgrades[name] = new Upgrade(this, name);
 };
-Game.prototype.AddAchievement = function(object) {
-    this.achievements[object.name] = object;
-    this.objects.push(object);
+Game.prototype.CreateAchievement = function(name) {
+    this.achievements[name] = new Achievement(this, name);
 };
 
 //Helpers
@@ -82,6 +75,7 @@ var GameObject = function(game, name) {
     this.events = new Events();
     this.game = game;
     this.name = name;
+    game.events.on('tick', this.Tick, this);
 };
 GameObject.prototype.Tick = function() {
 };
@@ -106,11 +100,15 @@ Resource.prototype.Remove = function(value) {
 /**
  * Generator
  */
-var Generator = function(game, name) {
+var Generator = function(game, name, auto) {
     GameObject.call(this, game, name);
     this.count = 0;
+    this.auto = auto;
     this.rates = {};
     this.multipliers = {};
+    if (!this.auto) {
+        game.events.off('tick', this.Tick);
+    }
 };
 Generator.prototype = inherit(GameObject.prototype, Generator);
 Generator.prototype.SetBaseRate = function(resource, rate) {
@@ -131,7 +129,9 @@ Generator.prototype.Tick = function() {
     for (var resource in this.rates) {
         var rate = this.rates[resource];
         var multiplier = this.multipliers[resource];
-        this.game.resources[resource].Add(this.count * rate * multiplier);
+        var result = this.count * rate * multiplier;
+        this.events.trigger('generate_resource', this, resource, result);
+        this.game.resources[resource].Add(result);
     }
 };
 
