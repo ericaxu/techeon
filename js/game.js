@@ -1,9 +1,12 @@
+/**
+ * Game
+ */
 var Game = function() {
     this.events = new Events();
     this.task = null;
     this.tick = 0;
     this.time = 0;
-    this.timePerTick = 1000 / 60;
+    this.timePerTick = 1000 / 50;
     this.objects = [];
     this.resources = {};
     this.generators = {};
@@ -12,19 +15,19 @@ var Game = function() {
     var self = this;
 };
 Game.prototype.Start = function() {
-    this.events.trigger("game_start", this);
+    this.events.trigger('game_start', this);
     this.time = currentTimeMS();
     this.Loop();
 };
 Game.prototype.Stop = function() {
     if (this.task) {
-        this.events.trigger("game_stop", this);
+        this.events.trigger('game_stop', this);
         clearTimeout(this.task);
         this.task = null;
     }
 };
 Game.prototype.Loop = function() {
-    this.events.trigger("pre_loop", this);
+    this.events.trigger('pre_loop', this);
     var targetTime = currentTimeMS();
 
     // Lots of lag, maybe went sleep?
@@ -36,24 +39,16 @@ Game.prototype.Loop = function() {
         this.time += this.timePerTick;
     }
 
-    this.events.trigger("post_loop", this);
+    this.events.trigger('post_loop', this);
     this.task = ctxSetTimeout(this.Loop, this.timePerTick, this);
 };
 Game.prototype.Tick = function() {
-    this.events.trigger("pre_tick", this);
+    this.events.trigger('pre_tick', this);
     this.tick++;
     for (var i = 0; i < this.objects.length; i++) {
         this.objects[i].Tick();
     }
-    this.events.trigger("post_tick", this);
-};
-Game.prototype.Run = function() {
-    this.events.trigger("game_start", this);
-    this.time = currentTimeMS();
-    this.Loop();
-};
-Game.prototype.Every = function(ticks) {
-    return (this.tick % ticks == 0);
+    this.events.trigger('post_tick', this);
 };
 Game.prototype.AddResource = function(object) {
     this.resources[object.name] = object;
@@ -72,6 +67,17 @@ Game.prototype.AddAchievement = function(object) {
     this.objects.push(object);
 };
 
+//Helpers
+Game.prototype.Every = function(ticks) {
+    return (this.tick % ticks == 0);
+};
+Game.prototype.MSToTicks = function(ms) {
+    return ms * this.timePerTick;
+};
+
+/**
+ * GameObject
+ */
 var GameObject = function(game, name) {
     this.events = new Events();
     this.game = game;
@@ -80,6 +86,9 @@ var GameObject = function(game, name) {
 GameObject.prototype.Tick = function() {
 };
 
+/**
+ * Generator
+ */
 var Generator = function(game, name) {
     GameObject.call(this, game, name);
     this.count = 0;
@@ -103,10 +112,13 @@ Generator.prototype.Tick = function() {
     for (var resource in this.rates) {
         var rate = this.rates[resource];
         var multiplier = this.multipliers[resource];
-        this.game.resources[resource].Add(rate, multiplier);
+        this.game.resources[resource].Add(count * rate * multiplier);
     }
 };
 
+/**
+ * Resource
+ */
 var Resource = function(game, name) {
     GameObject.call(this, game, name);
     this.value = 0.0;
@@ -119,6 +131,9 @@ Resource.prototype.Remove = function(value) {
     this.value -= value;
 };
 
+/**
+ * Upgrade
+ */
 var Upgrade = function(game, name) {
     GameObject.call(this, game, name);
     this.available = false;
@@ -144,6 +159,9 @@ Upgrade.prototype.Buy = function() {
     }
 };
 
+/**
+ * Achievement
+ */
 var Achievement = function(game, name) {
     GameObject.call(this, game, name);
     this.available = false;
