@@ -72,7 +72,7 @@ Game.prototype.Every = function(ticks) {
     return (this.tick % ticks == 0);
 };
 Game.prototype.MSToTicks = function(ms) {
-    return ms * this.timePerTick;
+    return ms / this.timePerTick;
 };
 
 /**
