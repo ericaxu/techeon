@@ -16,26 +16,85 @@
                 <p>Earns an additional $10 per second.</p>
                 <button>100 lines of code</button>
             </div>
-            <div>
+            <div class="unaffordable">
                 <h4>Careers page</h4>
                 <p>Able to hire people.</p>
                 <button>200 lines of code</button>
             </div>
-            <div>
+            <div class="unaffordable">
                 <h4>Flat design</h4>
                 <p>Earns an additional $30 per second.</p>
                 <button>100 lines of code</button>
             </div>
-            <div>
+            <div class="unaffordable">
                 <h4>Customer service livechat</h4>
                 <p>Earns an additional $50 per second.</p>
                 <button>500 lines of code</button>
             </div>
         </div>
 
-        <div id="main-stats-container" class="section"></div>
+        <div id="main-stats-container" class="section">
+            <div id="codebase">
+                <pre>static int copyFile(char* src, char* dst) {
+  unsigned int len, i;
+  char buffer[3072];
+  /* 3K ought to be enough for anyone*/
+  FILE *source, *dest;
+  int c;
 
-        <div id="team-container" class="section"></div>
+  source = fopen(src, "r");
+  if (source == NULL) {
+    fprintf(stderr, "Failed to open source file\n");
+    return -1;
+  }
+  
+  i = 0;
+  c = fgetc(source);
+  while (c != EOF) {
+    buffer[i]  = (unsigned char) c;
+    c = fgetc(source);
+    i++;
+  }
+
+  len = i;
+  fclose(source);
+}</pre>
+                <div id="main-stats">
+                    <div id="lines-of-code-stat">
+                        <span id="num-lines-of-code">120 lines</span>
+                        <p>5 lines / second</p>
+                    </div>
+                    <div id="money-stat">
+                        <span id="num-dollars">$300</span>
+                        <p>$5 / second</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="team-container" class="section">
+            <div>
+                <h4>Web developer</h4>
+                <p>Writes 20 lines of code per second.</p>
+                <button>$100</button>
+            </div>
+            <div>
+                <h4>Operations manager</h4>
+                <p>Unlocks upgrades for your company.</p>
+                <button>$150</button>
+            </div>
+            <div>
+                <h4>Android developer</h4>
+                <p>Writes 40 lines of code per second.</p>
+                <button>$200</button>
+            </div>
+            <div class="unaffordable">
+                <h4>Database admin</h4>
+                <p>Writes 90 lines of code per second.</p>
+                <button>$350</button>
+            </div>
+        </div>
 
         <div id="upgrade-container" class="section"></div>
 
