@@ -87,6 +87,21 @@ GameObject.prototype.Tick = function() {
 };
 
 /**
+ * Resource
+ */
+var Resource = function(game, name) {
+    GameObject.call(this, game, name);
+    this.value = 0.0;
+};
+Resource.prototype = inherit(GameObject.prototype, Resource);
+Resource.prototype.Add = function(value) {
+    this.value += value;
+};
+Resource.prototype.Remove = function(value) {
+    this.value -= value;
+};
+
+/**
  * Generator
  */
 var Generator = function(game, name) {
@@ -112,23 +127,8 @@ Generator.prototype.Tick = function() {
     for (var resource in this.rates) {
         var rate = this.rates[resource];
         var multiplier = this.multipliers[resource];
-        this.game.resources[resource].Add(count * rate * multiplier);
+        this.game.resources[resource].Add(this.count * rate * multiplier);
     }
-};
-
-/**
- * Resource
- */
-var Resource = function(game, name) {
-    GameObject.call(this, game, name);
-    this.value = 0.0;
-};
-Resource.prototype = inherit(GameObject.prototype, Resource);
-Resource.prototype.Add = function(value) {
-    this.value += value;
-};
-Resource.prototype.Remove = function(value) {
-    this.value -= value;
 };
 
 /**
