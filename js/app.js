@@ -3,27 +3,44 @@ var UI = function() {
 	this.$numDollars = $('#num-dollars');
 };
 
-UI.prototype.setLinesOfCode = function(newAmount) {
+UI.prototype.showLinesOfCode = function(newAmount) {
 	this.$numLinesOfCode.text(newAmount);
 };
 
-UI.prototype.setDollars = function(newAmount) {
+UI.prototype.showDollars = function(newAmount) {
 	this.$numDollars.text(newAmount);
+};
+
+UI.prototype.updateLinesOfCode = function(game) {
+	ui.showLinesOfCode(game.resources['code'].value);
+};
+
+UI.prototype.updateResources = function(game) {
+	this.updateLinesOfCode(game);
+	this.updateDollars(game);
+}
+
+UI.prototype.updateDollars = function(game) {
+	ui.showDollars(game.resources['money'].value);
 };
 
 var ui = new UI();
 
 var GAME = new Game();
-GAME.AddResource(new Resource(GAME, 'money'));
-GAME.AddResource(new Resource(GAME, 'code'));
+GAME.CreateResource('money');
+GAME.CreateResource('code');
 
-GAME.AddGenerator(new Generator(GAME, 'webdev').SetBaseRate('money', 1).Add(1));
+GAME.CreateGenerator('webdev').SetBaseRate('money', 1).Add(1);
 
 GAME.events.on('post_loop', function(game) {
 	if (game.Every(25)) {
-		ui.setLinesOfCode(GAME.resources['code'].value);
-		ui.setDollars(GAME.resources['money'].value);
+		ui.updateResources(GAME);
 	}
 });
 
 GAME.Start();
+
+$('#codebase').on('click', function() {
+	GAME.resources['code'].Add(1);
+	ui.updateLinesOfCode(GAME);
+});
