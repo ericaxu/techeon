@@ -12,7 +12,7 @@ UI.prototype.showDollars = function(newAmount) {
 };
 
 UI.prototype.updateLinesOfCode = function(game) {
-	ui.showLinesOfCode(game.resources['code'].value);
+	ui.showLinesOfCode(game.resources['code'].amount);
 };
 
 UI.prototype.updateResources = function(game) {
@@ -21,7 +21,7 @@ UI.prototype.updateResources = function(game) {
 }
 
 UI.prototype.updateDollars = function(game) {
-	ui.showDollars(game.resources['money'].value);
+	ui.showDollars(game.resources['money'].amount);
 };
 
 var ui = new UI();

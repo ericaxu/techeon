@@ -93,13 +93,13 @@ GameObject.prototype.Tick = function() {
  */
 var ValueBase = function(game, name) {
     GameObject.call(this, game, name);
-    this.value = 0.0;
-    this.maxValue = this.value;
+    this.amount = 0.0;
+    this.maxAmount = this.amount;
 };
 ValueBase.prototype = inherit(GameObject.prototype, ValueBase);
 ValueBase.prototype.Add = function(value) {
-    this.value += value;
-    this.maxValue = Math.max(this.value, this.maxValue);
+    this.amount += value;
+    this.maxAmount = Math.max(this.amount, this.maxAmount);
     return this;
 };
 ValueBase.prototype.Remove = function(value) {
@@ -137,7 +137,7 @@ Generator.prototype.Tick = function() {
     for (var resource in this.rates) {
         var rate = this.rates[resource];
         var multiplier = this.multipliers[resource];
-        var result = this.value * rate * multiplier;
+        var result = this.amount * rate * multiplier;
         this.events.trigger('generate_resource', this, resource, result);
         this.game.resources[resource].Add(result);
     }
@@ -156,7 +156,7 @@ Upgrade.prototype = inherit(GameObject.prototype, Upgrade);
 Upgrade.prototype.CanBuy = function() {
     for (var resource in this.cost) {
         var cost = this.cost[resource];
-        if (this.game.resources[resource].value < cost) {
+        if (this.game.resources[resource].amount < cost) {
             return false;
         }
     }
