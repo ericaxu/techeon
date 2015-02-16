@@ -1,6 +1,8 @@
-if(!Object.create) {
+if (!Object.create) {
     Object.create = function(prototype) {
-        function ctor() { }
+        function ctor() {
+        }
+
         ctor.prototype = prototype;
         return new ctor();
     }
@@ -16,6 +18,13 @@ function currentTimeMS() {
     return new Date().getTime();
 }
 
+function ctxSetTimeout(func, timeout, context) {
+    var callback = function() {
+        func.call(context);
+    };
+    return setTimeout(callback, timeout);
+}
+
 Events = function() {
     this.events = {};
 };
@@ -23,7 +32,7 @@ Events.prototype.on = function(name, func, ctx) {
     if (!this.events[name]) {
         this.events[name] = [];
     }
-    this.events[name].push({func:func, ctx:ctx})
+    this.events[name].push({func: func, ctx: ctx})
 };
 Events.prototype.off = function(name, func) {
     if (!func || !this.events[name]) {
@@ -31,19 +40,19 @@ Events.prototype.off = function(name, func) {
     }
     var list = this.events[name];
     for (var i = 0; i < list.length; i++) {
-        if(list[i] == func) {
-            list.splice(i,1)
+        if (list[i] == func) {
+            list.splice(i, 1);
         }
     }
 };
 Events.prototype.trigger = function() {
     var args = Array.apply([], arguments);
     var name = args.shift();
-    var list = this.events[name]
+    var list = this.events[name];
     if (!list) {
         return;
     }
     for (var i = 0; i < list.length; i++) {
-        list[i].func.apply(list[i].ctx, args)
+        list[i].func.apply(list[i].ctx, args);
     }
 };

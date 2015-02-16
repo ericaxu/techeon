@@ -10,11 +10,8 @@ var Game = function() {
     this.upgrades = {};
     this.achievements = {};
     var self = this;
-    this.RunLoop = function() {
-        self.Loop();
-    }
 };
-Game.prototype.Run = function() {
+Game.prototype.Start = function() {
     this.events.trigger("game_start", this);
     this.time = currentTimeMS();
     this.Loop();
@@ -40,7 +37,7 @@ Game.prototype.Loop = function() {
     }
 
     this.events.trigger("post_loop", this);
-    this.task = setTimeout(this.RunLoop, this.timePerTick);
+    this.task = ctxSetTimeout(this.Loop, this.timePerTick, this);
 };
 Game.prototype.Tick = function() {
     this.events.trigger("pre_tick", this);
@@ -56,7 +53,7 @@ Game.prototype.Run = function() {
     this.Loop();
 };
 Game.prototype.Every = function(ticks) {
-    return this.tick % ticks == 0;
+    return (this.tick % ticks == 0);
 };
 Game.prototype.AddResource = function(object) {
     this.resources[object.name] = object;
@@ -79,7 +76,7 @@ var GameObject = function(game, name) {
     this.events = new Events();
     this.game = game;
     this.name = name;
-}
+};
 GameObject.prototype.Tick = function() {
 };
 
@@ -90,9 +87,9 @@ var Generator = function(game, name) {
     this.multipliers = {};
 };
 Generator.prototype = inherit(GameObject.prototype, Generator);
-Generator.prototype.SetBaseRate = function(resourceName, rate) {
-    this.rates[resourceName] = rate;
-    this.multipliers[resourceName] = 1;
+Generator.prototype.SetBaseRate = function(resource, rate) {
+    this.rates[resource] = rate;
+    this.multipliers[resource] = 1;
     return this;
 };
 Generator.prototype.Add = function(value) {
@@ -103,10 +100,10 @@ Generator.prototype.Remove = function(value) {
 };
 Generator.prototype.Tick = function() {
     GameObject.prototype.Tick.call(this);
-    for (var resourceName in this.rates) {
-        var rate = this.rates[resourceName];
-        var multiplier = this.multipliers[resourceName];
-        this.game.resources[resourceName].Add(rate, multiplier);
+    for (var resource in this.rates) {
+        var rate = this.rates[resource];
+        var multiplier = this.multipliers[resource];
+        this.game.resources[resource].Add(rate, multiplier);
     }
 };
 
@@ -140,8 +137,8 @@ Upgrade.prototype.CanBuy = function() {
 };
 Upgrade.prototype.Buy = function() {
     if (this.CanBuy()) {
-        for (var resourceName in this.cost) {
-            var cost = this.cost[resourceName];
+        for (var resource in this.cost) {
+            var cost = this.cost[resource];
             this.game.resources[resource].Remove(cost);
         }
     }
