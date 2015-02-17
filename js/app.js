@@ -34,9 +34,9 @@ UI.prototype.updateResources = function(game) {
 
 UI.prototype.addTeamOption = function(generator) {
 	if (!generator.CanBuy()) {
-		var className = 'generator_' + generator.name + ' unaffordable';
+		var className = 'purchasable generator_' + generator.name + ' unaffordable';
 	} else {
-		var className = 'generator_' + generator.name;
+		var className = 'purchasable generator_' + generator.name;
 	}
 
 	var $div = addEl('div', this.$teamContainer, className);
@@ -52,9 +52,9 @@ UI.prototype.addTeamOption = function(generator) {
 
 UI.prototype.addFeatureOption = function(generator) {
 	if (!generator.CanBuy()) {
-		var className = 'generator_' + generator.name + ' unaffordable';
+		var className = 'purchasable generator_' + generator.name + ' unaffordable';
 	} else {
-		var className = 'generator_' + generator.name;
+		var className = 'purchasable generator_' + generator.name;
 	}
 
 	var $div = addEl('div', this.$featureContainer, className);

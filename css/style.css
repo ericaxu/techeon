@@ -1,3 +1,13 @@
+@font-face {
+	font-family: 'SF Collegiate';
+	src: url('fonts/SF Collegiate.ttf');
+}
+
+@font-face {
+	font-family: 'Willow Body';
+	src: url('fonts/Willow Body.ttf');
+}
+
 html, body, .section {
 	height: 100%;
 }
@@ -15,6 +25,7 @@ body {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	font-family: 'Willow Body';
 }
 
 .section {
@@ -30,9 +41,26 @@ h4 {
 	width: 300px;
 }
 
-#feature-container > div, #team-container > div {
-	margin: 20px 0;
+.purchasable h4 {
+	font-weight: normal;
+	margin-bottom: 5px;
+}
+
+.purchasable p {
+	font-size: 12px;
+	margin-bottom: 5px;
+}
+
+.purchasable button {
+	background: #222;
+	color: #EEE;
+	font-family: 'Willow Body';
+	cursor: pointer;
+}
+
+.purchasable {
 	padding: 10px;
+	border-bottom: 1px solid #777;
 }
 
 #main-stats-container {
@@ -68,5 +96,6 @@ h4 {
 }
 
 .unaffordable button {
-	color: #666;
-}
+	background: #888;
+	color: #CCC;
+ }
