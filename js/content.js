@@ -8,6 +8,9 @@ var generatorsData = [
         },
         effect: {
             code: 5
+        },
+        restriction: {
+            money: 0
         }
     },
     {
@@ -19,6 +22,9 @@ var generatorsData = [
         },
         effect: {
             //enables upgrades
+        },
+        restriction: {
+            money: 100
         }
     },
     {
@@ -30,6 +36,9 @@ var generatorsData = [
         },
         effect: {
             code: 20
+        },
+        restriction: {
+            money: 150
         }
     },
     {
@@ -41,6 +50,9 @@ var generatorsData = [
         },
         effect: {
             code: 90
+        },
+        restriction: {
+            money: 300
         }
     }
 ];
@@ -51,10 +63,13 @@ var featuresData = [
         title: 'Landing page',
         description: 'Earns an additional $10 per second.',
         cost: {
-            code: 100
+            code: 15
         },
         effect: {
             money: 10
+        },
+        restriction: {
+            code: 0
         }
     },
     {
@@ -62,10 +77,13 @@ var featuresData = [
         title: 'Careers page',
         description: 'Able to hire people.',
         cost: {
-            code: 200
+            code: 30
         },
         effect: {
             // enable hiring people
+        },
+        restriction: {
+            code: 10
         }
     },
     {
@@ -73,10 +91,13 @@ var featuresData = [
         title: 'Flat UI design',
         description: 'Earns an additional $10 per second.',
         cost: {
-            code: 350
+            code: 50
         },
         effect: {
             money: 30
+        },
+        restriction: {
+            code: 30
         }
     },
     {
@@ -84,10 +105,45 @@ var featuresData = [
         title: 'Customer service livechat',
         description: 'Earns an additional $50 per second.',
         cost: {
-            code: 500
+            code: 80
         },
         effect: {
             money: 50
+        },
+        restriction: {
+            code: 60
         }
     }
 ];
+
+var GAME = new Game();
+GAME.CreateResource('money');
+GAME.CreateResource('code');
+
+for (var i = 0; i < generatorsData.length; i++) {
+    var generatorData = generatorsData[i];
+    var generator = GAME.CreateGenerator(generatorData.name);
+    for (var c in generatorData.cost) {
+        generator.AddBuyPrice(c, generatorData.cost[c]);
+    }
+    for (var r in generatorData.effect) {
+        generator.AddRate(r, generatorData.effect[r] / GAME.GetTicksPerSecond());
+    }
+    for (var r in generatorData.restriction) {
+        generator.AddRestriction(r, generatorData.restriction[r]);
+    }
+}
+
+for (var i = 0; i < featuresData.length; i++) {
+    var featureData = featuresData[i];
+    var feature = GAME.CreateGenerator(featureData.name);
+    for (var c in featureData.cost) {
+        feature.AddBuyPrice(c, featureData.cost[c]);
+    }
+    for (var r in featureData.effect) {
+        feature.AddRate(r, featureData.effect[r] / GAME.GetTicksPerSecond());
+    }
+    for (var r in featureData.restriction) {
+        feature.AddRestriction(r, featureData.restriction[r]);
+    }
+}
