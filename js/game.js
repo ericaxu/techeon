@@ -116,6 +116,17 @@ Game.prototype.SetTicksPerSecond = function(ticksPerSecond) {
 Game.prototype.GetTicksPerSecond = function() {
     return this.tickPerSecond;
 };
+Game.prototype.GetRatesPerTick = function() {
+    var rates = {};
+    for(var resource in this.resources) {
+        var rate = 0;
+        for(var generator in this.generators) {
+            rate += this.generators[generator].GetRate(resource);
+        }
+        rates[resource] = rate;
+    }
+    return rates;
+};
 
 /**
  * Describable
@@ -365,6 +376,9 @@ var Entity = function(game, name) {
     Describable.call(this);
     game.events.on('tick', this.Tick, this);
 };
+Entity.prototype.GetName = function() {
+    return this.name;
+};
 Entity.prototype.Tick = function() {
 };
 
@@ -399,6 +413,9 @@ Generator.prototype.AddRate = function(resource, rate) {
 Generator.prototype.GetRate = function(resource) {
     var rate = this.rates[resource];
     var multiplier = this.multipliers[resource];
+    if(!rate || !multiplier) {
+        return 0;
+    }
     return this.amount * rate * multiplier;
 };
 Generator.prototype.Tick = function() {
