@@ -17,22 +17,25 @@ UI.prototype.updateLinesOfCode = function(game) {
 	ui.showLinesOfCode(game.resources['code'].amount);
 };
 
+UI.prototype.updateDollars = function(game) {
+	ui.showDollars(game.resources['money'].amount);
+};
+
 UI.prototype.updateResources = function(game) {
 	this.updateLinesOfCode(game);
 	this.updateDollars(game);
 };
 
-UI.prototype.updateDollars = function(game) {
-	ui.showDollars(game.resources['money'].amount);
-};
-
 UI.prototype.addTeamOption = function(generator) {
-	var className = 'generator_' + generator.name +
-	var $div = $('<div/>', {
-		class: 'generator_' + generator.name + ' employee'
-	});
+	if (!generator.CanBuy()) {
+		var className = 'generator_' + generator.name + ' unaffordable';
+	} else {
+		var className = 'generator_' + generator.name;
+	}
+
+	var $div = $('<div/>', { class: className });
 	$div.append($('<h4/>').text(generator.name));
-	var $button = $('<button/>').text(generator.buyPrice.money).on('click', function() {
+	var $button = $('<button/>').text('$' + generator.buyPrice.money).on('click', function() {
 		if (generator.CanBuy()) {
 			generator.Buy();
 		}
@@ -42,11 +45,14 @@ UI.prototype.addTeamOption = function(generator) {
 };
 
 UI.prototype.addFeatureOption = function(generator) {
-	var $div = $('<div/>', {
-		class: 'generator_' + generator.name + ' feature'
-	});
+	if (!generator.CanBuy()) {
+		var className = 'generator_' + generator.name + ' unaffordable';
+	} else {
+		var className = 'generator_' + generator.name;
+	}
+	var $div = $('<div/>', { class: className });
 	$div.append($('<h4/>').text(generator.name));
-	var $button = $('<button/>').text(generator.buyPrice.code).on('click', function() {
+	var $button = $('<button/>').text(generator.buyPrice.code + ' lines').on('click', function() {
 		if (generator.CanBuy()) {
 			console.log('buying');
 			generator.Buy();
@@ -92,7 +98,7 @@ $('#codebase').on('click', function() {
 });
 
 GAME.events.on('post_loop', function(game) {
-	if (game.Every(50)) {
+	if (game.Every(25)) {
 		ui.updateGenerators(game);
 	}
 });
