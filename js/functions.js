@@ -24,3 +24,29 @@ function ctxSetTimeout(func, timeout, context) {
     };
     return setTimeout(callback, timeout);
 }
+
+function addEl(tag, parent, className, text, attr) {
+    var $el = $('<' + tag + '/>');
+
+    if (className) {
+        $el.attr('class', className)
+    }
+
+    if (text) {
+        $el.text(text)
+    }
+
+    if (attr) {
+        $el.attr(attr);
+    }
+
+    if (parent) {
+        parent.append($el);
+    }
+
+    return $el;
+}
+
+function formatNumWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

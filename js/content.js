@@ -4,7 +4,7 @@ var GAME = (function() {
         {
             name: 'webdev',
             title: 'Web developer',
-            description: 'Writes 20 lines of code per second.',
+            description: 'Writes 5 lines of code per second.',
             price: {
                 money: 100
             },
@@ -32,7 +32,7 @@ var GAME = (function() {
         {
             name: 'android',
             title: 'Android developer',
-            description: 'Writes 40 lines of code per second.',
+            description: 'Writes 20 lines of code per second.',
             price: {
                 money: 200
             },
@@ -51,7 +51,7 @@ var GAME = (function() {
                 money: 350
             },
             rates: {
-                code: 90
+                code: 60
             },
             restriction: {
                 money: 300
@@ -91,7 +91,7 @@ var GAME = (function() {
         {
             name: 'flatdesign',
             title: 'Flat UI design',
-            description: 'Earns an additional $10 per second.',
+            description: 'Earns an additional $30 per second.',
             price: {
                 code: 50
             },
@@ -135,6 +135,7 @@ var GAME = (function() {
         for (var key in generator.restriction) {
             object.AddRestriction(key, generator.restriction[key]);
         }
+        object.SetTitle(generator.title).SetDescription(generator.description);
     };
 
     for (var i = 0; i < generators.length; i++) {
