@@ -84,6 +84,36 @@ Game.prototype.GetTicksPerSecond = function() {
 };
 
 /**
+ * Describable
+ */
+var Describable = function(title, description, icon) {
+    this.title = "";
+    this.description = "";
+    this.icon = "";
+    this.SetTitle = function(title) {
+        this.title = title;
+        return this;
+    };
+    this.GetTitle = function() {
+        return this.title;
+    };
+    this.SetDescription = function(description) {
+        this.description = description;
+        return this;
+    };
+    this.GetDescription = function() {
+        return this.description;
+    };
+    this.SetIcon = function(icon) {
+        this.icon = icon;
+        return this;
+    };
+    this.GetIcon = function() {
+        return this.icon;
+    };
+};
+
+/**
  * Amount
  */
 var Amount = function() {
@@ -298,6 +328,7 @@ var Entity = function(game, name) {
     this.events = new Events();
     this.game = game;
     this.name = name;
+    Describable.call(this);
     game.events.on('tick', this.Tick, this);
 };
 Entity.prototype.Tick = function() {

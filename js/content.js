@@ -124,32 +124,25 @@ var GAME = (function() {
     game.CreateResource('money');
     game.CreateResource('code');
 
+    var importGenerator = function(generator) {
+        var object = game.CreateGenerator(generator.name).SetTitle(generator.title).SetDescription(generator.description);
+        for (var key in generator.price) {
+            object.AddBuyPrice(key, generator.price[key]);
+        }
+        for (var key in generator.rates) {
+            object.AddRate(key, generator.rates[key] / game.GetTicksPerSecond());
+        }
+        for (var key in generator.restriction) {
+            object.AddRestriction(key, generator.restriction[key]);
+        }
+    };
+
     for (var i = 0; i < generators.length; i++) {
-        var model = generators[i];
-        var object = game.CreateGenerator(model.name);
-        for (var price in model.price) {
-            object.AddBuyPrice(price, model.price[price]);
-        }
-        for (var rate in model.rates) {
-            object.AddRate(rate, model.rates[rate] / game.GetTicksPerSecond());
-        }
-        for (var restriction in model.restriction) {
-            object.AddRestriction(restriction, model.restriction[restriction]);
-        }
+        importGenerator(generators[i]);
     }
 
     for (var i = 0; i < features.length; i++) {
-        var model = features[i];
-        var object = game.CreateGenerator(model.name);
-        for (var price in model.price) {
-            object.AddBuyPrice(price, model.price[price]);
-        }
-        for (var rate in model.rates) {
-            object.AddRate(rate, model.rates[rate] / game.GetTicksPerSecond());
-        }
-        for (var restriction in model.restriction) {
-            object.AddRestriction(restriction, model.restriction[restriction]);
-        }
+        importGenerator(features[i]);
     }
 
     return game;
