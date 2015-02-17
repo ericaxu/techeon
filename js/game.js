@@ -116,16 +116,12 @@ Game.prototype.SetTicksPerSecond = function(ticksPerSecond) {
 Game.prototype.GetTicksPerSecond = function() {
     return this.tickPerSecond;
 };
-Game.prototype.GetRatesPerTick = function() {
-    var rates = {};
-    for(var resource in this.resources) {
-        var rate = 0;
-        for(var generator in this.generators) {
-            rate += this.generators[generator].GetRate(resource);
-        }
-        rates[resource] = rate;
+Game.prototype.GetRatesPerTick = function(resource) {
+    var rate = 0;
+    for(var generator in this.generators) {
+        rate += this.generators[generator].GetRate(resource);
     }
-    return rates;
+    return rate;
 };
 
 /**
