@@ -42,7 +42,7 @@ UI.prototype.addTeamOption = function(generator) {
 	var $div = addEl('div', this.$teamContainer, className);
 	addEl('h4', $div, '', generator.GetTitle());
 	addEl('p', $div, '', generator.GetDescription());
-	addEl('button', $div, '', '$' + generator.buyPrice.money).on('click', $.proxy(function() {
+	addEl('button', $div, '', '$ ' + generator.buyPrice.money).on('click', $.proxy(function() {
 		if (generator.CanBuy()) {
 			generator.Buy();
 			this.updateGenerators();
