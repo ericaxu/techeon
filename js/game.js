@@ -68,6 +68,8 @@ Game.prototype.CreateAchievement = function(name) {
 };
 //Helpers
 Game.prototype.Every = function(ticks) {
+    //Ticks must be an integer!
+    ticks = Math.ceil(ticks);
     return (this.tick % ticks == 0);
 };
 Game.prototype.MSToTicks = function(ms) {
@@ -118,11 +120,11 @@ var Obtainable = function() {
     };
     this.Obtain = function() {
         this.obtained = true;
-        this.event.trigger('obtain', this);
+        this.events.trigger('obtain', this);
     };
     this.UnObtain = function() {
         this.obtained = false;
-        this.event.trigger('unobtain', this);
+        this.events.trigger('unobtain', this);
     };
     this.GetObtained = function() {
         return this.obtained;
@@ -176,13 +178,13 @@ var Purchasable = function() {
         for (var resource in this.buyPrice) {
             this.game.resources[resource].Remove(this.buyPrice[resource]);
         }
-        this.event.trigger('buy', this);
+        this.events.trigger('buy', this);
     };
     this.Sell = function() {
         for (var resource in this.sellPrice) {
             this.game.resources[resource].Add(this.sellPrice[resource]);
         }
-        this.event.trigger('sell', this);
+        this.events.trigger('sell', this);
     };
     if (!this.CanSell) {
         this.CanSell = function() {
@@ -348,8 +350,8 @@ Generator.prototype.Tick = function() {
 var Upgrade = function(game, name) {
     Entity.call(this, game, name);
     ObtainablePurchasable.call(this);
-    this.events.on('obtain', this.Obtained, this);
     Rewardable.call(this);
+    this.events.on('obtain', this.Obtained, this);
 };
 Upgrade.prototype = inherit(Entity.prototype, Upgrade);
 Upgrade.prototype.Obtained = function() {
