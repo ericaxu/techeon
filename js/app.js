@@ -42,11 +42,12 @@ UI.prototype.addTeamOption = function(generator) {
 	var $div = addEl('div', this.$teamContainer, className);
 	addEl('h4', $div, '', generator.GetTitle());
 	addEl('p', $div, '', generator.GetDescription());
-	addEl('button', $div, '', '$' + generator.buyPrice.money).on('click', function() {
+	addEl('button', $div, '', '$' + generator.buyPrice.money).on('click', $.proxy(function() {
 		if (generator.CanBuy()) {
 			generator.Buy();
+			this.updateGenerators();
 		}
-	});
+	}, this));
 };
 
 UI.prototype.addFeatureOption = function(generator) {
@@ -59,16 +60,17 @@ UI.prototype.addFeatureOption = function(generator) {
 	var $div = addEl('div', this.$featureContainer, className);
 	addEl('h4', $div, '', generator.GetTitle());
 	addEl('p', $div, '', generator.GetDescription());
-	addEl('button', $div, '', generator.buyPrice.code + ' lines').on('click', function() {
+	addEl('button', $div, '', generator.buyPrice.code + ' lines').on('click', $.proxy(function() {
 		if (generator.CanBuy()) {
 			generator.Buy();
+			this.updateGenerators();
 		}
-	});
+	}, this));
 };
 
-UI.prototype.updateGenerators = function (game) {
-	for (var name in game.generators) {
-		var generator = game.generators[name];
+UI.prototype.updateGenerators = function () {
+	for (var name in this.game.generators) {
+		var generator = this.game.generators[name];
 		var $generatorDiv = $('.generator_' + name);
 		// if it's not shown right now but it's available
 		if ($generatorDiv.length === 0 && generator.Available()) {
@@ -82,13 +84,17 @@ UI.prototype.updateGenerators = function (game) {
 		else if ($generatorDiv.length > 0 && $generatorDiv.hasClass('unaffordable') && generator.CanBuy()) {
 			$generatorDiv.removeClass('unaffordable');
 		}
+		// no longer have enough money to buy it
+		else if ($generatorDiv.length > 0 && !$generatorDiv.hasClass('unaffordable') && !generator.CanBuy()) {
+			$generatorDiv.addClass('unaffordable');
+		}
 	}
 };
 
 var ui = new UI(GAME);
 
 GAME.events.on('post_loop', function(game) {
-	if (game.Every(25)) {
+	if (game.Every(5)) {
 		ui.updateResources(GAME);
 	}
 });
@@ -102,7 +108,7 @@ $('#codebase').on('click', function() {
 
 GAME.events.on('post_loop', function(game) {
 	if (game.Every(25)) {
-		ui.updateGenerators(game);
+		ui.updateGenerators();
 	}
 });
 
