@@ -1,4 +1,4 @@
-var GAME = function() {
+var GAME = (function() {
 
     var generators = [
         {
@@ -153,4 +153,4 @@ var GAME = function() {
     }
 
     return game;
-};
+})();
