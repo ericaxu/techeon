@@ -46,7 +46,7 @@ body {
 h4 {
 	margin-bottom: 10px;
 	font-weight: normal;
-	font-size: 20px;
+	font-size: 18px;
 }
 
 #feature-container, #team-container, #upgrade-container {
@@ -93,11 +93,30 @@ h4 {
 }
 
 #codebase {
+	height: 332px;
+	overflow-y: hidden;
+}
+
+#codebase pre {
+	position: relative;
+	top: 0;
+	height: 212px;
 	color: #00FF00;
 	font-family: 'Consolas', sans-serif;
-	padding: 10px;
+	margin: 10px 30px;
 	font-size: 14px;
-	cursor: pointer;
+	line-height: 20px;
+	-webkit-user-select: auto;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+}
+
+#codebase > pre::selection {
+	background: #00FF00;
+	color: #000000;
 }
 
 #main-stats-container {
@@ -216,4 +235,68 @@ h4 {
 
 .close-btn::before {
 	content: "\D7";
+}
+
+/* Blinking cursor */
+#typed-cursor {
+	margin-left: 30px;
+	font-size: 14px;
+	color: #00FF00;
+}
+
+#typed-cursor.blinking {
+	-webkit-animation: 1s blink step-end infinite;
+	-moz-animation: 1s blink step-end infinite;
+	-ms-animation: 1s blink step-end infinite;
+	-o-animation: 1s blink step-end infinite;
+	animation: 1s blink step-end infinite;
+}
+
+@keyframes "blink" {
+	from,to {
+		color: transparent;
+	}
+	50% {
+		color: #00FF00;
+	}
+
+}
+
+@-moz-keyframes blink {
+	from,to {
+		color: transparent;
+	}
+	50% {
+		color: #00FF00;
+	}
+
+}
+
+@-webkit-keyframes "blink" {
+	from,to {
+		color: transparent;
+	}
+	50% {
+		color: #00FF00;
+	}
+
+}
+
+@-ms-keyframes "blink" {
+	from,to {
+		color: transparent;
+	}
+	50% {
+		color: #00FF00;
+	}
+
+}
+
+@-o-keyframes "blink" {
+	from,to {
+		color: transparent;
+	}
+	50% {
+		color: #00FF00;
+	}
 }

@@ -211,11 +211,6 @@ GAME.events.on('post_loop', function(game) {
 
 GAME.Start();
 
-$('#codebase').on('click', function() {
-	GAME.content.resources['code'].amount.Add(1);
-	ui.updateLinesOfCodeStats(GAME);
-});
-
 GAME.events.on('post_loop', function(game) {
 	if (game.Every(25)) {
 		ui.updateGenerators().updateUpgrades();
@@ -233,3 +228,14 @@ for(var key in GAME.content.achievements) {
 		achievement.describable.GetDescription(), '');
 	});
 }
+
+$(document).on('keyup', function(e) {
+	var newTop = parseInt($('#codebase pre').css('top')) - 20;
+	// cycle through the code again
+	if (newTop <= -6380) {
+		newTop = -380;
+	}
+	$('#codebase pre').css('top', newTop + 'px');
+	GAME.content.resources['code'].amount.Add(1);
+	ui.updateLinesOfCodeStats(GAME);
+});
