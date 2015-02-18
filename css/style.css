@@ -48,15 +48,21 @@ body {
 }
 
 .purchasable {
+	background: #F9F9F9;
 	position: relative;
 	padding: 15px;
 	border-bottom: 1px solid #777;
 	cursor: pointer;
 }
 
+.purchasable:hover {
+	background: #FFFFFF;
+}
+
 .purchasable h4 {
 	font-weight: normal;
-	margin-bottom: 5px;
+	font-size: 18px;
+	margin-bottom: 10px;
 }
 
 .purchasable p {
@@ -64,12 +70,8 @@ body {
 	margin-bottom: 5px;
 }
 
-.purchasable button {
-	background: #222;
-	color: #EEE;
-	font-family: 'Willow Body', sans-serif;
-	cursor: pointer;
-	outline: none;
+.purchasable .price {
+	color: #50AD50;
 }
 
 .purchasable_owned_count {
@@ -88,6 +90,12 @@ body {
 	width: 250px;
 	padding: 15px;
 	border: 1px solid #777;
+}
+
+.purchasable_tooltip h4 {
+	margin-bottom: 10px;
+	font-weight: normal;
+	font-size: 20px;
 }
 
 #codebase {
@@ -122,12 +130,11 @@ body {
 
 .unaffordable {
 	background: #DDD;
-	color: #666;
+	color: #555;
 }
 
-.unaffordable button {
-	background: #888;
-	color: #CCC;
+.unaffordable.purchasable .price {
+	color: #AD5050;
  }
 
 

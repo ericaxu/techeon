@@ -38,14 +38,14 @@ UI.prototype.updatePurchasable = function(generator, type) {
 	var tooltipClassName = '.generator_' + generator.GetName() + '_tooltip';
 
 	if (type == 'feature') {
-		var buttonText = generator.purchasable.GetBuyPrice().code + ' lines';
+		var price = generator.purchasable.GetBuyPrice().code + ' lines';
 	} else if (type == 'team') {
-		var buttonText = '$ ' + generator.purchasable.GetBuyPrice().money;
+		var price = '$ ' + generator.purchasable.GetBuyPrice().money;
 	} else if (type == 'upgrade') {
 		if ($.isEmptyObject(generator.purchasable.GetBuyPrice())) {
-			var buttonText = 'Free';
+			var price = 'Free';
 		} else {
-			var buttonText = '$ ' + generator.purchasable.GetBuyPrice().money;
+			var price = '$ ' + generator.purchasable.GetBuyPrice().money;
 		}
 
 	}
@@ -53,7 +53,7 @@ UI.prototype.updatePurchasable = function(generator, type) {
 	var $div = $(className);
 	var $tooltip = $(tooltipClassName);
 	$div.find('h4').text(generator.describable.GetTitle());
-	$div.find('button').text(buttonText);
+	$div.find('.price').text(price);
 	if (type !== 'upgrade') {
 		$div.find('.purchasable_owned_count').text(generator.amount.Get());
 	}
@@ -78,7 +78,8 @@ UI.prototype.showPurchasable = function(generator, type) {
 	var $div = addEl('div', $container, className);
 	addEl('h4', $div);
 	addEl('div', $div, 'purchasable_owned_count');
-	addEl('button', $div).on('click', $.proxy(function() {
+	addEl('div', $div, 'price');
+	$div.on('click', $.proxy(function() {
 		if (generator.purchasable.CanBuy()) {
 			generator.purchasable.Buy();
 			this.updateGenerators();
