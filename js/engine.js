@@ -118,7 +118,7 @@ var Entity = function(game, name) {
 	this.name = name;
 	this.components = [];
 	this.AddComponent(Describable);
-	game.events.on('tick', this.Tick, this);
+	game.events.on('tick', this.OnTick, this);
 };
 extend(Entity, null, {
 	AddComponent: function(component) {
@@ -134,7 +134,7 @@ extend(Entity, null, {
 	GetName: function() {
 		return this.name;
 	},
-	Tick: function() {
+	OnTick: function() {
 
 	}
 });
@@ -197,6 +197,7 @@ var Amount = function(entity) {
 	entity.amount = this;
 	this.amount = 0.0;
 	this.maxAmount = 0.0;
+	this.totalAmount = 0.0;
 };
 extend(Amount, Component, {
 	Get: function() {
@@ -204,7 +205,6 @@ extend(Amount, Component, {
 	},
 	Set: function(value) {
 		this.amount = value;
-		this.maxAmount = Math.max(this.amount, this.maxAmount);
 		return this.entity;
 	},
 	GetMax: function() {
@@ -214,11 +214,16 @@ extend(Amount, Component, {
 		this.maxAmount = value;
 		return this.entity;
 	},
+	GetTotal: function() {
+		return this.totalAmount;
+	},
 	Add: function(value) {
-		this.Set(this.amount + value);
+		this.amount += value;
+		this.totalAmount += value;
+		this.maxAmount = Math.max(this.amount, this.maxAmount);
 	},
 	Remove: function(value) {
-		this.Add(-value);
+		this.amount -= value;
 	},
 	Reset: function() {
 		this.amount = 0.0;
@@ -241,11 +246,11 @@ extend(Obtainable, Component, {
 	},
 	Obtain: function() {
 		this.obtained = true;
-		this.entity.events.trigger('obtain', this);
+		this.entity.events.trigger('obtain', this.entity);
 	},
 	UnObtain: function() {
 		this.obtained = false;
-		this.entity.events.trigger('unobtain', this);
+		this.entity.events.trigger('unobtain', this.entity);
 	},
 	GetObtained: function() {
 		return this.obtained;

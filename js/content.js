@@ -61,5 +61,43 @@ var GAME = (function() {
 			.AddRateSecond('money', 50)
 	);
 
+	//Achievements
+	game.AddAchievement(new AmountAchievement(game, 'live', game.content.generators.landing, 1)
+			.describable.SetTitle('It\'s Live!')
+			.describable.SetDescription('Make a landing page.')
+	);
+	game.AddAchievement(new AmountAchievement(game, 'hiring', game.content.generators.careerspage, 1)
+			.describable.SetTitle('We\'re Hiring!')
+			.describable.SetDescription('Make a careers page.')
+	);
+	game.AddAchievement(new AmountAchievement(game, 'flatui', game.content.generators.flatdesign, 1)
+			.describable.SetTitle('It\'s the new trend')
+			.describable.SetDescription('Make a flat UI.')
+	);
+	game.AddAchievement(new AmountAchievement(game, 'usersupport', game.content.generators.cslivechat, 1)
+			.describable.SetTitle('Online call center')
+			.describable.SetDescription('Make a customer service livechat page.')
+	);
+
+	game.AddAchievement(new AmountAchievement(game, 'html', game.content.generators.webdev, 1)
+			.describable.SetTitle('HTML, HTML everywhere')
+			.describable.SetDescription('Hire a web developer.')
+	);
+	game.AddAchievement(new AmountAchievement(game, 'opsman', game.content.generators.opmanager, 1)
+			.describable.SetTitle('Macromanagement')
+			.describable.SetDescription('Hire an operation manager.')
+	);
+	game.AddAchievement(new AmountAchievement(game, 'android', game.content.generators.android, 1)
+			.describable.SetTitle('Jelly Bean')
+			.describable.SetDescription('Hire an Android developer.')
+	);
+
+	for(var key in game.content.achievements) {
+		game.content.achievements[key].events.on('obtain', function(achievement) {
+			alert('Achievement Get: ' + achievement.describable.GetTitle() + '\n' +
+			achievement.describable.GetDescription());
+		});
+	}
+
 	return game;
 })();
