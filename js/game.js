@@ -169,7 +169,7 @@ var ExponentialAmountPurchasable = function(entity) {
 
 	this.buyPrice = {};
 	this.sellPrice = {};
-	this.factor = 1.5;
+	this.factor = 1.15;
 };
 extend(ExponentialAmountPurchasable, Component, {
 	SetExponentialFactor: function(factor) {
@@ -266,7 +266,7 @@ var ResourceReward = function(game, resource, amount) {
 extend(ResourceReward, Reward, {
 	Reward: function() {
 		this.game.content.resources[this.resource].amount.Add(this.amount);
-		this.events.trigger('reward_resource', this, this.resource, this.amount);
+		this.game.events.trigger('reward_resource', this, this.resource, this.amount);
 	}
 });
 var BaseRateReward = function(game, generator, resource, amount) {
@@ -278,7 +278,7 @@ var BaseRateReward = function(game, generator, resource, amount) {
 extend(BaseRateReward, Reward, {
 	Reward: function() {
 		this.game.content.generators[this.resource].rates[this.resource] += this.amount;
-		this.events.trigger('reward_baserate', this, this.resource, this.amount);
+		this.game.events.trigger('reward_baserate', this, this.resource, this.amount);
 	}
 });
 var MultiplierReward = function(game, generator, resource, multiplier_add, multiplier_multiply) {
@@ -297,7 +297,7 @@ extend(MultiplierReward, Reward, {
 		if(this.multiplier_multiply) {
 			generator.multipliers[this.resource] *= this.multiplier_multiply;
 		}
-		this.events.trigger('reward_multiplier', this, this.resource);
+		this.game.events.trigger('reward_multiplier', this, this.resource);
 	}
 });
 
