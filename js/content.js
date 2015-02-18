@@ -65,13 +65,13 @@ var GAME = (function() {
 	game.AddUpgrade(new Upgrade(game, 'freestuff')
 			.describable.SetTitle('Free stuff!')
 			.describable.SetDescription('Here\'s some free stuff to get you started!')
-			.rewardable.AddReward(new ResourceReward(game, 'code', 1000))
-			.rewardable.AddReward(new ResourceReward(game, 'money', 2000))
+			.rewardable.AddReward(new ResourceReward(game, game.content.resources.code, 1000))
+			.rewardable.AddReward(new ResourceReward(game, game.content.resources.money, 2000))
 	);
 	game.AddUpgrade(new Upgrade(game, 'jquery')
 			.describable.SetTitle('JQuery')
 			.describable.SetDescription('Web developers can write more code in the same amount of time (+5 base).')
-			.rewardable.AddReward(new BaseRateReward(game, game.content.generators.webdev, 'code', 5))
+			.rewardable.AddReward(new BaseRateReward(game, game.content.generators.webdev, 'code', game.GetRateTickFromSecond(5)))
 	);
 	game.AddUpgrade(new Upgrade(game, 'ergokeyboard')
 			.describable.SetTitle('Ergonomic Keyboard')
