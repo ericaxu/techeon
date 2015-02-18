@@ -32,40 +32,51 @@ UI.prototype.updateResources = function(game) {
 	this.updateDollarStats(game);
 };
 
-UI.prototype.addTeamOption = function(generator) {
+UI.prototype.showPurchasable = function(generator, type) {
 	if (!generator.CanBuy()) {
 		var className = 'purchasable generator_' + generator.name + ' unaffordable';
 	} else {
 		var className = 'purchasable generator_' + generator.name;
 	}
 
-	var $div = addEl('div', this.$teamContainer, className);
-	addEl('h4', $div, '', generator.GetTitle());
-	addEl('p', $div, '', generator.GetDescription());
-	addEl('button', $div, '', '$ ' + generator.buyPrice.money).on('click', $.proxy(function() {
-		if (generator.CanBuy()) {
-			generator.Buy();
-			this.updateGenerators();
-		}
-	}, this));
-};
-
-UI.prototype.addFeatureOption = function(generator) {
-	if (!generator.CanBuy()) {
-		var className = 'purchasable generator_' + generator.name + ' unaffordable';
-	} else {
-		var className = 'purchasable generator_' + generator.name;
+	if (type == 'feature') {
+		var buttonText = generator.buyPrice.code + ' lines';
+		var $container = this.$featureContainer;
+	} else if (type == 'team') {
+		var buttonText = '$ ' + generator.buyPrice.money;
+		var $container = this.$teamContainer;
 	}
 
-	var $div = addEl('div', this.$featureContainer, className);
+	var $div = addEl('div', $container, className);
 	addEl('h4', $div, '', generator.GetTitle());
-	addEl('p', $div, '', generator.GetDescription());
-	addEl('button', $div, '', generator.buyPrice.code + ' lines').on('click', $.proxy(function() {
+	addEl('button', $div, '', buttonText).on('click', $.proxy(function() {
 		if (generator.CanBuy()) {
 			generator.Buy();
 			this.updateGenerators();
 		}
 	}, this));
+	var $tooltip = addEl('div', $div, 'purchasable_tooltip');
+	addEl('h4', $tooltip, '', generator.GetTitle());
+	addEl('p', $tooltip, '', generator.GetDescription());
+
+	if (type === 'feature') {
+		$tooltip.offset({ left: $div.outerWidth() });
+	} else if (type === 'team') {
+		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() });
+	}
+
+	$div.on('mouseenter', function() {
+		$tooltip.show();
+		$div.on('mousemove', function(e) {
+			var offsetTop = Math.max(0, e.pageY - 20);
+			$tooltip.offset({ top: offsetTop });
+		});
+	});
+
+	$div.on('mouseleave', function() {
+		$tooltip.hide();
+		$div.off('mousemove');
+	});
 };
 
 UI.prototype.updateGenerators = function () {
@@ -75,9 +86,9 @@ UI.prototype.updateGenerators = function () {
 		// if it's not shown right now but it's available
 		if ($generatorDiv.length === 0 && generator.Available()) {
 			if (generator.buyPrice.code) {
-				this.addFeatureOption(generator);
+				this.showPurchasable(generator, 'feature');
 			} else if (generator.buyPrice.money) {
-				this.addTeamOption(generator);
+				this.showPurchasable(generator, 'team');
 			}
 		}
 		// just unlocked previously unaffordable items

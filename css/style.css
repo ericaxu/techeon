@@ -18,6 +18,7 @@ html {
 
 body {
 	display: table;
+	color: #333;
 	width: 100%;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -40,10 +41,6 @@ body {
 	display: table-cell;
 	vertical-align: top;
 	border-right: 1px solid black;
-}
-
-h4 {
-	font-weight: normal;
 }
 
 #feature-container, #team-container, #upgrade-container {
@@ -69,8 +66,18 @@ h4 {
 }
 
 .purchasable {
-	padding: 10px;
+	padding: 15px;
 	border-bottom: 1px solid #777;
+	cursor: pointer;
+}
+
+.purchasable_tooltip {
+	display: none;
+	position: absolute;
+	background: white;
+	top: 0;
+	width: 250px;
+	padding: 15px;
 }
 
 #codebase {
