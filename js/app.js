@@ -48,6 +48,7 @@ UI.prototype.updatePurchasable = function(generator, type) {
 	var $tooltip = $(tooltipClassName);
 	$div.find('h4').text(generator.describable.GetTitle());
 	$div.find('button').text(buttonText);
+	$div.find('.purchasable_owned_count').text(generator.amount.Get());
 	$tooltip.find('h4').text(generator.describable.GetTitle());
 	$tooltip.find('p').text(generator.describable.GetDescription());
 };
@@ -66,6 +67,7 @@ UI.prototype.showPurchasable = function(generator, type) {
 
 	var $div = addEl('div', $container, className);
 	addEl('h4', $div);
+	addEl('div', $div, 'purchasable_owned_count');
 	addEl('button', $div).on('click', $.proxy(function() {
 		if (generator.purchasable.CanBuy()) {
 			generator.purchasable.Buy();

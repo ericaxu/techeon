@@ -47,6 +47,13 @@ body {
 	width: 300px;
 }
 
+.purchasable {
+	position: relative;
+	padding: 15px;
+	border-bottom: 1px solid #777;
+	cursor: pointer;
+}
+
 .purchasable h4 {
 	font-weight: normal;
 	margin-bottom: 5px;
@@ -65,10 +72,12 @@ body {
 	outline: none;
 }
 
-.purchasable {
-	padding: 15px;
-	border-bottom: 1px solid #777;
-	cursor: pointer;
+.purchasable_owned_count {
+	position: absolute;
+	right: 20px;
+	top: 50%;
+	transform: translate(0, -50%);
+	font-size: 40px;
 }
 
 .purchasable_tooltip {
