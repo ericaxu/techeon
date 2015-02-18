@@ -92,12 +92,5 @@ var GAME = (function() {
 			.describable.SetDescription('Hire an Android developer.')
 	);
 
-	for(var key in game.content.achievements) {
-		game.content.achievements[key].events.on('obtain', function(achievement) {
-			alert('Achievement Get: ' + achievement.describable.GetTitle() + '\n' +
-			achievement.describable.GetDescription());
-		});
-	}
-
 	return game;
 })();

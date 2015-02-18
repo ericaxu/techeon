@@ -126,6 +126,25 @@ UI.prototype.updateGenerators = function() {
 	}
 };
 
+UI.prototype.setupPopup = function() {
+	// Closing popup
+	var $popup = $('.popup');
+	$('.wrapper, .close_btn').on('click', function () {
+		$popup.hide();
+	});
+
+	// Allow user to close popup with ESC key
+	$(document).keydown(function (e) {
+		if (e.keyCode == 27) {
+			$popup.hide();
+		}
+	});
+
+	$('.popup_content').click(function (e) {
+		e.stopPropagation();
+	});
+};
+
 var ui = new UI(GAME);
 
 GAME.events.on('post_loop', function(game) {
@@ -147,7 +166,17 @@ GAME.events.on('post_loop', function(game) {
 	}
 });
 
+ui.setupPopup();
 ui.updateGenerators(GAME);
+
+// Set up achievement event listeners
+for(var key in GAME.content.achievements) {
+	GAME.content.achievements[key].events.on('obtain', function(achievement) {
+		$('.popup_content').html('Achievement Get: ' + achievement.describable.GetTitle() + '<br>' +
+		achievement.describable.GetDescription());
+		$('.popup').show();
+	});
+}
 
 // Who has time for clicking?
 GAME.content.resources.code.amount.Add(100);
