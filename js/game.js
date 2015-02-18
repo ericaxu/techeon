@@ -2,6 +2,7 @@ var Game = function() {
 	GameEngine.call(this);
 	this.content.resources = {};
 	this.content.generators = {};
+	this.content.achievements = {};
 };
 extend(Game, GameEngine, {
 	GetResourceRatesPerSecond: function(resource) {
@@ -19,6 +20,9 @@ extend(Game, GameEngine, {
 	},
 	AddGenerator: function(entity) {
 		this.AddContent("generators", entity);
+	},
+	AddAchievement: function(entity) {
+		this.AddContent("achievements", entity);
 	}
 });
 
@@ -79,7 +83,7 @@ extend(Purchasable, Component, {
 		for (var resource in price) {
 			this.entity.game.content.resources[resource].amount.Remove(price[resource]);
 		}
-		this.entity.events.trigger('buy', this);
+		this.entity.events.trigger('buy', this.entity);
 	},
 	GetBaseSellPrice: function() {
 		return this.sellPrice;
@@ -92,7 +96,7 @@ extend(Purchasable, Component, {
 		for (var resource in price) {
 			this.entity.game.content.resources[resource].amount.Add(price[resource]);
 		}
-		this.entity.events.trigger('sell', this);
+		this.entity.events.trigger('sell', this.entity);
 	},
 	CanSell: function() {
 		return true;
@@ -161,7 +165,7 @@ var ExponentialAmountPurchasable = function(entity) {
 
 	this.buyPrice = {};
 	this.sellPrice = {};
-	this.factor = 1.1;
+	this.factor = 1.5;
 };
 extend(ExponentialAmountPurchasable, Component, {
 	SetExponentialFactor: function(factor) {
@@ -236,7 +240,7 @@ var Generator = function(game, name, manual) {
 	this.rates = {};
 	this.multipliers = {};
 	if (this.manual) {
-		game.events.off('tick', this.Tick);
+		game.events.off('tick', this.OnTick);
 	}
 };
 extend(Generator, Entity, {
@@ -256,7 +260,7 @@ extend(Generator, Entity, {
 		}
 		return this.amount.Get() * rate * multiplier;
 	},
-	Tick: function() {
+	OnTick: function() {
 		for (var resource in this.rates) {
 			var result = this.GetRate(resource);
 			this.events.trigger('generate_resource', this, resource, result);
@@ -272,10 +276,10 @@ var Upgrade = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(ObtainablePurchasable);
 	this.AddComponent(Rewardable);
-	this.events.on('obtain', this.Obtained, this);
+	this.events.on('obtain', this.OnObtain, this);
 };
 extend(Upgrade, Entity, {
-	Obtained: function() {
+	OnObtain: function() {
 		this.rewardable.GiveRewards();
 	}
 });
@@ -286,5 +290,31 @@ extend(Upgrade, Entity, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
+	this.events.on('obtain', this.OnObtain, this);
 };
-extend(Achievement, Entity, {});
+extend(Achievement, Entity, {
+	OnTick: function() {
+		if (!this.obtainable.GetObtained() && this.game.Every(20)) {
+			this.CheckAchievement();
+		}
+	},
+	CheckAchievement: function() {
+
+	},
+	OnObtain: function() {
+
+	}
+});
+
+var AmountAchievement = function(game, name, entity, value) {
+	Achievement.call(this, game, name);
+	this.entity = entity;
+	this.value = value;
+};
+extend(AmountAchievement, Achievement, {
+	CheckAchievement: function() {
+		if (this.entity.amount.GetMax() >= this.value) {
+			this.obtainable.Obtain();
+		}
+	}
+});
