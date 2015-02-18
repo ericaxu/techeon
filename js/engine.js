@@ -39,7 +39,7 @@ extend(Events, null, {
 
 
 /**
- * Game  Main game entry point
+ * Game - Main game entry point
  */
 var GameEngine = function() {
 	this.events = new Events();
@@ -116,12 +116,19 @@ var Entity = function(game, name) {
 	this.events = new Events();
 	this.game = game;
 	this.name = name;
+	this.components = [];
 	this.AddComponent(Describable);
 	game.events.on('tick', this.Tick, this);
 };
 extend(Entity, null, {
 	AddComponent: function(component) {
-		new component(this);
+		//Don't create same component twice
+		for (var i = 0; i < this.components.length; i++) {
+			if (this.components[i] instanceof component) {
+				return this;
+			}
+		}
+		this.components.push(new component(this));
 		return this;
 	},
 	GetName: function() {

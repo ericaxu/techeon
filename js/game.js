@@ -65,8 +65,11 @@ extend(Purchasable, Component, {
 		}
 		return true;
 	},
-	GetBuyPrice: function() {
+	GetBaseBuyPrice: function() {
 		return this.buyPrice;
+	},
+	GetBuyPrice: function() {
+		return this.GetBaseBuyPrice();
 	},
 	Buy: function() {
 		if (!this.CanBuy()) {
@@ -78,8 +81,11 @@ extend(Purchasable, Component, {
 		}
 		this.entity.events.trigger('buy', this);
 	},
-	GetSellPrice: function() {
+	GetBaseSellPrice: function() {
 		return this.sellPrice;
+	},
+	GetSellPrice: function() {
+		return this.GetBaseSellPrice();
 	},
 	Sell: function() {
 		var price = this.GetSellPrice();
@@ -143,6 +149,40 @@ extend(ObtainablePurchasable, Component, {
 	}
 });
 
+/**
+ * ExponentialAmountPurchasable
+ */
+var ExponentialAmountPurchasable = function(entity) {
+	Component.call(this, entity);
+	entity.AddComponent(AmountPurchasable);
+	this.entity.exponential = this;
+	this.entity.purchase.GetSellPrice = bind(this.GetSellPrice, this);
+	this.entity.purchase.GetBuyPrice = bind(this.GetBuyPrice, this);
+
+	this.buyPrice = {};
+	this.sellPrice = {};
+	this.factor = 1.1;
+};
+extend(ExponentialAmountPurchasable, Component, {
+	SetExponentialFactor: function(factor) {
+		this.factor = factor;
+	},
+	GetBuyPrice: function() {
+		var price = this.entity.purchase.GetBaseBuyPrice();
+		for (var key in price) {
+			this.buyPrice[key] = Math.ceil(price[key] * Math.pow(this.factor, this.entity.amount.Get()));
+		}
+		return this.buyPrice;
+	},
+	GetSellPrice: function() {
+		var price = this.entity.purchase.GetBaseSellPrice();
+		for (var key in price) {
+			this.sellPrice[key] = Math.ceil(price[key] * Math.pow(this.factor, this.entity.amount.Get()));
+		}
+		return this.sellPrice;
+	}
+});
+
 var ResourceReward = function(game, resource, amount) {
 	Reward.call(this, game);
 	this.resource = resource;
@@ -191,7 +231,7 @@ extend(Resource, Entity, {});
  */
 var Generator = function(game, name, manual) {
 	Entity.call(this, game, name);
-	this.AddComponent(AmountPurchasable);
+	this.AddComponent(ExponentialAmountPurchasable);
 	this.manual = manual;
 	this.rates = {};
 	this.multipliers = {};
