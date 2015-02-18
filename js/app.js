@@ -54,21 +54,21 @@ UI.prototype.showPurchasable = function(generator, type) {
 			this.updateGenerators();
 		}
 	}, this));
-	var $tooltip = addEl('div', $div, 'purchasable_tooltip');
+	var $tooltip = addEl('div', $container, 'purchasable_tooltip');
 	addEl('h4', $tooltip, '', generator.describable.GetTitle());
 	addEl('p', $tooltip, '', generator.describable.GetDescription());
 
 	if (type === 'feature') {
-		$tooltip.offset({left: $div.outerWidth()});
+		$tooltip.offset({ left: $div.outerWidth() });
 	} else if (type === 'team') {
-		$tooltip.offset({left: $div.offset().left - $tooltip.outerWidth()});
+		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() });
 	}
 
 	$div.on('mouseenter', function() {
 		$tooltip.show();
 		$div.on('mousemove', function(e) {
-			var offsetTop = Math.max(0, e.pageY - 20);
-			$tooltip.offset({top: offsetTop});
+			var offsetTop = Math.min(Math.max(0, e.pageY - 20), $(window).height() - $tooltip.outerHeight());
+			$tooltip.offset({ top: offsetTop });
 		});
 	});
 
