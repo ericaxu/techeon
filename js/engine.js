@@ -147,18 +147,6 @@ var Component = function(entity) {
 };
 
 /**
- * Reward
- */
-var Reward = function(game) {
-	this.game = game;
-};
-extend(Reward, null, {
-	Reward: function() {
-
-	}
-});
-
-/**
  * Describable
  */
 var Describable = function(entity) {
@@ -257,7 +245,6 @@ extend(Obtainable, Component, {
 	}
 });
 
-
 /**
  * Rewardable
  */
@@ -269,10 +256,24 @@ var Rewardable = function(entity) {
 extend(Rewardable, Component, {
 	AddReward: function(reward) {
 		this.rewards.push(reward);
+		return this.entity;
 	},
 	GiveRewards: function() {
 		for (var i = 0; i < this.rewards.length; i++) {
 			this.rewards[i].Reward();
 		}
+		this.entity.events.trigger('reward', this.entity);
+	}
+});
+
+/**
+ * Reward
+ */
+var Reward = function(game) {
+	this.game = game;
+};
+extend(Reward, null, {
+	Reward: function() {
+
 	}
 });

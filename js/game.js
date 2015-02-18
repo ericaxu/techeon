@@ -2,6 +2,7 @@ var Game = function() {
 	GameEngine.call(this);
 	this.content.resources = {};
 	this.content.generators = {};
+	this.content.upgrades = {};
 	this.content.achievements = {};
 };
 extend(Game, GameEngine, {
@@ -20,6 +21,9 @@ extend(Game, GameEngine, {
 	},
 	AddGenerator: function(entity) {
 		this.AddContent("generators", entity);
+	},
+	AddUpgrade: function(entity) {
+		this.AddContent("upgrades", entity);
 	},
 	AddAchievement: function(entity) {
 		this.AddContent("achievements", entity);
@@ -187,39 +191,6 @@ extend(ExponentialAmountPurchasable, Component, {
 	}
 });
 
-var ResourceReward = function(game, resource, amount) {
-	Reward.call(this, game);
-	this.resource = resource;
-	this.amount = amount;
-};
-extend(ResourceReward, Reward, {
-	GetRewardAmount: function() {
-		return this.amount;
-	},
-	Reward: function() {
-		var amount = this.GetRewardAmount();
-		this.events.trigger('reward_resource', this, this.resource, amount);
-		this.game.content.resources[this.resource].amount.Add(amount);
-	}
-});
-
-var MultiplierReward = function(game, generator, multiplier_add, multiplier_multiply) {
-	Reward.call(this, game);
-	this.generator = generator;
-	this.multiplier_add = multiplier_add;
-	this.multiplier_multiply = multiplier_multiply;
-};
-extend(MultiplierReward, Reward, {
-	GetRewardAmount: function() {
-		return this.amount;
-	},
-	Reward: function() {
-		var amount = this.GetRewardAmount();
-		this.events.trigger('reward_resource', this, this.resource, amount);
-		this.game.content.resources[this.resource].amount.Add(amount);
-	}
-});
-
 
 /**
  * Resource
@@ -281,6 +252,52 @@ var Upgrade = function(game, name) {
 extend(Upgrade, Entity, {
 	OnObtain: function() {
 		this.rewardable.GiveRewards();
+	}
+});
+
+/**
+ * Rewards
+ */
+var ResourceReward = function(game, resource, amount) {
+	Reward.call(this, game);
+	this.resource = resource;
+	this.amount = amount;
+};
+extend(ResourceReward, Reward, {
+	Reward: function() {
+		this.game.content.resources[this.resource].amount.Add(this.amount);
+		this.events.trigger('reward_resource', this, this.resource, this.amount);
+	}
+});
+var BaseRateReward = function(game, generator, resource, amount) {
+	Reward.call(this, game);
+	this.generator = generator;
+	this.resource = resource;
+	this.amount = amount;
+};
+extend(BaseRateReward, Reward, {
+	Reward: function() {
+		this.game.content.generators[this.resource].rates[this.resource] += this.amount;
+		this.events.trigger('reward_baserate', this, this.resource, this.amount);
+	}
+});
+var MultiplierReward = function(game, generator, resource, multiplier_add, multiplier_multiply) {
+	Reward.call(this, game);
+	this.generator = generator;
+	this.resource = resource;
+	this.multiplier_add = multiplier_add;
+	this.multiplier_multiply = multiplier_multiply;
+};
+extend(MultiplierReward, Reward, {
+	Reward: function() {
+		var generator = this.game.content.generators[this.generator];
+		if(this.multiplier_add) {
+			generator.multipliers[this.resource] += this.multiplier_add;
+		}
+		if(this.multiplier_multiply) {
+			generator.multipliers[this.resource] *= this.multiplier_multiply;
+		}
+		this.events.trigger('reward_multiplier', this, this.resource);
 	}
 });
 

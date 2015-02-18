@@ -36,7 +36,7 @@ var GAME = (function() {
 	//Features
 	game.AddGenerator(new Generator(game, 'landing')
 			.describable.SetTitle('Landing page')
-			.describable.SetDescription('Earns an additional $10 per second.')
+			.describable.SetDescription('Generates $10 of Ads revenue per second.')
 			.purchasable.AddBuyPrice('code', 15)
 			.AddRateSecond('money', 10)
 	);
@@ -59,6 +59,29 @@ var GAME = (function() {
 			.purchasable.AddBuyPrice('code', 80)
 			.purchasable.AddRestriction('code', 60)
 			.AddRateSecond('money', 50)
+	);
+
+	//Upgrades
+	game.AddUpgrade(new Upgrade(game, 'freestuff')
+			.describable.SetTitle('Free stuff!')
+			.describable.SetDescription('Here\'s some free stuff to get you started!')
+			.rewardable.AddReward(new ResourceReward(game, 'code', 1000))
+			.rewardable.AddReward(new ResourceReward(game, 'money', 2000))
+	);
+	game.AddUpgrade(new Upgrade(game, 'jquery')
+			.describable.SetTitle('JQuery')
+			.describable.SetDescription('Web developers can write more code in the same amount of time (+5 base).')
+			.rewardable.AddReward(new BaseRateReward(game, game.content.generators.webdev, 'code', 5))
+	);
+	game.AddUpgrade(new Upgrade(game, 'ergokeyboard')
+			.describable.SetTitle('Ergonomic Keyboard')
+			.describable.SetDescription('Web developers code twice as fast.')
+			.rewardable.AddReward(new MultiplierReward(game, game.content.generators.webdev, 'code', 0, 2))
+	);
+	game.AddUpgrade(new Upgrade(game, 'ddosprotect')
+			.describable.SetTitle('DDOS protection')
+			.describable.SetDescription('Landing pages generates 3 times their Ads revenue.')
+			.rewardable.AddReward(new MultiplierReward(game, game.content.generators.landing, 'money', 0, 3))
 	);
 
 	//Achievements
