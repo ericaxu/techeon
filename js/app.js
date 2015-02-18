@@ -34,29 +34,29 @@ UI.prototype.updateResources = function(game) {
 
 UI.prototype.showPurchasable = function(generator, type) {
 	var className = 'purchasable generator_' + generator.GetName();
-	if (!generator.purchase.CanBuy()) {
+	if (!generator.purchasable.CanBuy()) {
 		className += ' unaffordable';
 	}
 
 	if (type == 'feature') {
-		var buttonText = generator.purchase.GetBuyPrice().code + ' lines';
+		var buttonText = generator.purchasable.GetBuyPrice().code + ' lines';
 		var $container = this.$featureContainer;
 	} else if (type == 'team') {
-		var buttonText = '$ ' + generator.purchase.GetBuyPrice().money;
+		var buttonText = '$ ' + generator.purchasable.GetBuyPrice().money;
 		var $container = this.$teamContainer;
 	}
 
 	var $div = addEl('div', $container, className);
-	addEl('h4', $div, '', generator.desc.GetTitle());
+	addEl('h4', $div, '', generator.describable.GetTitle());
 	addEl('button', $div, '', buttonText).on('click', $.proxy(function() {
-		if (generator.purchase.CanBuy()) {
-			generator.purchase.Buy();
+		if (generator.purchasable.CanBuy()) {
+			generator.purchasable.Buy();
 			this.updateGenerators();
 		}
 	}, this));
 	var $tooltip = addEl('div', $div, 'purchasable_tooltip');
-	addEl('h4', $tooltip, '', generator.desc.GetTitle());
-	addEl('p', $tooltip, '', generator.desc.GetDescription());
+	addEl('h4', $tooltip, '', generator.describable.GetTitle());
+	addEl('p', $tooltip, '', generator.describable.GetDescription());
 
 	if (type === 'feature') {
 		$tooltip.offset({left: $div.outerWidth()});
@@ -83,19 +83,19 @@ UI.prototype.updateGenerators = function() {
 		var generator = this.game.content.generators[name];
 		var $generatorDiv = $('.generator_' + name);
 		// if it's not shown right now but it's available
-		if ($generatorDiv.length === 0 && generator.purchase.Available()) {
-			if (generator.purchase.GetBuyPrice().code) {
+		if ($generatorDiv.length === 0 && generator.purchasable.Available()) {
+			if (generator.purchasable.GetBuyPrice().code) {
 				this.showPurchasable(generator, 'feature');
-			} else if (generator.purchase.GetBuyPrice().money) {
+			} else if (generator.purchasable.GetBuyPrice().money) {
 				this.showPurchasable(generator, 'team');
 			}
 		}
 		// just unlocked previously unaffordable items
-		else if ($generatorDiv.length > 0 && $generatorDiv.hasClass('unaffordable') && generator.purchase.CanBuy()) {
+		else if ($generatorDiv.length > 0 && $generatorDiv.hasClass('unaffordable') && generator.purchasable.CanBuy()) {
 			$generatorDiv.removeClass('unaffordable');
 		}
 		// no longer have enough money to buy it
-		else if ($generatorDiv.length > 0 && !$generatorDiv.hasClass('unaffordable') && !generator.purchase.CanBuy()) {
+		else if ($generatorDiv.length > 0 && !$generatorDiv.hasClass('unaffordable') && !generator.purchasable.CanBuy()) {
 			$generatorDiv.addClass('unaffordable');
 		}
 	}

@@ -27,7 +27,7 @@ extend(Game, GameEngine, {
  */
 var Purchasable = function(entity) {
 	Component.call(this, entity);
-	entity.purchase = this;
+	entity.purchasable = this;
 	this.obtained = false;
 	this.buyPrice = {};
 	this.sellPrice = {};
@@ -106,9 +106,9 @@ var AmountPurchasable = function(entity) {
 	Component.call(this, entity);
 	entity.AddComponent(Amount);
 	entity.AddComponent(Purchasable);
-	entity.amountpurchase = this;
+	entity.amountpurchasable = this;
 
-	this.entity.purchase.CanSell = this.CanSell;
+	this.entity.purchasable.CanSell = this.CanSell;
 	this.entity.events.on('buy', this.OnBuy, this);
 	this.entity.events.on('sell', this.OnSell, this);
 };
@@ -131,21 +131,21 @@ var ObtainablePurchasable = function(entity) {
 	Component.call(this, entity);
 	entity.AddComponent(Obtainable);
 	entity.AddComponent(Purchasable);
-	entity.obtainpurchase = this;
+	entity.obtainablepurchasable = this;
 
-	this.entity.purchase.CanSell = this.CanSell;
+	this.entity.purchasable.CanSell = this.CanSell;
 	this.entity.events.on('buy', this.OnBuy, this);
 	this.entity.events.on('sell', this.OnSell, this);
 };
 extend(ObtainablePurchasable, Component, {
 	OnBuy: function() {
-		this.entity.obtain.Obtain();
+		this.entity.obtainable.Obtain();
 	},
 	OnSell: function() {
-		this.entity.obtain.UnObtain();
+		this.entity.obtainable.UnObtain();
 	},
 	CanSell: function() {
-		return this.obtain.GetObtained();
+		return this.obtainable.GetObtained();
 	}
 });
 
@@ -155,9 +155,9 @@ extend(ObtainablePurchasable, Component, {
 var ExponentialAmountPurchasable = function(entity) {
 	Component.call(this, entity);
 	entity.AddComponent(AmountPurchasable);
-	this.entity.exponential = this;
-	this.entity.purchase.GetSellPrice = bind(this.GetSellPrice, this);
-	this.entity.purchase.GetBuyPrice = bind(this.GetBuyPrice, this);
+	this.entity.exponentialamountpurchasable = this;
+	this.entity.purchasable.GetSellPrice = bind(this.GetSellPrice, this);
+	this.entity.purchasable.GetBuyPrice = bind(this.GetBuyPrice, this);
 
 	this.buyPrice = {};
 	this.sellPrice = {};
@@ -168,14 +168,14 @@ extend(ExponentialAmountPurchasable, Component, {
 		this.factor = factor;
 	},
 	GetBuyPrice: function() {
-		var price = this.entity.purchase.GetBaseBuyPrice();
+		var price = this.entity.purchasable.GetBaseBuyPrice();
 		for (var key in price) {
 			this.buyPrice[key] = Math.ceil(price[key] * Math.pow(this.factor, this.entity.amount.Get()));
 		}
 		return this.buyPrice;
 	},
 	GetSellPrice: function() {
-		var price = this.entity.purchase.GetBaseSellPrice();
+		var price = this.entity.purchasable.GetBaseSellPrice();
 		for (var key in price) {
 			this.sellPrice[key] = Math.ceil(price[key] * Math.pow(this.factor, this.entity.amount.Get()));
 		}
@@ -276,7 +276,7 @@ var Upgrade = function(game, name) {
 };
 extend(Upgrade, Entity, {
 	Obtained: function() {
-		this.reward.GiveRewards();
+		this.rewardable.GiveRewards();
 	}
 });
 

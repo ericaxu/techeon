@@ -163,7 +163,7 @@ extend(Reward, null, {
  */
 var Describable = function(entity) {
 	Component.call(this, entity);
-	entity.desc = this;
+	entity.describable = this;
 };
 extend(Describable, Component, {
 	SetTitle: function(title) {
@@ -231,7 +231,7 @@ extend(Amount, Component, {
  */
 var Obtainable = function(entity) {
 	Component.call(this, entity);
-	entity.obtain = this;
+	entity.obtainable = this;
 	this.obtained = false;
 };
 extend(Obtainable, Component, {
@@ -258,7 +258,7 @@ extend(Obtainable, Component, {
  */
 var Rewardable = function(entity) {
 	Component.call(this, entity);
-	entity.reward = this;
+	entity.rewardable = this;
 	this.rewards = [];
 };
 extend(Rewardable, Component, {
