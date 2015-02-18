@@ -12,16 +12,15 @@ var UI = function(game) {
 UI.prototype.showDollarStats = function() {
 	var dollars = this.game.content.resources['money'].amount.Get();
 	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
-	this.$numDollars.text(formatNumWithCommas(dollars.toFixed(2)));
-	this.$numDollarsPerSec.text(formatNumWithCommas(dollarsPerSec.toFixed(2)));
+	this.$numDollars.text(formatDollar(dollars));
+	this.$numDollarsPerSec.text(formatDollar(dollarsPerSec));
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
 	var linesOfCode = this.game.content.resources['code'].amount.Get();
 	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
-
-	this.$numLinesOfCode.text(formatNumWithCommas(linesOfCode.toFixed(0)));
-	this.$numLinesOfCodePerSec.text(formatNumWithCommas(linesOfCodePerSec.toFixed(0)));
+	this.$numLinesOfCode.text(formatLinesOfCode(linesOfCode));
+	this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec));
 };
 
 UI.prototype.updateDollarStats = function(game) {
@@ -38,16 +37,15 @@ UI.prototype.updatePurchasable = function(generator, type) {
 	var tooltipClassName = '.generator_' + generator.GetName() + '_tooltip';
 
 	if (type == 'feature') {
-		var price = generator.purchasable.GetBuyPrice().code + ' lines';
+		var price = formatLinesOfCode(generator.purchasable.GetBuyPrice().code);
 	} else if (type == 'team') {
-		var price = '$ ' + generator.purchasable.GetBuyPrice().money;
+		var price = formatDollar(generator.purchasable.GetBuyPrice().money);
 	} else if (type == 'upgrade') {
 		if ($.isEmptyObject(generator.purchasable.GetBuyPrice())) {
 			var price = 'Free';
 		} else {
-			var price = '$ ' + generator.purchasable.GetBuyPrice().money;
+			var price = formatDollar(generator.purchasable.GetBuyPrice().money);
 		}
-
 	}
 
 	var $div = $(className);

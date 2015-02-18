@@ -90,6 +90,40 @@ function addEl(tag, parent, className, text, attr) {
 	return $el;
 }
 
+function readableBigNumber(x, digits) {
+	var million = 1000000;
+	var billion = million * 1000;
+	var trillion = billion * 1000;
+	var quadrillion = trillion * 1000;
+
+	if (digits === undefined) {
+		var digits = 2;
+	}
+
+	if (x > quadrillion) {
+		return formatNumWithCommas((x / quadrillion).toFixed(2)) + ' quadrillion';
+	}
+	if (x > trillion) {
+		return formatNumWithCommas((x / trillion).toFixed(2)) + ' trillion';
+	}
+	if (x > billion) {
+		return formatNumWithCommas((x / billion).toFixed(2)) + ' billion';
+	}
+	if (x > million) {
+		return formatNumWithCommas((x / million).toFixed(2)) + ' million';
+	}
+
+	return formatNumWithCommas(parseFloat(x.toFixed(digits)));
+}
+
 function formatNumWithCommas(x) {
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatDollar(x) {
+	return '$ ' + readableBigNumber(x);
+}
+
+function formatLinesOfCode(x) {
+	return readableBigNumber(x, 0) + ' lines';
 }
