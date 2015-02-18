@@ -6,6 +6,7 @@ var UI = function(game) {
 	this.$numDollarsPerSec = $('#num-dollars-per-sec');
 	this.$featureContainer = $('#feature-container');
 	this.$teamContainer = $('#team-container');
+	this.$upgradeContainer = $('#upgrade-container');
 };
 
 UI.prototype.showDollarStats = function() {
@@ -38,17 +39,24 @@ UI.prototype.updatePurchasable = function(generator, type) {
 
 	if (type == 'feature') {
 		var buttonText = generator.purchasable.GetBuyPrice().code + ' lines';
-		var $container = this.$featureContainer;
 	} else if (type == 'team') {
 		var buttonText = '$ ' + generator.purchasable.GetBuyPrice().money;
-		var $container = this.$teamContainer;
+	} else if (type == 'upgrade') {
+		if ($.isEmptyObject(generator.purchasable.GetBuyPrice())) {
+			var buttonText = 'Free';
+		} else {
+			var buttonText = '$ ' + generator.purchasable.GetBuyPrice().money;
+		}
+
 	}
 
 	var $div = $(className);
 	var $tooltip = $(tooltipClassName);
 	$div.find('h4').text(generator.describable.GetTitle());
 	$div.find('button').text(buttonText);
-	$div.find('.purchasable_owned_count').text(generator.amount.Get());
+	if (type !== 'upgrade') {
+		$div.find('.purchasable_owned_count').text(generator.amount.Get());
+	}
 	$tooltip.find('h4').text(generator.describable.GetTitle());
 	$tooltip.find('p').text(generator.describable.GetDescription());
 };
@@ -63,6 +71,8 @@ UI.prototype.showPurchasable = function(generator, type) {
 		var $container = this.$featureContainer;
 	} else if (type == 'team') {
 		var $container = this.$teamContainer;
+	} else if (type == 'upgrade') {
+		var $container = this.$upgradeContainer;
 	}
 
 	var $div = addEl('div', $container, className);
@@ -84,8 +94,10 @@ UI.prototype.showPurchasable = function(generator, type) {
 	this.updatePurchasable(generator, type);
 
 	if (type === 'feature') {
-		$tooltip.offset({ left: $div.outerWidth() });
+		$tooltip.offset({ left: $div.outerWidth() + 1 });
 	} else if (type === 'team') {
+		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() });
+	} else if (type === 'upgrade') {
 		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() });
 	}
 
@@ -114,17 +126,37 @@ UI.prototype.updateGenerators = function() {
 			} else if (generator.purchasable.GetBuyPrice().money) {
 				this.showPurchasable(generator, 'team');
 			}
-		}
-		// just unlocked previously unaffordable items
-		else if ($generatorDiv.length > 0 && $generatorDiv.hasClass('unaffordable') && generator.purchasable.CanBuy()) {
-			$generatorDiv.removeClass('unaffordable');
-		}
-		// no longer have enough money to buy it
-		else if ($generatorDiv.length > 0 && !$generatorDiv.hasClass('unaffordable') && !generator.purchasable.CanBuy()) {
-			$generatorDiv.addClass('unaffordable');
+		} else if ($generatorDiv.length > 0) {
+			// just unlocked previously unaffordable items
+			if ($generatorDiv.hasClass('unaffordable') && generator.purchasable.CanBuy()) {
+				$generatorDiv.removeClass('unaffordable');
+			}
+			// no longer have enough money to buy it
+			else if (!$generatorDiv.hasClass('unaffordable') && !generator.purchasable.CanBuy()) {
+				$generatorDiv.addClass('unaffordable');
+			}
 		}
 	}
 };
+
+UI.prototype.updateUpgrades = function() {
+	for (var name in this.game.content.upgrades) {
+		var upgrade = this.game.content.upgrades[name];
+		var $generatorDiv = $('.generator_' + name);
+		if ($generatorDiv.length === 0 && upgrade.purchasable.Available()) {
+			this.showPurchasable(upgrade, 'upgrade');
+		} else if ($generatorDiv.length > 0) {
+			// just unlocked previously unaffordable items
+			if ($generatorDiv.hasClass('unaffordable') && upgrade.purchasable.CanBuy()) {
+				$generatorDiv.removeClass('unaffordable');
+			}
+			// no longer have enough money to buy it
+			else if (!$generatorDiv.hasClass('unaffordable') && !upgrade.purchasable.CanBuy()) {
+				$generatorDiv.addClass('unaffordable');
+			}
+		}
+	}
+}
 
 UI.prototype.setupPopup = function() {
 	// Closing popup
@@ -163,11 +195,13 @@ $('#codebase').on('click', function() {
 GAME.events.on('post_loop', function(game) {
 	if (game.Every(25)) {
 		ui.updateGenerators();
+		ui.updateUpgrades();
 	}
 });
 
 ui.setupPopup();
-ui.updateGenerators(GAME);
+ui.updateGenerators();
+ui.updateUpgrades();
 
 // Set up achievement event listeners
 for(var key in GAME.content.achievements) {
@@ -177,7 +211,3 @@ for(var key in GAME.content.achievements) {
 		$('.popup').show();
 	});
 }
-
-// Who has time for clicking?
-GAME.content.resources.code.amount.Add(100);
-GAME.content.resources.money.amount.Add(100);
