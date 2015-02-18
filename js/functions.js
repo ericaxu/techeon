@@ -8,10 +8,19 @@ if (!Object.create) {
     }
 }
 
-function inherit(prototype, constructor) {
-    var result = Object.create(prototype);
-    result.constructor = constructor;
-    return result;
+function extend(child, parent, prototype) {
+    inherit(child, parent);
+
+    for (var key in prototype) {
+        child.prototype[key] = prototype[key];
+    }
+}
+
+function inherit(child, parent) {
+    if (parent) {
+        child.prototype = Object.create(parent.prototype);
+        child.constructor = child;
+    }
 }
 
 function currentTimeMS() {

@@ -1,150 +1,65 @@
 var GAME = (function() {
 
-    var generators = [
-        {
-            name: 'webdev',
-            title: 'Web developer',
-            description: 'Writes 5 lines of code per second.',
-            price: {
-                money: 100
-            },
-            rates: {
-                code: 5
-            },
-            restriction: {
-                money: 0
-            }
-        },
-        {
-            name: 'opmanager',
-            title: 'Opeartion manager',
-            description: 'Doesn\'t code, but can help upgrade your company.',
-            price: {
-                money: 150
-            },
-            rates: {
-                //enables upgrades
-            },
-            restriction: {
-                money: 100
-            }
-        },
-        {
-            name: 'android',
-            title: 'Android developer',
-            description: 'Writes 20 lines of code per second.',
-            price: {
-                money: 200
-            },
-            rates: {
-                code: 20
-            },
-            restriction: {
-                money: 150
-            }
-        },
-        {
-            name: 'dba',
-            title: 'Database admin',
-            description: 'Writes 60 lines of code per second.',
-            price: {
-                money: 350
-            },
-            rates: {
-                code: 60
-            },
-            restriction: {
-                money: 300
-            }
-        }
-    ];
-
-    var features = [
-        {
-            name: 'landing',
-            title: 'Landing page',
-            description: 'Earns an additional $10 per second.',
-            price: {
-                code: 15
-            },
-            rates: {
-                money: 10
-            },
-            restriction: {
-                code: 0
-            }
-        },
-        {
-            name: 'careerspage',
-            title: 'Careers page',
-            description: 'Able to hire people.',
-            price: {
-                code: 30
-            },
-            rates: {
-                // enable hiring people
-            },
-            restriction: {
-                code: 10
-            }
-        },
-        {
-            name: 'flatdesign',
-            title: 'Flat UI design',
-            description: 'Earns an additional $30 per second.',
-            price: {
-                code: 50
-            },
-            rates: {
-                money: 30
-            },
-            restriction: {
-                code: 30
-            }
-        },
-        {
-            name: 'cslivechat',
-            title: 'Customer service livechat',
-            description: 'Earns an additional $50 per second.',
-            price: {
-                code: 80
-            },
-            rates: {
-                money: 50
-            },
-            restriction: {
-                code: 60
-            }
-        }
-    ];
-
-
     var game = new Game();
 
-    game.CreateResource('money');
-    game.CreateResource('code');
+    game.AddResource(new Resource(game, 'money'));
+    game.AddResource(new Resource(game, 'code'));
 
-    var importGenerator = function(generator) {
-        var object = game.CreateGenerator(generator.name).SetTitle(generator.title).SetDescription(generator.description);
-        for (var key in generator.price) {
-            object.AddBuyPrice(key, generator.price[key]);
-        }
-        for (var key in generator.rates) {
-            object.AddRate(key, generator.rates[key] / game.GetTicksPerSecond());
-        }
-        for (var key in generator.restriction) {
-            object.AddRestriction(key, generator.restriction[key]);
-        }
-        object.SetTitle(generator.title).SetDescription(generator.description);
-    };
+    //Hires
+    game.AddGenerator(new Generator(game, 'webdev')
+            .desc.SetTitle('Web developer')
+            .desc.SetDescription('Writes 5 lines of code per second.')
+            .purchase.AddBuyPrice('money', 100)
+            .AddRateSecond('code', 5)
+    );
+    game.AddGenerator(new Generator(game, 'opmanager')
+            .desc.SetTitle('Opeartion manager')
+            .desc.SetDescription('Doesn\'t code, but can help upgrade your company.')
+            .purchase.AddBuyPrice('money', 150)
+            .purchase.AddRestriction('money', 100)
+    );
+    game.AddGenerator(new Generator(game, 'android')
+            .desc.SetTitle('Android developer')
+            .desc.SetDescription('Writes 20 lines of code per second.')
+            .purchase.AddBuyPrice('money', 200)
+            .purchase.AddRestriction('money', 150)
+            .AddRateSecond('code', 20)
+    );
+    game.AddGenerator(new Generator(game, 'dba')
+            .desc.SetTitle('Database admin')
+            .desc.SetDescription('Writes 60 lines of code per second.')
+            .purchase.AddBuyPrice('money', 350)
+            .purchase.AddRestriction('money', 300)
+            .AddRateSecond('code', 60)
+    );
 
-    for (var i = 0; i < generators.length; i++) {
-        importGenerator(generators[i]);
-    }
-
-    for (var i = 0; i < features.length; i++) {
-        importGenerator(features[i]);
-    }
+    //Features
+    game.AddGenerator(new Generator(game, 'landing')
+            .desc.SetTitle('Landing page')
+            .desc.SetDescription('Earns an additional $10 per second.')
+            .purchase.AddBuyPrice('code', 15)
+            .AddRateSecond('money', 10)
+    );
+    game.AddGenerator(new Generator(game, 'careerspage')
+            .desc.SetTitle('Careers page')
+            .desc.SetDescription('Able to hire people.')
+            .purchase.AddBuyPrice('code', 30)
+            .purchase.AddRestriction('code', 10)
+    );
+    game.AddGenerator(new Generator(game, 'flatdesign')
+            .desc.SetTitle('Flat UI design')
+            .desc.SetDescription('Earns an additional $30 per second.')
+            .purchase.AddBuyPrice('code', 50)
+            .purchase.AddRestriction('code', 30)
+            .AddRateSecond('money', 30)
+    );
+    game.AddGenerator(new Generator(game, 'cslivechat')
+            .desc.SetTitle('Customer service livechat')
+            .desc.SetDescription('Earns an additional $50 per second.')
+            .purchase.AddBuyPrice('code', 80)
+            .purchase.AddRestriction('code', 60)
+            .AddRateSecond('money', 50)
+    );
 
     return game;
 })();

@@ -9,22 +9,22 @@ var UI = function(game) {
 };
 
 UI.prototype.showDollarStats = function() {
-	var dollars = this.game.resources['money'].amount;
-	var dollarsPerSec = this.game.GetRatesPerTick('money') * this.game.GetTicksPerSecond();
+	var dollars = this.game.content.resources['money'].amount.Get();
+	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
 	this.$numDollars.text(formatNumWithCommas(dollars.toFixed(2)));
 	this.$numDollarsPerSec.text(formatNumWithCommas(dollarsPerSec.toFixed(2)));
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
-	var linesOfCode = this.game.resources['code'].amount;
-	var linesOfCodePerSec = this.game.GetRatesPerTick('code') * this.game.GetTicksPerSecond();
+	var linesOfCode = this.game.content.resources['code'].amount.Get();
+	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
 
 	this.$numLinesOfCode.text(formatNumWithCommas(linesOfCode.toFixed(0)));
 	this.$numLinesOfCodePerSec.text(formatNumWithCommas(linesOfCodePerSec.toFixed(0)));
 };
 
 UI.prototype.updateDollarStats = function(game) {
-	ui.showDollarStats(game.resources['money'].amount);
+	ui.showDollarStats(game.content.resources['money'].amount.Get());
 };
 
 UI.prototype.updateResources = function(game) {
@@ -33,43 +33,42 @@ UI.prototype.updateResources = function(game) {
 };
 
 UI.prototype.showPurchasable = function(generator, type) {
-	if (!generator.CanBuy()) {
-		var className = 'purchasable generator_' + generator.name + ' unaffordable';
-	} else {
-		var className = 'purchasable generator_' + generator.name;
+	var className = 'purchasable generator_' + generator.GetName();
+	if (!generator.purchase.CanBuy()) {
+		className += ' unaffordable';
 	}
 
 	if (type == 'feature') {
-		var buttonText = generator.buyPrice.code + ' lines';
+		var buttonText = generator.purchase.GetBuyPrice().code + ' lines';
 		var $container = this.$featureContainer;
 	} else if (type == 'team') {
-		var buttonText = '$ ' + generator.buyPrice.money;
+		var buttonText = '$ ' + generator.purchase.GetBuyPrice().money;
 		var $container = this.$teamContainer;
 	}
 
 	var $div = addEl('div', $container, className);
-	addEl('h4', $div, '', generator.GetTitle());
+	addEl('h4', $div, '', generator.desc.GetTitle());
 	addEl('button', $div, '', buttonText).on('click', $.proxy(function() {
-		if (generator.CanBuy()) {
-			generator.Buy();
+		if (generator.purchase.CanBuy()) {
+			generator.purchase.Buy();
 			this.updateGenerators();
 		}
 	}, this));
 	var $tooltip = addEl('div', $div, 'purchasable_tooltip');
-	addEl('h4', $tooltip, '', generator.GetTitle());
-	addEl('p', $tooltip, '', generator.GetDescription());
+	addEl('h4', $tooltip, '', generator.desc.GetTitle());
+	addEl('p', $tooltip, '', generator.desc.GetDescription());
 
 	if (type === 'feature') {
-		$tooltip.offset({ left: $div.outerWidth() });
+		$tooltip.offset({left: $div.outerWidth()});
 	} else if (type === 'team') {
-		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() });
+		$tooltip.offset({left: $div.offset().left - $tooltip.outerWidth()});
 	}
 
 	$div.on('mouseenter', function() {
 		$tooltip.show();
 		$div.on('mousemove', function(e) {
 			var offsetTop = Math.max(0, e.pageY - 20);
-			$tooltip.offset({ top: offsetTop });
+			$tooltip.offset({top: offsetTop});
 		});
 	});
 
@@ -79,24 +78,24 @@ UI.prototype.showPurchasable = function(generator, type) {
 	});
 };
 
-UI.prototype.updateGenerators = function () {
-	for (var name in this.game.generators) {
-		var generator = this.game.generators[name];
+UI.prototype.updateGenerators = function() {
+	for (var name in this.game.content.generators) {
+		var generator = this.game.content.generators[name];
 		var $generatorDiv = $('.generator_' + name);
 		// if it's not shown right now but it's available
-		if ($generatorDiv.length === 0 && generator.Available()) {
-			if (generator.buyPrice.code) {
+		if ($generatorDiv.length === 0 && generator.purchase.Available()) {
+			if (generator.purchase.GetBuyPrice().code) {
 				this.showPurchasable(generator, 'feature');
-			} else if (generator.buyPrice.money) {
+			} else if (generator.purchase.GetBuyPrice().money) {
 				this.showPurchasable(generator, 'team');
 			}
 		}
 		// just unlocked previously unaffordable items
-		else if ($generatorDiv.length > 0 && $generatorDiv.hasClass('unaffordable') && generator.CanBuy()) {
+		else if ($generatorDiv.length > 0 && $generatorDiv.hasClass('unaffordable') && generator.purchase.CanBuy()) {
 			$generatorDiv.removeClass('unaffordable');
 		}
 		// no longer have enough money to buy it
-		else if ($generatorDiv.length > 0 && !$generatorDiv.hasClass('unaffordable') && !generator.CanBuy()) {
+		else if ($generatorDiv.length > 0 && !$generatorDiv.hasClass('unaffordable') && !generator.purchase.CanBuy()) {
 			$generatorDiv.addClass('unaffordable');
 		}
 	}
@@ -113,7 +112,7 @@ GAME.events.on('post_loop', function(game) {
 GAME.Start();
 
 $('#codebase').on('click', function() {
-	GAME.resources['code'].Add(1);
+	GAME.content.resources['code'].amount.Add(1);
 	ui.updateLinesOfCodeStats(GAME);
 });
 
