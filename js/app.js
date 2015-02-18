@@ -82,7 +82,7 @@ UI.prototype.showPurchasable = function(generator, type) {
 	$div.on('click', $.proxy(function() {
 		if (generator.purchasable.CanBuy()) {
 			generator.purchasable.Buy();
-			this.updateGenerators();
+			this.updateGenerators().updateUpgrades();
 			this.updatePurchasable(generator, type);
 		}
 	}, this));
@@ -138,13 +138,16 @@ UI.prototype.updateGenerators = function() {
 			}
 		}
 	}
+
+	return this;
 };
 
 UI.prototype.updateUpgrades = function() {
 	for (var name in this.game.content.upgrades) {
 		var upgrade = this.game.content.upgrades[name];
 		var $generatorDiv = $('.generator_' + name);
-		if ($generatorDiv.length === 0 && upgrade.purchasable.Available()) {
+		var $tooltipDiv = $('.generator_' + name + '_tooltip');
+		if ($generatorDiv.length === 0 && upgrade.purchasable.Available() && !upgrade.obtainable.GetObtained()) {
 			this.showPurchasable(upgrade, 'upgrade');
 		} else if ($generatorDiv.length > 0) {
 			// just unlocked previously unaffordable items
@@ -155,9 +158,16 @@ UI.prototype.updateUpgrades = function() {
 			else if (!$generatorDiv.hasClass('unaffordable') && !upgrade.purchasable.CanBuy()) {
 				$generatorDiv.addClass('unaffordable');
 			}
+			// upgrade already used
+			else if (upgrade.obtainable.GetObtained()) {
+				$generatorDiv.remove();
+				$tooltipDiv.remove();
+			}
 		}
 	}
-}
+
+	return this;
+};
 
 UI.prototype.setupPopup = function() {
 	// Closing popup
@@ -195,8 +205,7 @@ $('#codebase').on('click', function() {
 
 GAME.events.on('post_loop', function(game) {
 	if (game.Every(25)) {
-		ui.updateGenerators();
-		ui.updateUpgrades();
+		ui.updateGenerators().updateUpgrades();
 	}
 });
 

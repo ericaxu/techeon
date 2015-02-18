@@ -71,7 +71,7 @@ body {
 }
 
 .purchasable .price {
-	color: #50AD50;
+	color: #50A050;
 }
 
 .purchasable_owned_count {
@@ -134,7 +134,7 @@ body {
 }
 
 .unaffordable.purchasable .price {
-	color: #AD5050;
+	color: #A05050;
  }
 
 
