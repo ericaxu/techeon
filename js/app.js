@@ -7,13 +7,7 @@ var UI = function(game) {
 	this.$featureContainer = $('#feature-container');
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
-};
-
-UI.prototype.showDollarStats = function() {
-	var dollars = this.game.content.resources['money'].amount.Get();
-	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
-	this.$numDollars.text(formatDollar(dollars));
-	this.$numDollarsPerSec.text(formatDollar(dollarsPerSec));
+	this.$notifications = $('.notification-container');
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
@@ -24,7 +18,10 @@ UI.prototype.updateLinesOfCodeStats = function() {
 };
 
 UI.prototype.updateDollarStats = function(game) {
-	ui.showDollarStats(game.content.resources['money'].amount.Get());
+	var dollars = this.game.content.resources['money'].amount.Get();
+	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
+	this.$numDollars.text(formatDollar(dollars));
+	this.$numDollarsPerSec.text(formatDollar(dollarsPerSec));
 };
 
 UI.prototype.updateResources = function(game) {
@@ -33,8 +30,8 @@ UI.prototype.updateResources = function(game) {
 };
 
 UI.prototype.updatePurchasable = function(generator, type) {
-	var className = '.generator_' + generator.GetName();
-	var tooltipClassName = '.generator_' + generator.GetName() + '_tooltip';
+	var className = '.generator-' + generator.GetName();
+	var tooltipClassName = '.generator-' + generator.GetName() + '-tooltip';
 
 	if (type == 'feature') {
 		var price = formatLinesOfCode(generator.purchasable.GetBuyPrice().code);
@@ -53,14 +50,14 @@ UI.prototype.updatePurchasable = function(generator, type) {
 	$div.find('h4').text(generator.describable.GetTitle());
 	$div.find('.price').text(price);
 	if (type !== 'upgrade') {
-		$div.find('.purchasable_owned_count').text(generator.amount.Get());
+		$div.find('.purchasable-owned-count').text(generator.amount.Get());
 	}
 	$tooltip.find('h4').text(generator.describable.GetTitle());
 	$tooltip.find('p').text(generator.describable.GetDescription());
 };
 
 UI.prototype.showPurchasable = function(generator, type) {
-	var className = 'purchasable generator_' + generator.GetName();
+	var className = 'purchasable generator-' + generator.GetName();
 	if (!generator.purchasable.CanBuy()) {
 		className += ' unaffordable';
 	}
@@ -75,7 +72,7 @@ UI.prototype.showPurchasable = function(generator, type) {
 
 	var $div = addEl('div', $container, className);
 	addEl('h4', $div);
-	addEl('div', $div, 'purchasable_owned_count');
+	addEl('div', $div, 'purchasable-owned-count');
 	addEl('div', $div, 'price');
 	$div.on('click', $.proxy(function() {
 		if (generator.purchasable.CanBuy()) {
@@ -85,7 +82,7 @@ UI.prototype.showPurchasable = function(generator, type) {
 		}
 	}, this));
 
-	var tooltipClassName = 'purchasable_tooltip generator_' + generator.GetName() + '_tooltip';
+	var tooltipClassName = 'purchasable-tooltip generator-' + generator.GetName() + '-tooltip';
 	var $tooltip = addEl('div', $container, tooltipClassName);
 	addEl('h4', $tooltip);
 	addEl('p', $tooltip);
@@ -117,7 +114,7 @@ UI.prototype.showPurchasable = function(generator, type) {
 UI.prototype.updateGenerators = function() {
 	for (var name in this.game.content.generators) {
 		var generator = this.game.content.generators[name];
-		var $generatorDiv = $('.generator_' + name);
+		var $generatorDiv = $('.generator-' + name);
 		// if it's not shown right now but it's available
 		if ($generatorDiv.length === 0 && generator.purchasable.Available()) {
 			if (generator.purchasable.GetBuyPrice().code) {
@@ -143,8 +140,8 @@ UI.prototype.updateGenerators = function() {
 UI.prototype.updateUpgrades = function() {
 	for (var name in this.game.content.upgrades) {
 		var upgrade = this.game.content.upgrades[name];
-		var $generatorDiv = $('.generator_' + name);
-		var $tooltipDiv = $('.generator_' + name + '_tooltip');
+		var $generatorDiv = $('.generator-' + name);
+		var $tooltipDiv = $('.generator-' + name + '-tooltip');
 		if ($generatorDiv.length === 0 && upgrade.purchasable.Available() && !upgrade.obtainable.GetObtained()) {
 			this.showPurchasable(upgrade, 'upgrade');
 		} else if ($generatorDiv.length > 0) {
@@ -170,7 +167,7 @@ UI.prototype.updateUpgrades = function() {
 UI.prototype.setupPopup = function() {
 	// Closing popup
 	var $popup = $('.popup');
-	$('.wrapper, .close_btn').on('click', function () {
+	$('.wrapper, .close-btn').on('click', function () {
 		$popup.hide();
 	});
 
@@ -181,9 +178,27 @@ UI.prototype.setupPopup = function() {
 		}
 	});
 
-	$('.popup_content').click(function (e) {
+	$('.popup-content').click(function (e) {
 		e.stopPropagation();
 	});
+};
+
+UI.prototype.showNotification = function(title, text, icon) {
+	var $notification = addEl('div', this.$notifications, 'notification');
+	addEl('span', $notification, 'close-btn').on('click', function() {
+		$notification.remove();
+	});
+	addEl('img', $notification, '', '', {
+		src: 'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg',
+		alt: title
+	});
+	var $achievement = addEl('div', $notification);
+	addEl('h4', $achievement, '', title);
+	addEl('p', $achievement, '', text);
+
+	setTimeout(function() {
+		$notification.remove();
+	}, 2000);
 };
 
 var ui = new UI(GAME);
@@ -214,8 +229,7 @@ ui.updateUpgrades();
 // Set up achievement event listeners
 for(var key in GAME.content.achievements) {
 	GAME.content.achievements[key].events.on('obtain', function(achievement) {
-		$('.popup_content').html('Achievement Get: ' + achievement.describable.GetTitle() + '<br>' +
-		achievement.describable.GetDescription());
-		$('.popup').show();
+		ui.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
+		achievement.describable.GetDescription(), '');
 	});
 }

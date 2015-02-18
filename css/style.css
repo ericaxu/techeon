@@ -43,6 +43,12 @@ body {
 	border-right: 1px solid #777;
 }
 
+h4 {
+	margin-bottom: 10px;
+	font-weight: normal;
+	font-size: 20px;
+}
+
 #feature-container, #team-container, #upgrade-container {
 	width: 300px;
 }
@@ -59,12 +65,6 @@ body {
 	background: #FFFFFF;
 }
 
-.purchasable h4 {
-	font-weight: normal;
-	font-size: 18px;
-	margin-bottom: 10px;
-}
-
 .purchasable p {
 	font-size: 12px;
 	margin-bottom: 5px;
@@ -74,7 +74,7 @@ body {
 	color: #50A050;
 }
 
-.purchasable_owned_count {
+.purchasable-owned-count {
 	position: absolute;
 	right: 20px;
 	top: 50%;
@@ -82,7 +82,7 @@ body {
 	font-size: 40px;
 }
 
-.purchasable_tooltip {
+.purchasable-tooltip {
 	display: none;
 	position: absolute;
 	background: white;
@@ -90,12 +90,6 @@ body {
 	width: 250px;
 	padding: 15px;
 	border: 1px solid #777;
-}
-
-.purchasable_tooltip h4 {
-	margin-bottom: 10px;
-	font-weight: normal;
-	font-size: 20px;
 }
 
 #codebase {
@@ -143,7 +137,7 @@ body {
 	display: none;
 }
 
-.popup_bg {
+.popup-bg {
 	background: #3d464d;
 	opacity: 0.6;
 	position: fixed;
@@ -162,12 +156,12 @@ body {
 	left: 0;
 }
 
-.popup_cell {
+.popup-cell {
 	display: table-cell;
 	vertical-align: middle;
 }
 
-.popup_content {
+.popup-content {
 	width: 400px;
 	padding: 20px 40px 40px 40px;
 	text-align: left;
@@ -175,4 +169,51 @@ body {
 	border: none;
 	margin: 0 auto;
 	overflow: hidden;
+}
+
+
+/* Notification */
+.notification-container {
+	position: fixed;
+	top: 30px;
+	left: 30px;
+	background: #FFF;
+}
+
+.notification {
+	position: relative;
+	width: 400px;
+	min-height: 50px;
+	padding: 20px;
+	border: 1px solid #777;
+}
+
+.notification img {
+	display: inline-block;
+	width: 60px;
+	height: 60px;
+	vertical-align: middle;
+}
+
+.notification > div {
+	display: inline-block;
+	width: 300px;
+	padding: 0 5px 0 20px;
+	vertical-align: middle;
+}
+
+.close-btn {
+	position: absolute;
+	display: inline-block;
+	height: 20px;
+	width: 20px;
+	font-size: 30px;
+	cursor: pointer;
+	top: 0;
+	right: 2px;
+	padding: 8px;
+}
+
+.close-btn::before {
+	content: "\D7";
 }
