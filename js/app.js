@@ -32,11 +32,9 @@ UI.prototype.updateResources = function(game) {
 	this.updateDollarStats(game);
 };
 
-UI.prototype.showPurchasable = function(generator, type) {
-	var className = 'purchasable generator_' + generator.GetName();
-	if (!generator.purchasable.CanBuy()) {
-		className += ' unaffordable';
-	}
+UI.prototype.updatePurchasable = function(generator, type) {
+	var className = '.generator_' + generator.GetName();
+	var tooltipClassName = '.generator_' + generator.GetName() + '_tooltip';
 
 	if (type == 'feature') {
 		var buttonText = generator.purchasable.GetBuyPrice().code + ' lines';
@@ -46,17 +44,42 @@ UI.prototype.showPurchasable = function(generator, type) {
 		var $container = this.$teamContainer;
 	}
 
+	var $div = $(className);
+	var $tooltip = $(tooltipClassName);
+	$div.find('h4').text(generator.describable.GetTitle());
+	$div.find('button').text(buttonText);
+	$tooltip.find('h4').text(generator.describable.GetTitle());
+	$tooltip.find('p').text(generator.describable.GetDescription());
+};
+
+UI.prototype.showPurchasable = function(generator, type) {
+	var className = 'purchasable generator_' + generator.GetName();
+	if (!generator.purchasable.CanBuy()) {
+		className += ' unaffordable';
+	}
+
+	if (type == 'feature') {
+		var $container = this.$featureContainer;
+	} else if (type == 'team') {
+		var $container = this.$teamContainer;
+	}
+
 	var $div = addEl('div', $container, className);
-	addEl('h4', $div, '', generator.describable.GetTitle());
-	addEl('button', $div, '', buttonText).on('click', $.proxy(function() {
+	addEl('h4', $div);
+	addEl('button', $div).on('click', $.proxy(function() {
 		if (generator.purchasable.CanBuy()) {
 			generator.purchasable.Buy();
 			this.updateGenerators();
+			this.updatePurchasable(generator, type);
 		}
 	}, this));
-	var $tooltip = addEl('div', $container, 'purchasable_tooltip');
-	addEl('h4', $tooltip, '', generator.describable.GetTitle());
-	addEl('p', $tooltip, '', generator.describable.GetDescription());
+
+	var tooltipClassName = 'purchasable_tooltip generator_' + generator.GetName() + '_tooltip';
+	var $tooltip = addEl('div', $container, tooltipClassName);
+	addEl('h4', $tooltip);
+	addEl('p', $tooltip);
+
+	this.updatePurchasable(generator, type);
 
 	if (type === 'feature') {
 		$tooltip.offset({ left: $div.outerWidth() });
@@ -123,3 +146,7 @@ GAME.events.on('post_loop', function(game) {
 });
 
 ui.updateGenerators(GAME);
+
+// Who has time for clicking?
+GAME.content.resources.code.amount.Add(100);
+GAME.content.resources.money.amount.Add(100);
