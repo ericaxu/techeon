@@ -82,19 +82,25 @@ UI.prototype.showPurchasable = function(generator, type) {
 		}
 	}, this));
 
-	var tooltipClassName = 'purchasable-tooltip generator-' + generator.GetName() + '-tooltip';
+	var tooltipClassName = 'purchasable-tooltip-wrapper fancy-border generator-' + generator.GetName() + '-tooltip';
 	var $tooltip = addEl('div', $container, tooltipClassName);
-	addEl('h4', $tooltip);
-	addEl('p', $tooltip);
+	var $outerBorder1 = addEl('div', $tooltip, 'purchasable-tooltip-outer-border-1 fancy-border');
+	var $outerBorder2 = addEl('div', $outerBorder1, 'purchasable-tooltip-outer-border-2 fancy-border');
+	var $innerWrapper = addEl('div', $outerBorder2, 'purchasable-tooltip-inner-wrapper');
+	var $innerBorder1 = addEl('div', $innerWrapper, 'purchasable-tooltip-inner-border-1 fancy-border');
+	var $innerBorder2 = addEl('div', $innerBorder1, 'purchasable-tooltip-inner-border-2 fancy-border');
+	//var $innerContent = addEl('div', $outerContent, 'purchasable-tooltip-content-inner');
+	addEl('h4', $innerBorder2);
+	addEl('p', $innerBorder2);
 
 	this.updatePurchasable(generator, type);
 
 	if (type === 'feature') {
-		$tooltip.offset({ left: $div.outerWidth() + 1 });
+		$tooltip.offset({ left: $div.outerWidth() + 4 });
 	} else if (type === 'team') {
-		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() });
+		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - 4 });
 	} else if (type === 'upgrade') {
-		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() });
+		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - 4 });
 	}
 
 	$div.on('mouseenter', function() {

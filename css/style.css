@@ -82,15 +82,102 @@ h4 {
 	font-size: 40px;
 }
 
-.purchasable-tooltip {
+.purchasable-tooltip-wrapper {
 	display: none;
 	position: absolute;
-	background: white;
+	background: #46CEF0;
+	box-shadow: 0 0 8px 4px #222;
 	top: 0;
 	width: 250px;
-	padding: 15px;
-	border: 1px solid #777;
+	padding: 7px;
 	z-index: 1;
+}
+
+.fancy-border:before, .fancy-border:after {
+	content: '';
+	position: absolute;
+	border-style: solid;
+}
+
+.purchasable-tooltip-inner-wrapper {
+	position: relative;
+	box-shadow: 0 0 5px 2px #81E4FC;
+	z-index: 1;
+}
+
+.purchasable-tooltip-wrapper:before, .purchasable-tooltip-wrapper:after {
+	border: none;
+}
+
+.purchasable-tooltip-outer-border-1, .purchasable-tooltip-outer-border-2 {
+	width: 250px;
+	background-image: linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #024e74), color-stop(0.5, #000203), color-stop(1, #000203));
+	background-image: -moz-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
+	background-image: -o-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
+	background-image: -ms-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
+
+	color: white;
+}
+
+.purchasable-tooltip-inner-border-1, .purchasable-tooltip-inner-border-2 {
+	padding: 5px;
+}
+
+.purchasable-tooltip-outer-border-1:before {
+	top: 0;
+	left: 0;
+	border-width: 0 0 10px 10px;
+	border-color: transparent #222;
+}
+
+.purchasable-tooltip-outer-border-2:before {
+	bottom: 0;
+	right: 0;
+	border-width: 10px 10px 0 0;
+	border-color: transparent #222;
+}
+
+.purchasable-tooltip-outer-border-1:after {
+	top: 0;
+	right: 0;
+	border-width: 0 10px 10px 0;
+	border-color: transparent #222;
+}
+
+.purchasable-tooltip-outer-border-2:after {
+	bottom: 0;
+	left: 0;
+	border-width: 10px 0 0 10px;
+	border-color: transparent #222;
+}
+
+.purchasable-tooltip-inner-border-1:before {
+	top: 0;
+	left: 0;
+	border-width: 0 0 6px 6px;
+	border-color: transparent #6EE2FF;
+}
+
+.purchasable-tooltip-inner-border-2:before {
+	bottom: 0;
+	right: 0;
+	border-width: 6px 6px 0 0;
+	border-color: transparent #6EE2FF;
+}
+
+.purchasable-tooltip-inner-border-1:after {
+	top: 0;
+	right: 0;
+	border-width: 0 6px 6px 0;
+	border-color: transparent #6EE2FF;
+}
+
+.purchasable-tooltip-inner-border-2:after {
+	bottom: 0;
+	left: 0;
+	border-width: 6px 0 0 6px;
+	border-color: transparent #6EE2FF;
 }
 
 .unaffordable {
