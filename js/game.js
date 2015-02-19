@@ -265,7 +265,7 @@ var ResourceReward = function(game, resource, amount) {
 };
 extend(ResourceReward, Reward, {
 	Reward: function() {
-		this.resource.amount.Add(this.amount);
+		this.game.content.resources[this.resource].amount.Add(this.amount);
 		this.game.events.trigger('reward_resource', this, this.resource, this.amount);
 	}
 });
@@ -277,7 +277,7 @@ var BaseRateReward = function(game, generator, resource, amount) {
 };
 extend(BaseRateReward, Reward, {
 	Reward: function() {
-		this.generator.rates[this.resource] += this.amount;
+		this.game.content.generators[this.generator].rates[this.resource] += this.amount;
 		this.game.events.trigger('reward_baserate', this, this.resource, this.amount);
 	}
 });
@@ -290,11 +290,12 @@ var MultiplierReward = function(game, generator, resource, multiplier_add, multi
 };
 extend(MultiplierReward, Reward, {
 	Reward: function() {
+		var multipliers = this.game.content.generators[this.generator].multipliers;
 		if(this.multiplier_add) {
-			this.generator.multipliers[this.resource] += this.multiplier_add;
+			multipliers[this.resource] += this.multiplier_add;
 		}
 		if(this.multiplier_multiply) {
-			this.generator.multipliers[this.resource] *= this.multiplier_multiply;
+			multipliers[this.resource] *= this.multiplier_multiply;
 		}
 		this.game.events.trigger('reward_multiplier', this, this.resource);
 	}

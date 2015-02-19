@@ -152,6 +152,11 @@ var Component = function(entity) {
 var Describable = function(entity) {
 	Component.call(this, entity);
 	entity.describable = this;
+	this.title = "";
+	this.effect = "";
+	this.description = "";
+	this.detail = "";
+	this.icon = "";
 };
 extend(Describable, Component, {
 	SetTitle: function(title) {
@@ -161,12 +166,26 @@ extend(Describable, Component, {
 	GetTitle: function() {
 		return this.title;
 	},
+	SetEffect: function(effect) {
+		this.effect = effect;
+		return this.entity;
+	},
+	GetEffect: function() {
+		return this.effect;
+	},
 	SetDescription: function(description) {
 		this.description = description;
 		return this.entity;
 	},
 	GetDescription: function() {
 		return this.description;
+	},
+	SetDetail: function(detail) {
+		this.detail = detail;
+		return this.entity;
+	},
+	GetDetail: function() {
+		return this.detail;
 	},
 	SetIcon: function(icon) {
 		this.icon = icon;
