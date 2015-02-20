@@ -6,6 +6,8 @@
 @double-border-between: #333333;
 @double-border-content-color: #EEEEEE;
 
+@dark-text: #333;
+
 .top-left-slanted-corner(@size: 0px) {
 	top: 0;
 	left: 0;
@@ -50,7 +52,7 @@ html {
 
 body {
 	display: table;
-	color: #333;
+	color: @dark-text;
 	width: 100%;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
@@ -62,7 +64,6 @@ body {
 }
 
 #logo {
-	color: #DDD;
 	font-family: 'SF Collegiate', sans-serif;
 	font-size: 54px;
 	text-align: center;
@@ -241,7 +242,6 @@ h4 {
 
 #main-stats {
 	text-align: center;
-	color: #DDD;
 }
 
 #main-stats > div {

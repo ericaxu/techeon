@@ -30,31 +30,33 @@ UI.prototype.updateResources = function(game) {
 	this.updateDollarStats(game);
 };
 
-UI.prototype.updatePurchasable = function(generator, type) {
-	var className = '.generator-' + generator.GetName();
-	var tooltipClassName = '.generator-' + generator.GetName() + '-tooltip';
+UI.prototype.updatePurchasable = function(entity, type) {
+	var className = '.generator-' + entity.GetName();
+	var tooltipClassName = '.generator-' + entity.GetName() + '-tooltip';
 
 	if (type == 'feature') {
-		var price = formatLinesOfCode(generator.purchasable.GetBuyPrice().code);
+		var price = formatLinesOfCode(entity.purchasable.GetBuyPrice().code);
 	} else if (type == 'team') {
-		var price = formatDollar(generator.purchasable.GetBuyPrice().money);
+		var price = formatDollar(entity.purchasable.GetBuyPrice().money);
 	} else if (type == 'upgrade') {
-		if ($.isEmptyObject(generator.purchasable.GetBuyPrice())) {
+		if ($.isEmptyObject(entity.purchasable.GetBuyPrice())) {
 			var price = 'Free';
 		} else {
-			var price = formatDollar(generator.purchasable.GetBuyPrice().money);
+			var price = formatDollar(entity.purchasable.GetBuyPrice().money);
 		}
 	}
 
 	var $div = $(className);
 	var $tooltip = $(tooltipClassName);
-	$div.find('h4').text(generator.describable.GetTitle());
+	$div.find('h4').text(entity.describable.GetTitle());
 	$div.find('.price').text(price);
-	if (type !== 'upgrade') {
-		$div.find('.purchasable-owned-count').text(generator.amount.Get());
+	if (entity.amount) {
+		var amount = entity.amount.Get() || '';
+		$div.find('.purchasable-owned-count').text(amount);
 	}
-	$tooltip.find('h4').text(generator.describable.GetTitle());
-	$tooltip.find('p').text(generator.describable.GetDescription());
+
+	$tooltip.find('h4').text(entity.describable.GetTitle());
+	$tooltip.find('p').text(entity.describable.GetDescription());
 };
 
 UI.prototype.showPurchasable = function(generator, type) {
@@ -223,14 +225,6 @@ ui.setupPopup();
 ui.updateGenerators();
 ui.updateUpgrades();
 
-// Set up achievement event listeners
-for(var key in GAME.content.achievements) {
-	GAME.content.achievements[key].events.on('obtain', function(achievement) {
-		ui.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
-		achievement.describable.GetDescription(), '');
-	});
-}
-
 $(document).on('keyup', function(e) {
 	var newTop = parseInt($('#codebase pre').css('top')) - 20;
 	// cycle through the code again
@@ -245,7 +239,7 @@ $(document).on('keyup', function(e) {
 setInterval(function() {
 	var saveObject = GAME.loader.Save();
 	localStorage.setItem('techeon-save', JSON.stringify(saveObject));
-}, 30000);
+}, 1000);
 
 var savedString = localStorage.getItem('techeon-save');
 
@@ -254,3 +248,11 @@ if (savedString) {
 }
 
 sh_highlightDocument();
+
+// Set up achievement event listeners
+for(var key in GAME.content.achievements) {
+	GAME.content.achievements[key].events.on('obtain', function(achievement) {
+		ui.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
+		achievement.describable.GetDescription(), '');
+	});
+}
