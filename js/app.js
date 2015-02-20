@@ -8,7 +8,7 @@ var UI = function(game) {
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
-	this.pixelsBetweenTooltip = 1;
+	this.pixelsBetweenTooltip = 0;
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
@@ -32,7 +32,6 @@ UI.prototype.updateResources = function(game) {
 
 UI.prototype.updatePurchasable = function(entity, type) {
 	var className = '.generator-' + entity.GetName();
-	var tooltipClassName = '.generator-' + entity.GetName() + '-tooltip';
 
 	if (type == 'feature') {
 		var price = formatLinesOfCode(entity.purchasable.GetBuyPrice().code);
@@ -47,21 +46,21 @@ UI.prototype.updatePurchasable = function(entity, type) {
 	}
 
 	var $div = $(className);
-	var $tooltip = $(tooltipClassName);
 	$div.find('h4').text(entity.describable.GetTitle());
 	$div.find('.price').text(price);
 	if (entity.amount) {
 		var amount = entity.amount.Get() || '';
 		$div.find('.purchasable-owned-count').text(amount);
 	}
-
-	$tooltip.find('h4').text(entity.describable.GetTitle());
-	$tooltip.find('p').text(entity.describable.GetDescription());
 };
 
-UI.prototype.showPurchasable = function(generator, type) {
-	var className = 'purchasable generator-' + generator.GetName();
-	if (!generator.purchasable.CanBuy()) {
+UI.prototype.showTooltip = function() {
+
+}
+
+UI.prototype.showPurchasable = function(entity, type) {
+	var className = 'purchasable generator-' + entity.GetName();
+	if (!entity.purchasable.CanBuy()) {
 		className += ' unaffordable';
 	}
 
@@ -78,30 +77,31 @@ UI.prototype.showPurchasable = function(generator, type) {
 	addEl('div', $div, 'purchasable-owned-count');
 	addEl('div', $div, 'price');
 	$div.on('click', $.proxy(function() {
-		if (generator.purchasable.CanBuy()) {
-			generator.purchasable.Buy();
+		if (entity.purchasable.CanBuy()) {
+			entity.purchasable.Buy();
 			this.updateGenerators().updateUpgrades();
-			this.updatePurchasable(generator, type);
+			this.updatePurchasable(entity, type);
 		}
 	}, this));
 
-	var tooltipClassName = 'purchasable-tooltip-wrapper fancy-border generator-' + generator.GetName() + '-tooltip';
-	var $tooltip = addEl('div', $container, tooltipClassName);
-	var $innerBorder = drawDoubleBorder($tooltip);
-	addEl('h4', $innerBorder);
-	addEl('p', $innerBorder);
+	this.updatePurchasable(entity, type);
 
-	this.updatePurchasable(generator, type);
-
-	if (type === 'feature') {
-		$tooltip.offset({ left: $div.outerWidth() + this.pixelsBetweenTooltip });
-	} else if (type === 'team') {
-		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.pixelsBetweenTooltip });
-	} else if (type === 'upgrade') {
-		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.pixelsBetweenTooltip });
-	}
-
+	var self = this;
+	var $tooltip = $('.purchasable-tooltip-wrapper');
 	$div.on('mouseenter', function() {
+		var $tooltipContent = $tooltip.find('.inner-border-2');
+		$tooltipContent.empty();
+		addEl('h4', $tooltipContent, '', entity.describable.GetTitle());
+		addEl('p', $tooltipContent, '', entity.describable.GetDescription());
+
+		if (type === 'feature') {
+			$tooltip.offset({ left: $div.outerWidth() + self.pixelsBetweenTooltip });
+		} else if (type === 'team') {
+			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.pixelsBetweenTooltip });
+		} else if (type === 'upgrade') {
+			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.pixelsBetweenTooltip });
+		}
+
 		$tooltip.show();
 		$div.on('mousemove', function(e) {
 			var offsetTop = Math.min(Math.max(0, e.pageY - 20), $(window).height() - $tooltip.outerHeight());
@@ -110,7 +110,7 @@ UI.prototype.showPurchasable = function(generator, type) {
 	});
 
 	$div.on('mouseleave', function() {
-		$tooltip.hide();
+		$tooltip.offset({ left: 0, top: 0 }).hide();
 		$div.off('mousemove');
 	});
 };
@@ -145,7 +145,6 @@ UI.prototype.updateUpgrades = function() {
 	for (var name in this.game.content.upgrades) {
 		var upgrade = this.game.content.upgrades[name];
 		var $generatorDiv = $('.generator-' + name);
-		var $tooltipDiv = $('.generator-' + name + '-tooltip');
 		if ($generatorDiv.length === 0 && upgrade.purchasable.Available() && !upgrade.obtainable.GetObtained()) {
 			this.showPurchasable(upgrade, 'upgrade');
 		} else if ($generatorDiv.length > 0) {
@@ -160,7 +159,6 @@ UI.prototype.updateUpgrades = function() {
 			// upgrade already used
 			else if (upgrade.obtainable.GetObtained()) {
 				$generatorDiv.remove();
-				$tooltipDiv.remove();
 			}
 		}
 	}
