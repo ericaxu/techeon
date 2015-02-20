@@ -8,6 +8,7 @@ var UI = function(game) {
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
+	this.pixelsBetweenTooltip = 1;
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
@@ -91,11 +92,11 @@ UI.prototype.showPurchasable = function(generator, type) {
 	this.updatePurchasable(generator, type);
 
 	if (type === 'feature') {
-		$tooltip.offset({ left: $div.outerWidth() + 4 });
+		$tooltip.offset({ left: $div.outerWidth() + this.pixelsBetweenTooltip });
 	} else if (type === 'team') {
-		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - 4 });
+		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.pixelsBetweenTooltip });
 	} else if (type === 'upgrade') {
-		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - 4 });
+		$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.pixelsBetweenTooltip });
 	}
 
 	$div.on('mouseenter', function() {
@@ -251,3 +252,5 @@ var savedString = localStorage.getItem('techeon-save');
 if (savedString) {
 	GAME.loader.Load(JSON.parse(savedString));
 }
+
+sh_highlightDocument();

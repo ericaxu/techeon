@@ -1,3 +1,11 @@
+//@double-border-color: #6EE2FF;
+@double-border-outer-shadow: transparent;
+@double-border-outer-corner: white;
+@double-border-inner-corner: #333333;
+@double-border-inner-shadow: transparent;
+@double-border-between: #333333;
+@double-border-content-color: #EEEEEE;
+
 .top-left-slanted-corner(@size: 0px) {
 	top: 0;
 	left: 0;
@@ -109,11 +117,12 @@ h4 {
 .purchasable-tooltip-wrapper {
 	display: none;
 	position: absolute;
-	background: #46CEF0;
-	box-shadow: 0 0 8px 4px #222;
+//	background: #46CEF0;
+	background: @double-border-between;
+	box-shadow: 0 0 8px 4px @double-border-outer-shadow;
 	top: 0;
 	width: 250px;
-	padding: 7px;
+	padding: 5px;
 	z-index: 1;
 }
 
@@ -125,8 +134,9 @@ h4 {
 
 .inner-wrapper {
 	position: relative;
-	box-shadow: 0 0 5px 2px #81E4FC;
+	box-shadow: 0 0 5px 3px @double-border-inner-shadow;
 	z-index: 1;
+	background: @double-border-content-color;
 }
 
 .purchasable-tooltip-wrapper:before, .purchasable-tooltip-wrapper:after {
@@ -135,13 +145,11 @@ h4 {
 
 .outer-border-1, .outer-border-2 {
 	width: 250px;
-	background-image: linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
-	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #024e74), color-stop(0.5, #000203), color-stop(1, #000203));
-	background-image: -moz-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
-	background-image: -o-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
-	background-image: -ms-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
-
-	color: white;
+//	background-image: linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
+//	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #024e74), color-stop(0.5, #000203), color-stop(1, #000203));
+//	background-image: -moz-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
+//	background-image: -o-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
+//	background-image: -ms-linear-gradient(top, #024e74 0%, #000203 50%, #000203 100%);
 }
 
 .inner-border-1, .inner-border-2 {
@@ -150,42 +158,42 @@ h4 {
 
 .outer-border-1:before {
 	.top-left-slanted-corner(10px);
-	border-color: transparent #222;
+	border-color: transparent @double-border-outer-corner;
 }
 
 .outer-border-2:before {
 	.bottom-right-slanted-corner(10px);
-	border-color: transparent #222;
+	border-color: transparent @double-border-outer-corner;
 }
 
 .outer-border-1:after {
 	.top-right-slanted-corner(10px);
-	border-color: transparent #222;
+	border-color: transparent @double-border-outer-corner;
 }
 
 .outer-border-2:after {
 	.bottom-left-slanted-corner(10px);
-	border-color: transparent #222;
+	border-color: transparent @double-border-outer-corner;
 }
 
 .inner-border-1:before {
 	.top-left-slanted-corner(6px);
-	border-color: transparent #6EE2FF;
+	border-color: transparent @double-border-inner-corner;
 }
 
 .inner-border-2:before {
 	.bottom-right-slanted-corner(6px);
-	border-color: transparent #6EE2FF;
+	border-color: transparent @double-border-inner-corner;
 }
 
 .inner-border-1:after {
 	.top-right-slanted-corner(6px);
-	border-color: transparent #6EE2FF;
+	border-color: transparent @double-border-inner-corner;
 }
 
 .inner-border-2:after {
 	.bottom-left-slanted-corner(6px);
-	border-color: transparent #6EE2FF;
+	border-color: transparent @double-border-inner-corner;
 }
 
 .unaffordable {
@@ -210,7 +218,6 @@ h4 {
 	position: relative;
 	top: 0;
 	height: 212px;
-	color: #00FF00;
 	font-family: 'Consolas', sans-serif;
 	margin: 10px 30px;
 	font-size: 14px;
@@ -229,7 +236,7 @@ h4 {
 }
 
 #main-stats-container {
-	background: #000000;
+//	background: #000000;
 }
 
 #main-stats {
@@ -341,7 +348,7 @@ h4 {
 #typed-cursor {
 	margin-left: 30px;
 	font-size: 14px;
-	color: #00FF00;
+	color: #000000;
 }
 
 #typed-cursor.blinking {
@@ -357,7 +364,7 @@ h4 {
 		color: transparent;
 	}
 	50% {
-		color: #00FF00;
+		color: #000000;
 	}
 
 }
@@ -367,7 +374,7 @@ h4 {
 		color: transparent;
 	}
 	50% {
-		color: #00FF00;
+		color: #000000;
 	}
 
 }
@@ -377,7 +384,7 @@ h4 {
 		color: transparent;
 	}
 	50% {
-		color: #00FF00;
+		color: #000000;
 	}
 
 }
@@ -387,7 +394,7 @@ h4 {
 		color: transparent;
 	}
 	50% {
-		color: #00FF00;
+		color: #000000;
 	}
 
 }
@@ -397,6 +404,6 @@ h4 {
 		color: transparent;
 	}
 	50% {
-		color: #00FF00;
+		color: #000000;
 	}
 }
