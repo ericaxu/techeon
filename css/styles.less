@@ -1,3 +1,27 @@
+.top-left-slanted-corner(@size: 0px) {
+	top: 0;
+	left: 0;
+	border-width: 0 0 @size @size;
+}
+
+.top-right-slanted-corner(@size) {
+	top: 0;
+	right: 0;
+	border-width: 0 @size @size 0;
+}
+
+.bottom-left-slanted-corner(@size) {
+	bottom: 0;
+	left: 0;
+	border-width: @size 0 0 @size;
+}
+
+.bottom-right-slanted-corner(@size) {
+	bottom: 0;
+	right: 0;
+	border-width: @size @size 0 0;
+}
+
 @font-face {
 	font-family: 'SF Collegiate';
 	src: url('fonts/SF Collegiate.ttf');
@@ -59,19 +83,19 @@ h4 {
 	padding: 15px;
 	border-bottom: 1px solid #777;
 	cursor: pointer;
-}
 
-.purchasable:hover {
-	background: #FFFFFF;
-}
+	&:hover {
+		 background: #FFFFFF;
+	 }
 
-.purchasable p {
-	font-size: 12px;
-	margin-bottom: 5px;
-}
+	p {
+		font-size: 12px;
+		margin-bottom: 5px;
+	}
 
-.purchasable .price {
-	color: #50A050;
+	.price {
+		color: #50A050;
+	}
 }
 
 .purchasable-owned-count {
@@ -125,58 +149,42 @@ h4 {
 }
 
 .outer-border-1:before {
-	top: 0;
-	left: 0;
-	border-width: 0 0 10px 10px;
+	.top-left-slanted-corner(10px);
 	border-color: transparent #222;
 }
 
 .outer-border-2:before {
-	bottom: 0;
-	right: 0;
-	border-width: 10px 10px 0 0;
+	.bottom-right-slanted-corner(10px);
 	border-color: transparent #222;
 }
 
 .outer-border-1:after {
-	top: 0;
-	right: 0;
-	border-width: 0 10px 10px 0;
+	.top-right-slanted-corner(10px);
 	border-color: transparent #222;
 }
 
 .outer-border-2:after {
-	bottom: 0;
-	left: 0;
-	border-width: 10px 0 0 10px;
+	.bottom-left-slanted-corner(10px);
 	border-color: transparent #222;
 }
 
 .inner-border-1:before {
-	top: 0;
-	left: 0;
-	border-width: 0 0 6px 6px;
+	.top-left-slanted-corner(6px);
 	border-color: transparent #6EE2FF;
 }
 
 .inner-border-2:before {
-	bottom: 0;
-	right: 0;
-	border-width: 6px 6px 0 0;
+	.bottom-right-slanted-corner(6px);
 	border-color: transparent #6EE2FF;
 }
 
 .inner-border-1:after {
-	top: 0;
-	right: 0;
-	border-width: 0 6px 6px 0;
+	.top-right-slanted-corner(6px);
 	border-color: transparent #6EE2FF;
 }
 
 .inner-border-2:after {
-	bottom: 0;
-	left: 0;
-	border-width: 6px 0 0 6px;
+	.bottom-left-slanted-corner(6px);
 	border-color: transparent #6EE2FF;
 }
 
