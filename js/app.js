@@ -84,14 +84,9 @@ UI.prototype.showPurchasable = function(generator, type) {
 
 	var tooltipClassName = 'purchasable-tooltip-wrapper fancy-border generator-' + generator.GetName() + '-tooltip';
 	var $tooltip = addEl('div', $container, tooltipClassName);
-	var $outerBorder1 = addEl('div', $tooltip, 'purchasable-tooltip-outer-border-1 fancy-border');
-	var $outerBorder2 = addEl('div', $outerBorder1, 'purchasable-tooltip-outer-border-2 fancy-border');
-	var $innerWrapper = addEl('div', $outerBorder2, 'purchasable-tooltip-inner-wrapper');
-	var $innerBorder1 = addEl('div', $innerWrapper, 'purchasable-tooltip-inner-border-1 fancy-border');
-	var $innerBorder2 = addEl('div', $innerBorder1, 'purchasable-tooltip-inner-border-2 fancy-border');
-	//var $innerContent = addEl('div', $outerContent, 'purchasable-tooltip-content-inner');
-	addEl('h4', $innerBorder2);
-	addEl('p', $innerBorder2);
+	var $innerBorder = drawDoubleBorder($tooltip);
+	addEl('h4', $innerBorder);
+	addEl('p', $innerBorder);
 
 	this.updatePurchasable(generator, type);
 

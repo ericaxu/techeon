@@ -127,3 +127,13 @@ function formatDollar(x) {
 function formatLinesOfCode(x) {
 	return readableBigNumber(x, 0) + ' lines';
 }
+
+function drawDoubleBorder($container) {
+	var $outerBorder1 = addEl('div', $container, 'outer-border-1 fancy-border');
+	var $outerBorder2 = addEl('div', $outerBorder1, 'outer-border-2 fancy-border');
+	var $innerWrapper = addEl('div', $outerBorder2, 'inner-wrapper');
+	var $innerBorder1 = addEl('div', $innerWrapper, 'inner-border-1 fancy-border');
+	var $innerBorder2 = addEl('div', $innerBorder1, 'inner-border-2 fancy-border');
+
+	return $innerBorder2;
+}
