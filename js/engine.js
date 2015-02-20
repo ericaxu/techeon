@@ -1,42 +1,114 @@
+var MapList = function() {
+	this.data = {};
+};
+extend(MapList, null, {
+	add: function(name, object) {
+		var data = this.data[name];
+		if (!data) {
+			data = [];
+			this.data[name] = data;
+		}
+		data.push(object);
+	},
+	remove: function(name, object) {
+		this.removePredicate(name, function(obj) {
+			return obj == object;
+		});
+	},
+	removePredicate: function(name, func) {
+		if (!this.data[name]) {
+			return;
+		}
+		var list = this.data[name];
+		for (var i = 0; i < list.length; i++) {
+			if (func(list[i])) {
+				list.splice(i, 1);
+			}
+		}
+		if (list.length == 0) {
+			delete this.data[name];
+		}
+	},
+	each: function(name, func, context) {
+		var list = this.data[name];
+		if (list) {
+			for (var i = 0; i < list.length; i++) {
+				func.call(context, list[i]);
+			}
+		}
+	},
+	get: function() {
+		return this.data;
+	}
+});
+
 /**
  * Events - Simple event system
  */
 var Events = function() {
-	this.events = {};
+	this.events = new MapList();
+	this.bridges = new MapList();
 };
 extend(Events, null, {
 	on: function(name, func, context) {
-		var event = this.events[name];
-		if (!event) {
-			event = [];
-			this.events[name] = event;
-		}
-		event.push({func: func, context: context})
+		this.events.add(name, {func: func, context: context});
 	},
 	off: function(name, func) {
-		if (!func || !this.events[name]) {
-			return;
-		}
-		var list = this.events[name];
-		for (var i = 0; i < list.length; i++) {
-			if (list[i] == func) {
-				list.splice(i, 1);
-			}
-		}
+		this.events.removePredicate(name, function(obj) {
+			return obj.func == func;
+		});
+	},
+	bridge: function(name1, name2) {
+		this.bridges.add(name1, name2);
+	},
+	unbridge: function(name1, name2) {
+		this.bridges.remove(name1, name2);
 	},
 	trigger: function() {
 		var args = Array.apply([], arguments);
 		var name = args.shift();
-		var list = this.events[name];
-		if (!list) {
-			return;
+
+		this.events.each(name, function(object) {
+			object.func.apply(object.context, args);
+		}, this);
+		this.bridges.each(name, function(object) {
+			this.trigger(object);
+		}, this);
+	}
+});
+
+/**
+ * Events - Simple event system
+ */
+var TickEvents = function(game) {
+	this.events = new MapList();
+	this.game = game;
+};
+extend(TickEvents, null, {
+	on: function(ticks, func, context) {
+		this.events.add(ticks, {func: func, context: context});
+	},
+	off: function(func) {
+		for (var ticks in this.events) {
+			this.events.removePredicate(ticks, function(obj) {
+				return obj.func == func;
+			});
 		}
-		for (var i = 0; i < list.length; i++) {
-			list[i].func.apply(list[i].context, args);
+	},
+	tick: function() {
+		for (var ticks in this.events.get()) {
+			if (this.game.Every(ticks)) {
+				this.events.each(ticks, function(object) {
+					object.func.call(object.context, this.game);
+				}, this);
+			}
 		}
 	}
 });
 
+/**
+ * Loader - Save and load functionality
+ */
 var Loader = function(owner) {
 	this.owner = owner;
 	this.owner.loader = this;
@@ -54,14 +126,17 @@ extend(Loader, null, {
 				this.owner[key] = result;
 			}
 		}
+		if (this.owner.events) {
+			this.owner.events.trigger('load', this.owner);
+		}
 	},
 	LoadSingle: function(data, dest) {
 		if (isObject(data) && isObject(dest)) {
-			if(dest.loader) {
+			if (dest.loader) {
 				dest.loader.Load(data);
 			}
 			else {
-				for(var key in data) {
+				for (var key in data) {
 					dest[key] = this.LoadSingle(data[key], dest[key]);
 				}
 			}
@@ -76,17 +151,21 @@ extend(Loader, null, {
 			data[key] = this.SaveSingle(this.owner[key]);
 		}
 
+		if (this.owner.events) {
+			this.owner.events.trigger('save', this.owner);
+		}
+
 		return data;
 	},
 	SaveSingle: function(dest) {
 		var data = dest;
 		if (isObject(dest)) {
-			if(dest.loader) {
+			if (dest.loader) {
 				data = dest.loader.Save();
 			}
 			else {
 				data = {};
-				for(var key in dest) {
+				for (var key in dest) {
 					data[key] = this.SaveSingle(dest[key]);
 				}
 			}
@@ -103,11 +182,12 @@ var GameEngine = function() {
 	this.events = new Events();
 	this.loopTask = null;
 	this.time = 0;
+	this.tickSubscribers = new TickEvents(this);
 	this.SetTicksPerSecond(50);
 
 	this.tick = 0;
 	this.content = {};
-	new Loader(this).AddElement("tick").AddElement("content");
+	new Loader(this).AddElement('tick').AddElement('content');
 };
 extend(GameEngine, null, {
 	Start: function() {
@@ -142,14 +222,24 @@ extend(GameEngine, null, {
 		this.events.trigger('pre_tick', this);
 		this.tick++;
 		this.events.trigger('tick', this);
+		this.tickSubscribers.tick();
 		this.events.trigger('post_tick', this);
 	},
 	AddContent: function(type, entity) {
 		this.content[type][entity.GetName()] = entity;
 	},
+	SubscribePeriodic: function(ticks, func, context) {
+		this.tickSubscribers.on(ticks, func, context);
+	},
+	UnsubscribePeriodic: function(func) {
+		this.tickSubscribers.off(func);
+	},
 
 	//Helpers
 	Every: function(ticks) {
+		if (isString(ticks)) {
+			ticks = parseInt(ticks);
+		}
 		//Ticks must be an integer!
 		ticks = Math.ceil(ticks);
 		return (this.tick % ticks == 0);
@@ -174,11 +264,11 @@ extend(GameEngine, null, {
  */
 var Entity = function(game, name) {
 	this.events = new Events();
-	new Loader(this);
 	this.game = game;
 	this.name = name;
 	this.components = [];
 	this.AddComponent(Describable);
+	new Loader(this);
 	game.events.on('tick', this.OnTick, this);
 };
 extend(Entity, null, {
@@ -214,11 +304,11 @@ var Component = function(entity) {
 var Describable = function(entity) {
 	Component.call(this, entity);
 	entity.describable = this;
-	this.title = "";
-	this.effect = "";
-	this.description = "";
-	this.detail = "";
-	this.icon = "";
+	this.title = '';
+	this.effect = '';
+	this.description = '';
+	this.detail = '';
+	this.icon = '';
 };
 extend(Describable, Component, {
 	SetTitle: function(title) {
@@ -264,11 +354,12 @@ extend(Describable, Component, {
 var Amount = function(entity) {
 	Component.call(this, entity);
 	entity.amount = this;
-	entity.loader.AddElement("amount");
+	entity.loader.AddElement('amount');
 	this.amount = 0.0;
 	this.maxAmount = 0.0;
 	this.totalAmount = 0.0;
-	new Loader(this).AddElement("amount").AddElement("maxAmount").AddElement("totalAmount");
+	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount');
+	this.entity.events.bridge('load', 'amount_changed');
 };
 extend(Amount, Component, {
 	Get: function() {
@@ -276,6 +367,7 @@ extend(Amount, Component, {
 	},
 	Set: function(value) {
 		this.amount = value;
+		this.TriggerChanged();
 		return this.entity;
 	},
 	GetMax: function() {
@@ -283,6 +375,7 @@ extend(Amount, Component, {
 	},
 	SetMax: function(value) {
 		this.maxAmount = value;
+		this.TriggerChanged();
 		return this.entity;
 	},
 	GetTotal: function() {
@@ -292,13 +385,19 @@ extend(Amount, Component, {
 		this.amount += value;
 		this.totalAmount += value;
 		this.maxAmount = Math.max(this.amount, this.maxAmount);
+		this.TriggerChanged();
 	},
 	Remove: function(value) {
 		this.amount -= value;
+		this.TriggerChanged();
 	},
 	Reset: function() {
 		this.amount = 0.0;
 		this.maxAmount = 0.0;
+		this.TriggerChanged();
+	},
+	TriggerChanged: function() {
+		this.entity.events.trigger('amount_changed', this.entity);
 	}
 });
 
@@ -308,9 +407,10 @@ extend(Amount, Component, {
 var Obtainable = function(entity) {
 	Component.call(this, entity);
 	entity.obtainable = this;
-	entity.loader.AddElement("obtainable");
+	entity.loader.AddElement('obtainable');
 	this.obtained = false;
-	new Loader(this).AddElement("obtained");
+	this.loader.AddElement('obtained');
+	this.entity.events.on('load', this.TriggerEvent, this);
 };
 extend(Obtainable, Component, {
 	SetObtained: function(value) {
@@ -319,11 +419,18 @@ extend(Obtainable, Component, {
 	},
 	Obtain: function() {
 		this.obtained = true;
-		this.entity.events.trigger('obtain', this.entity);
+		this.TriggerEvent();
 	},
 	UnObtain: function() {
 		this.obtained = false;
-		this.entity.events.trigger('unobtain', this.entity);
+		this.TriggerEvent();
+	},
+	TriggerEvent: function() {
+		if (this.obtained) {
+			this.entity.events.trigger('obtain', this.entity);
+		} else {
+			this.entity.events.trigger('unobtain', this.entity);
+		}
 	},
 	GetObtained: function() {
 		return this.obtained;
@@ -347,7 +454,7 @@ extend(Rewardable, Component, {
 		for (var i = 0; i < this.rewards.length; i++) {
 			this.rewards[i].Reward();
 		}
-		this.entity.events.trigger('reward', this.entity);
+		this.entity.events.trigger('rewarded', this.entity);
 	}
 });
 

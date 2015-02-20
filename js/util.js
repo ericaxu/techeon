@@ -64,6 +64,10 @@ function isArray(object) {
 	return object !== null && object.constructor === Array
 }
 
+function isString(object) {
+	return object !== null && (typeof object == 'string' || object instanceof String)
+}
+
 
 function currentTimeMS() {
 	return new Date().getTime();

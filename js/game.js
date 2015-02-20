@@ -165,6 +165,9 @@ var ExponentialAmountPurchasable = function(entity) {
 	this.entity.exponentialamountpurchasable = this;
 	this.entity.purchasable.GetSellPrice = bind(this.GetSellPrice, this);
 	this.entity.purchasable.GetBuyPrice = bind(this.GetBuyPrice, this);
+	this.entity.events.on('buy', this.TriggerPriceChange, this);
+	this.entity.events.on('sell', this.TriggerPriceChange, this);
+	this.entity.events.on('load', this.TriggerPriceChange, this);
 
 	this.buyPrice = {};
 	this.sellPrice = {};
@@ -187,6 +190,9 @@ extend(ExponentialAmountPurchasable, Component, {
 			this.sellPrice[key] = Math.ceil(price[key] * Math.pow(this.factor, this.entity.amount.Get()));
 		}
 		return this.sellPrice;
+	},
+	TriggerPriceChange: function() {
+		this.entity.events.trigger('price_changed', this.entity);
 	}
 });
 
@@ -198,7 +204,14 @@ var Resource = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Amount);
 };
-extend(Resource, Entity, {});
+extend(Resource, Entity, {
+	Generate: function(amount) {
+		this.amount.Add(amount);
+	},
+	Reward: function(amount) {
+		this.amount.Add(amount);
+	}
+});
 
 /**
  * Generator
@@ -235,7 +248,7 @@ extend(Generator, Entity, {
 		for (var resource in this.rates) {
 			var result = this.GetRate(resource);
 			this.events.trigger('generate_resource', this, resource, result);
-			this.game.content.resources[resource].amount.Add(result);
+			this.game.content.resources[resource].Generate(result);
 		}
 	}
 });
@@ -265,7 +278,7 @@ var ResourceReward = function(game, resource, amount) {
 };
 extend(ResourceReward, Reward, {
 	Reward: function() {
-		this.game.content.resources[this.resource].amount.Add(this.amount);
+		this.game.content.resources[this.resource].Reward(this.amount);
 		this.game.events.trigger('reward_resource', this, this.resource, this.amount);
 	}
 });
@@ -291,10 +304,10 @@ var MultiplierReward = function(game, generator, resource, multiplier_add, multi
 extend(MultiplierReward, Reward, {
 	Reward: function() {
 		var multipliers = this.game.content.generators[this.generator].multipliers;
-		if(this.multiplier_add) {
+		if (this.multiplier_add) {
 			multipliers[this.resource] += this.multiplier_add;
 		}
-		if(this.multiplier_multiply) {
+		if (this.multiplier_multiply) {
 			multipliers[this.resource] *= this.multiplier_multiply;
 		}
 		this.game.events.trigger('reward_multiplier', this, this.resource);
@@ -307,7 +320,6 @@ extend(MultiplierReward, Reward, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
-	this.events.on('obtain', this.OnObtain, this);
 };
 extend(Achievement, Entity, {
 	OnTick: function() {
@@ -316,9 +328,6 @@ extend(Achievement, Entity, {
 		}
 	},
 	CheckAchievement: function() {
-
-	},
-	OnObtain: function() {
 
 	}
 });
