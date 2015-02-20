@@ -1,3 +1,6 @@
+/**
+ * MapList - A map with Lists as values
+ */
 var MapList = function() {
 	this.data = {};
 };
@@ -78,7 +81,7 @@ extend(Events, null, {
 });
 
 /**
- * Events - Simple event system
+ * TickEvents - Tick event system
  */
 var TickEvents = function(game) {
 	this.events = new MapList();
@@ -269,7 +272,6 @@ var Entity = function(game, name) {
 	this.components = [];
 	this.AddComponent(Describable);
 	new Loader(this);
-	game.events.on('tick', this.OnTick, this);
 };
 extend(Entity, null, {
 	AddComponent: function(component) {
@@ -284,9 +286,6 @@ extend(Entity, null, {
 	},
 	GetName: function() {
 		return this.name;
-	},
-	OnTick: function() {
-
 	}
 });
 

@@ -222,8 +222,8 @@ var Generator = function(game, name, manual) {
 	this.manual = manual;
 	this.rates = {};
 	this.multipliers = {};
-	if (this.manual) {
-		game.events.off('tick', this.OnTick);
+	if (!this.manual) {
+		game.events.on('tick', this.OnTick, this);
 	}
 	this.loader.AddElement("rates").AddElement("multipliers");
 };
@@ -320,6 +320,7 @@ extend(MultiplierReward, Reward, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
+	game.events.on('tick', this.OnTick, this);
 };
 extend(Achievement, Entity, {
 	OnTick: function() {
