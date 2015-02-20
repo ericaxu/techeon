@@ -133,9 +133,5 @@ var GAME = (function() {
 			.describable.SetDescription('Hire an Android developer.')
 	);
 
-	game.SubscribePeriodic(25, function(game) {
-		console.log("test 25");
-	});
-
 	return game;
 })();
