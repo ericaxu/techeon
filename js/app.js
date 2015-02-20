@@ -8,7 +8,7 @@ var UI = function(game) {
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
-	this.pixelsBetweenTooltip = 0;
+	this.pixelsBetweenTooltip = 1;
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
@@ -53,10 +53,6 @@ UI.prototype.updatePurchasable = function(entity, type) {
 		$div.find('.purchasable-owned-count').text(amount);
 	}
 };
-
-UI.prototype.showTooltip = function() {
-
-}
 
 UI.prototype.showPurchasable = function(entity, type) {
 	var className = 'purchasable generator-' + entity.GetName();
@@ -219,10 +215,6 @@ GAME.events.on('post_loop', function(game) {
 	}
 });
 
-ui.setupPopup();
-ui.updateGenerators();
-ui.updateUpgrades();
-
 $(document).on('keyup', function(e) {
 	var newTop = parseInt($('#codebase pre').css('top')) - 20;
 	// cycle through the code again
@@ -254,3 +246,7 @@ for(var key in GAME.content.achievements) {
 		achievement.describable.GetDescription(), '');
 	});
 }
+
+ui.setupPopup();
+ui.updateGenerators();
+ui.updateUpgrades();
