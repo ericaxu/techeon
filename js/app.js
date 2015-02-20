@@ -240,3 +240,14 @@ $(document).on('keyup', function(e) {
 	GAME.content.resources['code'].amount.Add(1);
 	ui.updateLinesOfCodeStats(GAME);
 });
+
+setInterval(function() {
+	var saveObject = GAME.loader.Save();
+	localStorage.setItem('techeon-save', JSON.stringify(saveObject));
+}, 30000);
+
+var savedString = localStorage.getItem('techeon-save');
+
+if (savedString) {
+	GAME.loader.Load(JSON.parse(savedString));
+}
