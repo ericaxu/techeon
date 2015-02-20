@@ -56,6 +56,14 @@ function cloneSimple(obj) {
 	throw new Error("Unable to copy obj! Its type isn't supported.");
 }
 
+function isObject(object) {
+	return object !== null && typeof object === 'object';
+}
+
+function isArray(object) {
+	return object !== null && object.constructor === Array
+}
+
 
 function currentTimeMS() {
 	return new Date().getTime();

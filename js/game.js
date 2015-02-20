@@ -36,7 +36,6 @@ extend(Game, GameEngine, {
 var Purchasable = function(entity) {
 	Component.call(this, entity);
 	entity.purchasable = this;
-	this.obtained = false;
 	this.buyPrice = {};
 	this.sellPrice = {};
 	this.restrictions = {};
@@ -213,6 +212,7 @@ var Generator = function(game, name, manual) {
 	if (this.manual) {
 		game.events.off('tick', this.OnTick);
 	}
+	this.loader.AddElement("rates").AddElement("multipliers");
 };
 extend(Generator, Entity, {
 	AddRateSecond: function(resource, rate) {

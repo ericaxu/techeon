@@ -37,6 +37,64 @@ extend(Events, null, {
 	}
 });
 
+var Loader = function(owner) {
+	this.owner = owner;
+	this.owner.loader = this;
+	this.elements = {};
+};
+extend(Loader, null, {
+	AddElement: function(name) {
+		this.elements[name] = true;
+		return this;
+	},
+	Load: function(data) {
+		for (var key in this.elements) {
+			var result = this.LoadSingle(data[key], this.owner[key]);
+			if (result !== null) {
+				this.owner[key] = result;
+			}
+		}
+	},
+	LoadSingle: function(data, dest) {
+		if (isObject(data) && isObject(dest)) {
+			if(dest.loader) {
+				dest.loader.Load(data);
+			}
+			else {
+				for(var key in data) {
+					dest[key] = this.LoadSingle(data[key], dest[key]);
+				}
+			}
+			return dest;
+		}
+		return data;
+	},
+	Save: function() {
+		var data = {};
+
+		for (var key in this.elements) {
+			data[key] = this.SaveSingle(this.owner[key]);
+		}
+
+		return data;
+	},
+	SaveSingle: function(dest) {
+		var data = dest;
+		if (isObject(dest)) {
+			if(dest.loader) {
+				data = dest.loader.Save();
+			}
+			else {
+				data = {};
+				for(var key in dest) {
+					data[key] = this.SaveSingle(dest[key]);
+				}
+			}
+		}
+		return data;
+	}
+});
+
 
 /**
  * Game - Main game entry point
@@ -44,10 +102,12 @@ extend(Events, null, {
 var GameEngine = function() {
 	this.events = new Events();
 	this.loopTask = null;
-	this.tick = 0;
 	this.time = 0;
-	this.content = {};
 	this.SetTicksPerSecond(50);
+
+	this.tick = 0;
+	this.content = {};
+	new Loader(this).AddElement("tick").AddElement("content");
 };
 extend(GameEngine, null, {
 	Start: function() {
@@ -114,6 +174,7 @@ extend(GameEngine, null, {
  */
 var Entity = function(game, name) {
 	this.events = new Events();
+	new Loader(this);
 	this.game = game;
 	this.name = name;
 	this.components = [];
@@ -144,6 +205,7 @@ extend(Entity, null, {
  */
 var Component = function(entity) {
 	this.entity = entity;
+	new Loader(this);
 };
 
 /**
@@ -202,9 +264,11 @@ extend(Describable, Component, {
 var Amount = function(entity) {
 	Component.call(this, entity);
 	entity.amount = this;
+	entity.loader.AddElement("amount");
 	this.amount = 0.0;
 	this.maxAmount = 0.0;
 	this.totalAmount = 0.0;
+	new Loader(this).AddElement("amount").AddElement("maxAmount").AddElement("totalAmount");
 };
 extend(Amount, Component, {
 	Get: function() {
@@ -244,7 +308,9 @@ extend(Amount, Component, {
 var Obtainable = function(entity) {
 	Component.call(this, entity);
 	entity.obtainable = this;
+	entity.loader.AddElement("obtainable");
 	this.obtained = false;
+	new Loader(this).AddElement("obtained");
 };
 extend(Obtainable, Component, {
 	SetObtained: function(value) {
