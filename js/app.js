@@ -9,13 +9,13 @@ var UI = function(game) {
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
 	this.pixelsBetweenTooltip = 0;
-	this.scrollCodebaseLimit = 10;
+	this.scrollCodebaseLimit = 50;
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
 	var linesOfCode = this.game.content.resources['code'].amount.Get();
 	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
-	this.scrollCodebase(linesOfCodePerSec / this.game.GetTicksPerSecond());
+	this.scrollCodebase(linesOfCodePerSec / this.game.GetTicksPerSecond() * 5);
 
 	this.$numLinesOfCode.text(formatLinesOfCode(linesOfCode));
 	this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec));
