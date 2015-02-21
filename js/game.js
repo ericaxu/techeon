@@ -41,15 +41,19 @@ var Purchasable = function(entity) {
 	this.restrictions = {};
 };
 extend(Purchasable, Component, {
-	AddBuyPrice: function(resource, price) {
+	SetBuyPrice: function(resource, price) {
 		this.buyPrice[resource] = price;
 		return this.entity;
 	},
-	AddSellPrice: function(resource, price) {
+	SetSellPrice: function(resource, price) {
 		this.sellPrice[resource] = price;
 		return this.entity;
 	},
-	AddRestriction: function(resource, restriction) {
+	SetSellPriceBuyFactor: function(resource, factor) {
+		this.sellPrice[resource] = this.buyPrice[resource] * factor;
+		return this.entity;
+	},
+	SetRestriction: function(resource, restriction) {
 		this.restrictions[resource] = restriction;
 		return this.entity;
 	},
@@ -228,10 +232,10 @@ var Generator = function(game, name, manual) {
 	this.loader.AddElement("rates").AddElement("multipliers");
 };
 extend(Generator, Entity, {
-	AddRateSecond: function(resource, rate) {
-		return this.AddRate(resource, this.game.GetRateTickFromSecond(rate));
+	SetRateSecond: function(resource, rate) {
+		return this.SetRate(resource, this.game.GetRateTickFromSecond(rate));
 	},
-	AddRate: function(resource, rate) {
+	SetRate: function(resource, rate) {
 		this.rates[resource] = rate;
 		this.multipliers[resource] = 1;
 		return this;
