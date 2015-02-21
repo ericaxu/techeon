@@ -89,6 +89,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 		$tooltipContent.empty();
 		addEl('h4', $tooltipContent, '', entity.describable.GetTitle());
 		addEl('p', $tooltipContent, '', entity.describable.GetDescription());
+		addEl('p', $tooltipContent, '', entity.describable.GetEffect());
 
 		if (type === 'feature') {
 			$tooltip.offset({ left: $div.outerWidth() + self.pixelsBetweenTooltip });
@@ -100,7 +101,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 
 		$tooltip.show();
 		$div.on('mousemove', function(e) {
-			var offsetTop = Math.min(Math.max(0, e.pageY - 20), $(window).height() - $tooltip.outerHeight());
+			var offsetTop = Math.min(Math.max(0, e.pageY - 30), $(window).height() - $tooltip.outerHeight());
 			$tooltip.offset({ top: offsetTop });
 		});
 	});
