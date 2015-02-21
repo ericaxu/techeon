@@ -97,7 +97,9 @@ UI.prototype.showPurchasable = function(entity, type) {
 		$tooltipContent.empty();
 		addEl('h4', $tooltipContent, '', entity.describable.GetTitle());
 		addEl('p', $tooltipContent, '', entity.describable.GetDescription());
-		addEl('p', $tooltipContent, '', entity.describable.GetEffect());
+		if (entity.amount !== undefined && entity.amount.GetMax() > 0) {
+			addEl('p', $tooltipContent, '', entity.describable.GetEffect());
+		}
 
 		if (type === 'feature') {
 			$tooltip.offset({ left: $div.outerWidth() + self.pixelsBetweenTooltip });
