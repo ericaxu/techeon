@@ -85,7 +85,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 	var self = this;
 	var $tooltip = $('.purchasable-tooltip-wrapper');
 	$div.off('mouseenter').on('mouseenter', function() {
-		clearTimeout(self.tooltipDisappearTimeout);
+		//clearTimeout(self.tooltipDisappearTimeout);
 
 		$div.off('mousemove').on('mousemove', function(e) {
 			var offsetTop = Math.min(Math.max(0, e.pageY - 30), $(window).height() - $tooltip.outerHeight());
@@ -111,19 +111,20 @@ UI.prototype.showPurchasable = function(entity, type) {
 
 	});
 
-	$tooltip.off('mouseenter').on('mouseenter', function() {
-		clearTimeout(self.tooltipDisappearTimeout);
-		$div.off('mousemove');
-	});
-
-	$tooltip.off('mouseleave').on('mouseleave', function() {
-		$(this).offset({ left: 0, top: 0 }).hide();
-	});
+	//$tooltip.off('mouseenter').on('mouseenter', function() {
+	//	clearTimeout(self.tooltipDisappearTimeout);
+	//	$div.off('mousemove');
+	//});
+    //
+	//$tooltip.off('mouseleave').on('mouseleave', function() {
+	//	$(this).offset({ left: 0, top: 0 }).hide();
+	//});
 
 	$div.off('mouseleave').on('mouseleave', function() {
-		self.tooltipDisappearTimeout = setTimeout(function() {
-			$tooltip.offset({ left: 0, top: 0 }).hide();
-		}, 100);
+		//self.tooltipDisappearTimeout = setTimeout(function() {
+		//	$tooltip.offset({ left: 0, top: 0 }).hide();
+		//}, 100);
+		$tooltip.offset({ left: 0, top: 0 }).hide();
 		$div.off('mousemove');
 	});
 };
@@ -246,7 +247,7 @@ $(document).on('keyup', function(e) {
 setInterval(function() {
 	var saveObject = GAME.loader.Save();
 	localStorage.setItem('techeon-save', JSON.stringify(saveObject));
-}, 1000);
+}, 10000);
 
 var savedString = localStorage.getItem('techeon-save');
 
