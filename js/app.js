@@ -8,7 +8,7 @@ var UI = function(game) {
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
-	this.pixelsBetweenTooltip = 1;
+	this.pixelsBetweenTooltip = 0;
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
@@ -18,16 +18,16 @@ UI.prototype.updateLinesOfCodeStats = function() {
 	this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec));
 };
 
-UI.prototype.updateDollarStats = function(game) {
+UI.prototype.updateDollarStats = function() {
 	var dollars = this.game.content.resources['money'].amount.Get();
 	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
 	this.$numDollars.text(formatDollar(dollars));
 	this.$numDollarsPerSec.text(formatDollar(dollarsPerSec));
 };
 
-UI.prototype.updateResources = function(game) {
-	this.updateLinesOfCodeStats(game);
-	this.updateDollarStats(game);
+UI.prototype.updateResources = function() {
+	this.updateLinesOfCodeStats();
+	this.updateDollarStats();
 };
 
 UI.prototype.updatePurchasable = function(entity, type) {
@@ -84,7 +84,15 @@ UI.prototype.showPurchasable = function(entity, type) {
 
 	var self = this;
 	var $tooltip = $('.purchasable-tooltip-wrapper');
-	$div.on('mouseenter', function() {
+	$div.off('mouseenter').on('mouseenter', function() {
+		clearTimeout(self.tooltipDisappearTimeout);
+
+		$div.off('mousemove').on('mousemove', function(e) {
+			var offsetTop = Math.min(Math.max(0, e.pageY - 30), $(window).height() - $tooltip.outerHeight());
+			$tooltip.offset({ top: offsetTop });
+		});
+
+		// show tooltip
 		var $tooltipContent = $tooltip.find('.inner-border-2');
 		$tooltipContent.empty();
 		addEl('h4', $tooltipContent, '', entity.describable.GetTitle());
@@ -100,14 +108,22 @@ UI.prototype.showPurchasable = function(entity, type) {
 		}
 
 		$tooltip.show();
-		$div.on('mousemove', function(e) {
-			var offsetTop = Math.min(Math.max(0, e.pageY - 30), $(window).height() - $tooltip.outerHeight());
-			$tooltip.offset({ top: offsetTop });
-		});
+
 	});
 
-	$div.on('mouseleave', function() {
-		$tooltip.offset({ left: 0, top: 0 }).hide();
+	$tooltip.off('mouseenter').on('mouseenter', function() {
+		clearTimeout(self.tooltipDisappearTimeout);
+		$div.off('mousemove');
+	});
+
+	$tooltip.off('mouseleave').on('mouseleave', function() {
+		$(this).offset({ left: 0, top: 0 }).hide();
+	});
+
+	$div.off('mouseleave').on('mouseleave', function() {
+		self.tooltipDisappearTimeout = setTimeout(function() {
+			$tooltip.offset({ left: 0, top: 0 }).hide();
+		}, 100);
 		$div.off('mousemove');
 	});
 };
@@ -204,7 +220,7 @@ var ui = new UI(GAME);
 
 GAME.events.on('post_loop', function(game) {
 	if (game.Every(5)) {
-		ui.updateResources(GAME);
+		ui.updateResources();
 	}
 });
 
