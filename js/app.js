@@ -9,11 +9,14 @@ var UI = function(game) {
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
 	this.pixelsBetweenTooltip = 0;
+	this.scrollCodebaseLimit = 10;
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
 	var linesOfCode = this.game.content.resources['code'].amount.Get();
 	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
+	this.scrollCodebase(linesOfCodePerSec / this.game.GetTicksPerSecond());
+
 	this.$numLinesOfCode.text(formatLinesOfCode(linesOfCode));
 	this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec));
 };
@@ -219,6 +222,18 @@ UI.prototype.showNotification = function(title, text, icon) {
 	}, 2000);
 };
 
+UI.prototype.scrollCodebase = function(numOfLines) {
+	var $codebase = $('#codebase > pre');
+	numOfLines = Math.min(this.scrollCodebaseLimit, numOfLines);
+	for (var i = 0; i < numOfLines; i++) {
+		var newTop = parseInt($codebase.css('top')) - 20;
+		// cycle through the code again
+		if (newTop <= -6380) {
+			newTop = -380;
+		}
+		$codebase.css('top', newTop + 'px');
+	}
+};
 var ui = new UI(GAME);
 
 GAME.events.on('post_loop', function(game) {
@@ -236,12 +251,7 @@ GAME.events.on('post_loop', function(game) {
 });
 
 $(document).on('keyup', function(e) {
-	var newTop = parseInt($('#codebase pre').css('top')) - 20;
-	// cycle through the code again
-	if (newTop <= -6380) {
-		newTop = -380;
-	}
-	$('#codebase pre').css('top', newTop + 'px');
+	ui.scrollCodebase(1);
 	GAME.content.resources['code'].amount.Add(1);
 	ui.updateLinesOfCodeStats(GAME);
 });
