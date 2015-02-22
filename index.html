@@ -13,9 +13,41 @@
     <body>
         <div id="feature-container" class="section"></div>
 
-        <div id="main-stats-container" class="section">
-            <div id="logo">TECHMONOPOLY</div>
-            <div id="codebase">
+        <div id="main-screen" class="section">
+			<div id="logo">TECHMONOPOLY</div>
+			<ul class="navbar">
+				<li>
+					<div class="nav-item nav-achievements">
+						<div class="nav-overlay"></div>
+						<div class="nav-item-content">
+							<img src="img/trophy.svg" alt="Achievements">
+							Achievements
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="nav-item nav-settings">
+						<div class="nav-overlay"></div>
+						<div class="nav-item-content">
+							<img src="img/settings.svg" alt="Menu"/>
+							Settings
+						</div>
+					</div>
+				</li>
+			</ul>
+			<ul class="back">
+				<li>
+					<div class="nav-item nav-back">
+						<div class="nav-overlay"></div>
+						<div class="nav-item-content">
+							<img src="img/back.svg" alt="Back">
+							Back
+						</div>
+					</div>
+				</li>
+			</ul>
+			<div class="main-game-screen screen">
+				<div id="codebase">
                 <pre class="sh_c">
 
 
@@ -339,19 +371,23 @@ struct file *get_mm_exe_file(struct mm_struct *mm)
 	up_read(&mm->mmap_sem);
 	return exe_file;
 }</pre>
-            </div>
-            <span id="typed-cursor" class="blinking">|</span>
-            <div id="main-stats">
-                <div id="lines-of-code-stat">
-                    <span id="num-lines-of-code" class="huge-stats"></span>
-                    <p><span id="num-lines-of-code-per-sec"></span> / second</p>
-                </div>
-                <div id="money-stat">
-                    <span id="num-dollars" class="huge-stats">300</span>
-                    <p><span id="num-dollars-per-sec"></span> / second</p>
-                </div>
+				</div>
+				<span id="typed-cursor" class="blinking">|</span>
+				<div id="main-stats">
+					<div id="lines-of-code-stat">
+						<span id="num-lines-of-code" class="huge-stats"></span>
+						<p><span id="num-lines-of-code-per-sec"></span> / second</p>
+					</div>
+					<div id="money-stat">
+						<span id="num-dollars" class="huge-stats">300</span>
+						<p><span id="num-dollars-per-sec"></span> / second</p>
+					</div>
+				</div>
+			</div>
 
-            </div>
+			<div class="achievements-screen screen">Achievements placeholder</div>
+			<div class="settings-screen screen">Settings placeholder</div>
+
         </div>
 
         <div id="team-container" class="section"></div>

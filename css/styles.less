@@ -71,7 +71,7 @@ body {
 	font-family: 'SF Collegiate', sans-serif;
 	font-size: 64px;
 	text-align: center;
-	padding: 40px;
+	padding: 40px 0 15px 0;
 }
 
 .section {
@@ -86,8 +86,102 @@ h4 {
 	font-size: 18px;
 }
 
+.navbar, .back {
+	text-align: center;
+	img {
+		width: 30px;
+		height: 30px;
+		margin-right: 5px;
+	}
+}
+
+.back {
+	display: none;
+}
+
+.navbar li, .back li {
+	display: inline-block;
+}
+
+.nav-item {
+	width: 200px;
+	height: 60px;
+	position: relative;
+}
+
+.nav-overlay, .nav-item-content {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.nav-overlay {
+	background: rgba(255, 255, 255, 0.4);
+	z-index: 1;
+	transition: ease-in-out 0.1s;
+	-webkit-transition: ease-in-out 0.1s;
+	cursor: pointer;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+}
+
+.nav-item-content {
+	vertical-align: top;
+	font-size: 18px;
+	line-height: 30px;
+}
+
 #feature-container, #team-container, #upgrade-container {
 	width: 300px;
+}
+
+.achievements-screen, .settings-screen {
+	display: none;
+}
+
+
+
+#codebase {
+	height: 332px;
+	overflow-y: hidden;
+}
+
+#codebase pre {
+	position: relative;
+	background: @background;
+	top: 0;
+	height: 212px;
+	font-family: 'Consolas', sans-serif;
+//	margin: 10px 30px;
+	font-size: 14px;
+	line-height: 20px;
+	-webkit-user-select: auto;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+}
+
+#main-stats {
+	text-align: center;
+}
+
+#main-stats > div {
+	padding: 20px;
+}
+
+.huge-stats {
+	font-size: 40px;
+}
+
+#main-stats p {
+	margin-top: 15px;
+	font-size: 18px;
 }
 
 .purchasable {
@@ -232,45 +326,6 @@ h4 {
 
 .unaffordable.purchasable:hover {
 	background: #DDD;
-}
-
-#codebase {
-	height: 332px;
-	overflow-y: hidden;
-}
-
-#codebase pre {
-	position: relative;
-	background: @background;
-	top: 0;
-	height: 212px;
-	font-family: 'Consolas', sans-serif;
-	margin: 10px 30px;
-	font-size: 14px;
-	line-height: 20px;
-	-webkit-user-select: auto;
-	white-space: pre-wrap;
-	white-space: -moz-pre-wrap;
-	white-space: -pre-wrap;
-	white-space: -o-pre-wrap;
-	word-wrap: break-word;
-}
-
-#main-stats {
-	text-align: center;
-}
-
-#main-stats > div {
-	padding: 20px;
-}
-
-.huge-stats {
-	font-size: 40px;
-}
-
-#main-stats p {
-	margin-top: 15px;
-	font-size: 18px;
 }
 
 

@@ -234,6 +234,22 @@ UI.prototype.scrollCodebase = function(numOfLines) {
 		$codebase.css('top', newTop + 'px');
 	}
 };
+
+UI.prototype.setupNavClickHandlers = function() {
+	$('.nav-achievements').on('click', function() {
+		$('.screen, .navbar').hide();
+		$('.achievements-screen, .back').show();
+	});
+	$('.nav-settings').on('click', function() {
+		$('.screen, .navbar').hide();
+		$('.settings-screen, .back').show();
+	});
+	$('.back').on('click', function() {
+		$('.screen, .back').hide();
+		$('.main-game-screen, .navbar').show();
+	});
+};
+
 var ui = new UI(GAME);
 
 GAME.events.on('post_loop', function(game) {
@@ -278,5 +294,6 @@ for(var key in GAME.content.achievements) {
 }
 
 ui.setupPopup();
+ui.setupNavClickHandlers();
 ui.updateGenerators();
 ui.updateUpgrades();
