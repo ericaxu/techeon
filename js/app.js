@@ -309,9 +309,11 @@ GAME.events.on('post_loop', function(game) {
 });
 
 $(document).on('keyup', function(e) {
-	ui.scrollCodebase(1);
-	GAME.content.resources['code'].amount.Add(1);
-	ui.updateLinesOfCodeStats(GAME);
+	if (isPrintable(e.keyCode)) {
+		ui.scrollCodebase(1);
+		GAME.content.resources['code'].amount.Add(1);
+		ui.updateLinesOfCodeStats(GAME);
+	}
 });
 
 setInterval(function() {
