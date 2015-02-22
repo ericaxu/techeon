@@ -1,4 +1,12 @@
-var UI = function(game) {
+var uiConfig = {
+	saveInterval: 10000,
+	updateResourceFrequencyInTicks: 5,
+	updatePurchasablesFrequencyInTicks: 25,
+	pixelsBetweenTooltip: 0,
+	scrollCodebaseLimit: 50
+};
+
+var UI = function(game, config) {
 	this.game = game;
 	this.$numLinesOfCode = $('#num-lines-of-code');
 	this.$numDollars = $('#num-dollars');
@@ -8,9 +16,10 @@ var UI = function(game) {
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
-	this.pixelsBetweenTooltip = 0;
-	this.scrollCodebaseLimit = 50;
 	this.mostRecentKeydown = 0;
+	this.config = config;
+
+	this.init();
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
@@ -92,7 +101,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 		//clearTimeout(self.tooltipDisappearTimeout);
 
 		$div.off('mousemove').on('mousemove', function(e) {
-			var offsetTop = Math.min(Math.max(0, e.pageY - 30), $(window).height() - $tooltip.outerHeight());
+			var offsetTop = Math.min(Math.max(0, e.pageY - $tooltip.outerHeight() / 2), $(window).height() - $tooltip.outerHeight());
 			$tooltip.offset({ top: offsetTop });
 		});
 
@@ -106,11 +115,11 @@ UI.prototype.showPurchasable = function(entity, type) {
 		}
 
 		if (type === 'feature') {
-			$tooltip.offset({ left: $div.outerWidth() + self.pixelsBetweenTooltip });
+			$tooltip.offset({ left: $div.outerWidth() + self.config.pixelsBetweenTooltip });
 		} else if (type === 'team') {
-			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.pixelsBetweenTooltip });
+			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.config.pixelsBetweenTooltip });
 		} else if (type === 'upgrade') {
-			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.pixelsBetweenTooltip });
+			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.config.pixelsBetweenTooltip });
 		}
 
 		$tooltip.show();
@@ -225,7 +234,7 @@ UI.prototype.showNotification = function(title, text, icon) {
 
 UI.prototype.scrollCodebase = function(numOfLines) {
 	var $codebase = $('#codebase > pre');
-	numOfLines = Math.min(this.scrollCodebaseLimit, numOfLines);
+	numOfLines = Math.min(this.config.scrollCodebaseLimit, numOfLines);
 	for (var i = 0; i < numOfLines; i++) {
 		var newTop = parseInt($codebase.css('top')) - 20;
 		// cycle through the code again
@@ -299,56 +308,59 @@ UI.prototype.setupKeypressListener = function() {
 	}, this));
 	$(document).on('keyup', $.proxy(function(e) {
 		if (e.keyCode == this.mostRecentKeydown && isPrintable(e.keyCode)) {
-			ui.scrollCodebase(1);
-			GAME.content.resources['code'].amount.Add(1);
-			ui.updateLinesOfCodeStats(GAME);
+			this.scrollCodebase(1);
+			this.game.content.resources['code'].amount.Add(1);
+			this.updateLinesOfCodeStats(GAME);
 		}
 	}, this));
 };
 
-var ui = new UI(GAME);
-
-GAME.events.on('post_loop', function(game) {
-	if (game.Every(5)) {
-		ui.updateResources();
+UI.prototype.loadGame = function() {
+	var savedString = localStorage.getItem('techeon-save');
+	if (savedString) {
+		GAME.loader.Load(JSON.parse(savedString));
 	}
-});
+};
 
+UI.prototype.setupSaveGame = function() {
+	setInterval(function() {
+		var saveObject = GAME.loader.Save();
+		localStorage.setItem('techeon-save', JSON.stringify(saveObject));
+	}, this.config.saveInterval);
+};
+
+UI.prototype.setupObtainAchievementListener = function() {
+	for (var key in this.game.content.achievements) {
+		this.game.content.achievements[key].events.on('obtain', $.proxy(function(achievement) {
+			this.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
+			achievement.describable.GetDescription(), '');
+			this.showAchievements();
+		}, this));
+	}
+};
+
+UI.prototype.init = function() {
+	this.setupPopup();
+	this.setupNavClickHandlers();
+	this.updateGenerators();
+	this.updateUpgrades();
+	this.showAchievements();
+	this.setupKeypressListener();
+	this.loadGame();
+	this.setupSaveGame();
+	this.setupObtainAchievementListener();
+	sh_highlightDocument();
+
+	this.game.SubscribePeriodic(this.config.updateResourceFrequencyInTicks, $.proxy(function() {
+		this.updateResources();
+	}, this));
+	this.game.SubscribePeriodic(this.config.updatePurchasablesFrequencyInTicks, $.proxy(function() {
+		this.updateGenerators();
+		this.updateUpgrades();
+	}, this));
+};
+
+var ui = new UI(GAME, uiConfig);
 GAME.Start();
 
-GAME.events.on('post_loop', function(game) {
-	if (game.Every(25)) {
-		ui.updateGenerators().updateUpgrades();
-	}
-});
 
-
-
-setInterval(function() {
-	var saveObject = GAME.loader.Save();
-	localStorage.setItem('techeon-save', JSON.stringify(saveObject));
-}, 10000);
-
-var savedString = localStorage.getItem('techeon-save');
-
-if (savedString) {
-	GAME.loader.Load(JSON.parse(savedString));
-}
-
-sh_highlightDocument();
-
-// Set up achievement event listeners
-for (var key in GAME.content.achievements) {
-	GAME.content.achievements[key].events.on('obtain', function(achievement) {
-		ui.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
-		achievement.describable.GetDescription(), '');
-		ui.showAchievements();
-	});
-}
-
-ui.setupPopup();
-ui.setupNavClickHandlers();
-ui.updateGenerators();
-ui.updateUpgrades();
-ui.showAchievements();
-ui.setupKeypressListener();
