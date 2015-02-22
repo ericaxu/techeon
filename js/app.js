@@ -250,22 +250,45 @@ UI.prototype.setupNavClickHandlers = function() {
 	});
 };
 
-UI.prototype.renderAchievements = function() {
+UI.prototype.showAchievement = function(achievement, $container) {
+	if (achievement.obtainable.GetObtained()) {
+		var $div = addEl('div', $container, 'achievement');
+		addEl('img', $div, '', '', {
+			src: 'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg',
+			alt: achievement.describable.GetTitle()
+		});
+		var $tooltip = $('.purchasable-tooltip-wrapper');
+		$div.off('mouseenter').on('mouseenter', function() {
+			$div.off('mousemove').on('mousemove', function(e) {
+				var offsetTop = Math.min(Math.max(0, e.pageY - $tooltip.outerHeight() / 2), $(window).height() - $tooltip.outerHeight());
+				var offsetLeft = Math.min(Math.max(0, e.pageX + 30), $(window).width() - $tooltip.outerWidth());
+				$tooltip.offset({ top: offsetTop, left: offsetLeft });
+			});
+
+			// show tooltip
+			var $tooltipContent = $tooltip.find('.inner-border-2');
+			$tooltipContent.empty();
+			addEl('h4', $tooltipContent, '', achievement.describable.GetTitle());
+			addEl('p', $tooltipContent, '', achievement.describable.GetDescription());
+			$tooltip.show();
+		});
+
+		$div.off('mouseleave').on('mouseleave', function() {
+			$tooltip.offset({ left: 0, top: 0 }).hide();
+			$div.off('mousemove');
+		});
+	} else {
+		var $div = addEl('div', $container, 'locked achievement');
+		addEl('div', $div, '', '?');
+	}
+};
+
+UI.prototype.showAchievements = function() {
 	var $achievementsList = $('.achievements-list');
 	$achievementsList.empty();
 	for (var key in this.game.content.achievements) {
 		var achievement = this.game.content.achievements[key];
-		console.log(this.game.content.achievements[key]);
-		if (achievement.obtainable.GetObtained()) {
-			var $div = addEl('div', $achievementsList, 'achievement');
-			addEl('img', $div, '', '', {
-				src: 'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg',
-				alt: achievement.describable.GetTitle()
-			});
-		} else {
-			var $div = addEl('div', $achievementsList, 'locked achievement');
-			addEl('div', $div, '', '?');
-		}
+		this.showAchievement(achievement, $achievementsList);
 	}
 };
 
@@ -309,7 +332,7 @@ for (var key in GAME.content.achievements) {
 	GAME.content.achievements[key].events.on('obtain', function(achievement) {
 		ui.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
 		achievement.describable.GetDescription(), '');
-		ui.renderAchievements();
+		ui.showAchievements();
 	});
 }
 
@@ -317,4 +340,4 @@ ui.setupPopup();
 ui.setupNavClickHandlers();
 ui.updateGenerators();
 ui.updateUpgrades();
-ui.renderAchievements();
+ui.showAchievements();
