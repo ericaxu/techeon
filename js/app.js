@@ -250,6 +250,25 @@ UI.prototype.setupNavClickHandlers = function() {
 	});
 };
 
+UI.prototype.renderAchievements = function() {
+	var $achievementsList = $('.achievements-list');
+	$achievementsList.empty();
+	for (var key in this.game.content.achievements) {
+		var achievement = this.game.content.achievements[key];
+		console.log(this.game.content.achievements[key]);
+		if (achievement.obtainable.GetObtained()) {
+			var $div = addEl('div', $achievementsList, 'achievement');
+			addEl('img', $div, '', '', {
+				src: 'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg',
+				alt: achievement.describable.GetTitle()
+			});
+		} else {
+			var $div = addEl('div', $achievementsList, 'locked achievement');
+			addEl('div', $div, '', '?');
+		}
+	}
+};
+
 var ui = new UI(GAME);
 
 GAME.events.on('post_loop', function(game) {
@@ -286,10 +305,11 @@ if (savedString) {
 sh_highlightDocument();
 
 // Set up achievement event listeners
-for(var key in GAME.content.achievements) {
+for (var key in GAME.content.achievements) {
 	GAME.content.achievements[key].events.on('obtain', function(achievement) {
 		ui.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
 		achievement.describable.GetDescription(), '');
+		ui.renderAchievements();
 	});
 }
 
@@ -297,3 +317,4 @@ ui.setupPopup();
 ui.setupNavClickHandlers();
 ui.updateGenerators();
 ui.updateUpgrades();
+ui.renderAchievements();
