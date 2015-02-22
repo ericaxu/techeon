@@ -10,6 +10,7 @@ var UI = function(game) {
 	this.$notifications = $('.notification-container');
 	this.pixelsBetweenTooltip = 0;
 	this.scrollCodebaseLimit = 50;
+	this.mostRecentKeydown = 0;
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
@@ -292,6 +293,19 @@ UI.prototype.showAchievements = function() {
 	}
 };
 
+UI.prototype.setupKeypressListener = function() {
+	$(document).on('keydown', $.proxy(function(e) {
+		this.mostRecentKeydown = e.keyCode;
+	}, this));
+	$(document).on('keyup', $.proxy(function(e) {
+		if (e.keyCode == this.mostRecentKeydown && isPrintable(e.keyCode)) {
+			ui.scrollCodebase(1);
+			GAME.content.resources['code'].amount.Add(1);
+			ui.updateLinesOfCodeStats(GAME);
+		}
+	}, this));
+};
+
 var ui = new UI(GAME);
 
 GAME.events.on('post_loop', function(game) {
@@ -308,13 +322,7 @@ GAME.events.on('post_loop', function(game) {
 	}
 });
 
-$(document).on('keyup', function(e) {
-	if (isPrintable(e.keyCode)) {
-		ui.scrollCodebase(1);
-		GAME.content.resources['code'].amount.Add(1);
-		ui.updateLinesOfCodeStats(GAME);
-	}
-});
+
 
 setInterval(function() {
 	var saveObject = GAME.loader.Save();
@@ -343,3 +351,4 @@ ui.setupNavClickHandlers();
 ui.updateGenerators();
 ui.updateUpgrades();
 ui.showAchievements();
+ui.setupKeypressListener();
