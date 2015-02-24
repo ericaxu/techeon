@@ -37,7 +37,7 @@ UI.prototype.updateLinesOfCodeStats = function() {
 };
 
 UI.prototype.updateDollarStats = function() {
-	var dollars = this.game.GetResources('money').amount.Get();
+	var dollars = this.game.GetResource('money').amount.Get();
 	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
 
 	if (dollars > 0) {
@@ -99,7 +99,8 @@ UI.prototype.showPurchasable = function(entity, type) {
 	$div.on('click', $.proxy(function() {
 		if (entity.purchasable.CanBuy()) {
 			entity.purchasable.Buy();
-			this.updateGenerators().updateUpgrades();
+			this.updateGenerators();
+			this.updateUpgrades();
 			this.updatePurchasable(entity, type);
 		}
 	}, this));
@@ -156,8 +157,8 @@ UI.prototype.showPurchasable = function(entity, type) {
 };
 
 UI.prototype.updateGenerators = function() {
-	each(this.game.GetGenerators(), function(generator, name) {
-		var $generatorDiv = $('.generator-' + name);
+	each(this.game.GetGenerators(), function(generator) {
+		var $generatorDiv = $('.generator-' + generator.GetName());
 		// if it's not shown right now but it's available
 		if ($generatorDiv.length === 0 && generator.purchasable.Available()) {
 			if (generator.purchasable.GetBuyPrice().code) {
@@ -179,8 +180,8 @@ UI.prototype.updateGenerators = function() {
 };
 
 UI.prototype.updateUpgrades = function() {
-	each(this.game.GetUpgrades(), function(upgrade, name) {
-		var $generatorDiv = $('.generator-' + name);
+	each(this.game.GetUpgrades(), function(upgrade) {
+		var $generatorDiv = $('.generator-' + upgrade.GetName());
 		if ($generatorDiv.length === 0 && upgrade.purchasable.Available() && !upgrade.obtainable.GetObtained()) {
 			this.showPurchasable(upgrade, 'upgrade');
 		} else if ($generatorDiv.length > 0) {
