@@ -16,6 +16,20 @@ function extend(child, parent, prototype) {
 	}
 }
 
+function each(obj, func, context) {
+	if (obj instanceof Array) {
+		for(var i = 0; i < obj.length; i++) {
+			func.call(context, obj[i], i, obj);
+		}
+	}
+
+	if (obj instanceof Object) {
+		for(var key in obj) {
+			func.call(context, obj[key], key, obj);
+		}
+	}
+}
+
 function inherit(child, parent) {
 	if (parent) {
 		child.prototype = Object.create(parent.prototype);

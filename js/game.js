@@ -1,9 +1,17 @@
 var Game = function() {
 	GameEngine.call(this);
-	this.content.resources = {};
-	this.content.generators = {};
-	this.content.upgrades = {};
-	this.content.achievements = {};
+
+	this.data.resources = {};
+	this.content.resources = [];
+
+	this.data.generators = {};
+	this.content.generators = [];
+
+	this.data.upgrades = {};
+	this.content.upgrades = [];
+
+	this.data.achievements = {};
+	this.content.achievements = [];
 };
 extend(Game, GameEngine, {
 	GetResourceRatesPerSecond: function(resource) {
@@ -11,22 +19,46 @@ extend(Game, GameEngine, {
 	},
 	GetResourceRatesPerTick: function(resource) {
 		var rate = 0;
-		for (var generator in this.content.generators) {
-			rate += this.content.generators[generator].GetRate(resource);
-		}
+		each(this.content.generators, function(generator) {
+			rate += generator.GetRate(resource);
+		});
 		return rate;
 	},
 	AddResource: function(entity) {
-		this.AddContent("resources", entity);
+		return this.AddEntity("resources", entity);
 	},
 	AddGenerator: function(entity) {
-		this.AddContent("generators", entity);
+		return this.AddEntity("generators", entity);
 	},
 	AddUpgrade: function(entity) {
-		this.AddContent("upgrades", entity);
+		return this.AddEntity("upgrades", entity);
 	},
 	AddAchievement: function(entity) {
-		this.AddContent("achievements", entity);
+		return this.AddEntity("achievements", entity);
+	},
+	GetResources: function() {
+		return this.content.resources;
+	},
+	GetGenerators: function() {
+		return this.content.generators;
+	},
+	GetUpgrades: function() {
+		return this.content.upgrades;
+	},
+	GetAchievements: function() {
+		return this.content.achievements;
+	},
+	GetResource: function(name) {
+		return this.data.resources[name];
+	},
+	GetGenerator: function(name) {
+		return this.data.generators[name];
+	},
+	GetUpgrade: function(name) {
+		return this.data.upgrades[name];
+	},
+	GetAchievement: function(name) {
+		return this.data.achievements[name];
 	}
 });
 
@@ -60,7 +92,7 @@ extend(Purchasable, Component, {
 	Available: function() {
 		for (var resource in this.restrictions) {
 			var restriction = this.restrictions[resource];
-			if (this.entity.game.content.resources[resource].amount.GetMax() < restriction) {
+			if (this.entity.game.data.resources[resource].amount.GetMax() < restriction) {
 				return false;
 			}
 		}
@@ -70,7 +102,7 @@ extend(Purchasable, Component, {
 		var price = this.GetBuyPrice();
 		for (var resource in price) {
 			var cost = price[resource];
-			if (this.entity.game.content.resources[resource].amount.Get() < cost) {
+			if (this.entity.game.data.resources[resource].amount.Get() < cost) {
 				return false;
 			}
 		}
@@ -88,7 +120,7 @@ extend(Purchasable, Component, {
 		}
 		var price = this.GetBuyPrice();
 		for (var resource in price) {
-			this.entity.game.content.resources[resource].amount.Remove(price[resource]);
+			this.entity.game.data.resources[resource].amount.Remove(price[resource]);
 		}
 		this.entity.events.trigger('buy', this.entity);
 	},
@@ -101,7 +133,7 @@ extend(Purchasable, Component, {
 	Sell: function() {
 		var price = this.GetSellPrice();
 		for (var resource in price) {
-			this.entity.game.content.resources[resource].amount.Add(price[resource]);
+			this.entity.game.data.resources[resource].amount.Add(price[resource]);
 		}
 		this.entity.events.trigger('sell', this.entity);
 	},
@@ -252,7 +284,7 @@ extend(Generator, Entity, {
 		for (var resource in this.rates) {
 			var result = this.GetRate(resource);
 			this.events.trigger('generate_resource', this, resource, result);
-			this.game.content.resources[resource].Generate(result);
+			this.game.data.resources[resource].Generate(result);
 		}
 	}
 });
@@ -282,7 +314,7 @@ var ResourceReward = function(game, resource, amount) {
 };
 extend(ResourceReward, Reward, {
 	Reward: function() {
-		this.game.content.resources[this.resource].Reward(this.amount);
+		this.resource.Reward(this.amount);
 		this.game.events.trigger('reward_resource', this, this.resource, this.amount);
 	}
 });
@@ -294,7 +326,7 @@ var BaseRateReward = function(game, generator, resource, amount) {
 };
 extend(BaseRateReward, Reward, {
 	Reward: function() {
-		this.game.content.generators[this.generator].rates[this.resource] += this.amount;
+		this.game.data.generators[this.generator].rates[this.resource] += this.amount;
 		this.game.events.trigger('reward_baserate', this, this.resource, this.amount);
 	}
 });
@@ -307,7 +339,7 @@ var MultiplierReward = function(game, generator, resource, multiplier_add, multi
 };
 extend(MultiplierReward, Reward, {
 	Reward: function() {
-		var multipliers = this.game.content.generators[this.generator].multipliers;
+		var multipliers = this.game.data.generators[this.generator].multipliers;
 		if (this.multiplier_add) {
 			multipliers[this.resource] += this.multiplier_add;
 		}

@@ -189,8 +189,9 @@ var GameEngine = function() {
 	this.SetTicksPerSecond(50);
 
 	this.tick = 0;
+	this.data = {};
 	this.content = {};
-	new Loader(this).AddElement('tick').AddElement('content');
+	new Loader(this).AddElement('tick').AddElement('data');
 };
 extend(GameEngine, null, {
 	Start: function() {
@@ -228,8 +229,10 @@ extend(GameEngine, null, {
 		this.tickSubscribers.tick();
 		this.events.trigger('post_tick', this);
 	},
-	AddContent: function(type, entity) {
-		this.content[type][entity.GetName()] = entity;
+	AddEntity: function(type, entity) {
+		this.content[type].push(entity);
+		this.data[type][entity.GetName()] = entity;
+		return entity;
 	},
 	SubscribePeriodic: function(ticks, func, context) {
 		this.tickSubscribers.on(ticks, func, context);
