@@ -306,15 +306,18 @@ UI.prototype.fillAchievementInfo = function(achievement, $div) {
 
 UI.prototype.showAchievement = function(achievement, $container) {
 	var $div = addEl('div', $container, 'locked achievement');
+	var $achievementsNav = $('.nav-achievements');
 	addEl('div', $div, '', '?');
 	achievement.events.on('update', function(achievement) {
 		if (achievement.obtainable.GetObtained()) {
 			this.fillAchievementInfo(achievement, $div);
+			$achievementsNav.show();
 		}
 	}, this);
 	achievement.events.on('obtain', function(achievement) {
 		this.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
 		achievement.describable.GetDescription(), '');
+		$achievementsNav.show();
 	}, this);
 };
 
