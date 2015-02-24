@@ -43,9 +43,15 @@ extend(MapList, null, {
 /**
  * Events - Simple event system
  */
-var Events = function() {
+var Events = function(owner) {
+	this.owner = owner;
 	this.events = new MapList();
 	this.bridges = new MapList();
+	this.owner.on = bind(this.on, this);
+	this.owner.off = bind(this.off, this);
+	this.owner.trigger = bind(this.trigger, this);
+	this.owner.bridge = bind(this.bridge, this);
+	this.owner.unbridge = bind(this.unbridge, this);
 };
 extend(Events, null, {
 	on: function(name, func, context) {
@@ -127,7 +133,7 @@ extend(Loader, null, {
 			}
 		}
 		if (this.owner.events) {
-			this.owner.events.trigger('load', this.owner);
+			this.owner.trigger('load', this.owner);
 		}
 	},
 	LoadSingle: function(data, dest) {
@@ -155,7 +161,7 @@ extend(Loader, null, {
 		}
 
 		if (this.owner.events) {
-			this.owner.events.trigger('save', this.owner);
+			this.owner.trigger('save', this.owner);
 		}
 
 		return data;
@@ -182,7 +188,7 @@ extend(Loader, null, {
  * Game - Main game entry point
  */
 var GameEngine = function() {
-	this.events = new Events();
+	this.events = new Events(this);
 	this.loopTask = null;
 	this.time = 0;
 	this.tickSubscribers = new TickEvents(this);
@@ -195,19 +201,19 @@ var GameEngine = function() {
 };
 extend(GameEngine, null, {
 	Start: function() {
-		this.events.trigger('game_start', this);
+		this.trigger('game_start', this);
 		this.time = currentTimeMS();
 		this.Loop();
 	},
 	Stop: function() {
 		if (this.loopTask) {
-			this.events.trigger('game_stop', this);
+			this.trigger('game_stop', this);
 			clearTimeout(this.loopTask);
 			this.loopTask = null;
 		}
 	},
 	Loop: function() {
-		this.events.trigger('pre_loop', this);
+		this.trigger('pre_loop', this);
 		var targetTime = currentTimeMS();
 
 		// Lots of lag, maybe went sleep?
@@ -219,15 +225,15 @@ extend(GameEngine, null, {
 			this.time += this.timePerTick;
 		}
 
-		this.events.trigger('post_loop', this);
+		this.trigger('post_loop', this);
 		this.loopTask = ctxSetTimeout(this.Loop, this.timePerTick, this);
 	},
 	Tick: function() {
-		this.events.trigger('pre_tick', this);
+		this.trigger('pre_tick', this);
 		this.tick++;
-		this.events.trigger('tick', this);
+		this.trigger('tick', this);
 		this.tickSubscribers.tick();
-		this.events.trigger('post_tick', this);
+		this.trigger('post_tick', this);
 	},
 	AddEntity: function(type, entity) {
 		this.content[type].push(entity);
@@ -269,7 +275,7 @@ extend(GameEngine, null, {
  * Entity
  */
 var Entity = function(game, name) {
-	this.events = new Events();
+	this.events = new Events(this);
 	this.game = game;
 	this.name = name;
 	this.components = [];
@@ -361,8 +367,8 @@ var Amount = function(entity) {
 	this.maxAmount = 0.0;
 	this.totalAmount = 0.0;
 	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount');
-	this.entity.events.bridge('load', 'update');
-	this.entity.events.bridge('amount_change', 'update');
+	this.entity.bridge('load', 'update');
+	this.entity.bridge('amount_change', 'update');
 };
 extend(Amount, Component, {
 	Get: function() {
@@ -400,7 +406,7 @@ extend(Amount, Component, {
 		this.TriggerChanged();
 	},
 	TriggerChanged: function() {
-		this.entity.events.trigger('amount_change', this.entity);
+		this.entity.trigger('amount_change', this.entity);
 	}
 });
 
@@ -413,9 +419,9 @@ var Obtainable = function(entity) {
 	entity.loader.AddElement('obtainable');
 	this.obtained = false;
 	this.loader.AddElement('obtained');
-	this.entity.events.bridge('load', 'update');
-	this.entity.events.bridge('obtain', 'update');
-	this.entity.events.bridge('unobtain', 'update');
+	this.entity.bridge('load', 'update');
+	this.entity.bridge('obtain', 'update');
+	this.entity.bridge('unobtain', 'update');
 };
 extend(Obtainable, Component, {
 	SetObtained: function(value) {
@@ -424,11 +430,11 @@ extend(Obtainable, Component, {
 	},
 	Obtain: function() {
 		this.obtained = true;
-		this.entity.events.trigger('obtain', this.entity);
+		this.entity.trigger('obtain', this.entity);
 	},
 	UnObtain: function() {
 		this.obtained = false;
-		this.entity.events.trigger('unobtain', this.entity);
+		this.entity.trigger('unobtain', this.entity);
 	},
 	GetObtained: function() {
 		return this.obtained;
@@ -442,19 +448,19 @@ var Rewardable = function(entity) {
 	Component.call(this, entity);
 	entity.rewardable = this;
 	this.rewards = [];
-	this.entity.events.bridge('reward_add', 'update');
+	this.entity.bridge('reward_add', 'update');
 };
 extend(Rewardable, Component, {
 	AddReward: function(reward) {
 		this.rewards.push(reward);
-		this.entity.events.trigger('reward_add', this.entity);
+		this.entity.trigger('reward_add', this.entity);
 		return this.entity;
 	},
 	GiveRewards: function() {
 		for (var i = 0; i < this.rewards.length; i++) {
 			this.rewards[i].Reward();
 		}
-		this.entity.events.trigger('reward', this.entity);
+		this.entity.trigger('reward', this.entity);
 	}
 });
 
