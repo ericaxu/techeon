@@ -305,18 +305,17 @@ UI.prototype.fillAchievementInfo = function(achievement, $div) {
 };
 
 UI.prototype.showAchievement = function(achievement, $container) {
-	if (achievement.obtainable.GetObtained()) {
-		var $div = addEl('div', $container, 'achievement');
-		this.fillAchievementInfo(achievement, $div);
-	} else {
-		var $div = addEl('div', $container, 'locked achievement');
-		addEl('div', $div, '', '?');
-		achievement.events.on('obtain', $.proxy(function(achievement) {
-			this.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
-			achievement.describable.GetDescription(), '');
+	var $div = addEl('div', $container, 'locked achievement');
+	addEl('div', $div, '', '?');
+	achievement.events.on('update', function(achievement) {
+		if (achievement.obtainable.GetObtained()) {
 			this.fillAchievementInfo(achievement, $div);
-		}, this));
-	}
+		}
+	}, this);
+	achievement.events.on('obtain', function(achievement) {
+		this.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
+		achievement.describable.GetDescription(), '');
+	}, this);
 };
 
 UI.prototype.showAchievements = function() {
@@ -360,7 +359,6 @@ UI.prototype.init = function() {
 	this.updateGenerators();
 	this.updateUpgrades();
 	this.setupKeypressListener();
-	this.loadGame();
 	this.setupSaveGame();
 	this.showAchievements();
 	sh_highlightDocument();
@@ -372,6 +370,8 @@ UI.prototype.init = function() {
 		this.updateGenerators();
 		this.updateUpgrades();
 	}, this));
+
+	this.loadGame();
 };
 
 var ui = new UI(GAME, uiConfig);
