@@ -75,7 +75,8 @@ extend(Events, null, {
 			object.func.apply(object.context, args);
 		}, this);
 		this.bridges.each(name, function(object) {
-			this.trigger(object);
+			args[0] = object;
+			this.trigger.apply(this, args);
 		}, this);
 	}
 });
@@ -364,7 +365,8 @@ var Amount = function(entity) {
 	this.maxAmount = 0.0;
 	this.totalAmount = 0.0;
 	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount');
-	this.entity.events.bridge('load', 'amount_update');
+	this.entity.events.bridge('load', 'update');
+	this.entity.events.bridge('amount_change', 'update');
 };
 extend(Amount, Component, {
 	Get: function() {
@@ -402,7 +404,7 @@ extend(Amount, Component, {
 		this.TriggerChanged();
 	},
 	TriggerChanged: function() {
-		this.entity.events.trigger('amount_update', this.entity);
+		this.entity.events.trigger('amount_change', this.entity);
 	}
 });
 
@@ -415,9 +417,9 @@ var Obtainable = function(entity) {
 	entity.loader.AddElement('obtainable');
 	this.obtained = false;
 	this.loader.AddElement('obtained');
-	this.entity.events.bridge('load', 'obtainable_update');
-	this.entity.events.bridge('obtain', 'obtainable_update');
-	this.entity.events.bridge('unobtain', 'obtainable_update');
+	this.entity.events.bridge('load', 'update');
+	this.entity.events.bridge('obtain', 'update');
+	this.entity.events.bridge('unobtain', 'update');
 };
 extend(Obtainable, Component, {
 	SetObtained: function(value) {
@@ -444,11 +446,12 @@ var Rewardable = function(entity) {
 	Component.call(this, entity);
 	entity.rewardable = this;
 	this.rewards = [];
+	this.entity.events.bridge('reward_add', 'update');
 };
 extend(Rewardable, Component, {
 	AddReward: function(reward) {
 		this.rewards.push(reward);
-		this.entity.events.trigger('rewardable_update', this.entity);
+		this.entity.events.trigger('reward_add', this.entity);
 		return this.entity;
 	},
 	GiveRewards: function() {

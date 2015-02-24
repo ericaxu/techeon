@@ -71,6 +71,8 @@ var Purchasable = function(entity) {
 	this.buyPrice = {};
 	this.sellPrice = {};
 	this.restrictions = {};
+	this.entity.events.bridge('buy', 'update');
+	this.entity.events.bridge('sell', 'update');
 };
 extend(Purchasable, Component, {
 	SetBuyPrice: function(resource, price) {
@@ -204,6 +206,7 @@ var ExponentialAmountPurchasable = function(entity) {
 	this.entity.events.on('buy', this.TriggerPriceChange, this);
 	this.entity.events.on('sell', this.TriggerPriceChange, this);
 	this.entity.events.on('load', this.TriggerPriceChange, this);
+	this.entity.events.bridge('price_change', 'update');
 
 	this.buyPrice = {};
 	this.sellPrice = {};
@@ -228,7 +231,7 @@ extend(ExponentialAmountPurchasable, Component, {
 		return this.sellPrice;
 	},
 	TriggerPriceChange: function() {
-		this.entity.events.trigger('purchasable_update', this.entity);
+		this.entity.events.trigger('price_change', this.entity);
 	}
 });
 
