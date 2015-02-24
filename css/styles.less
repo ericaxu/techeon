@@ -108,6 +108,10 @@ h4 {
 	width: 200px;
 	height: 60px;
 	position: relative;
+
+	&.active .nav-overlay {
+		background: rgba(255, 255, 255, 0.1);
+	}
 }
 
 .nav-overlay, .nav-item-content {
@@ -119,14 +123,14 @@ h4 {
 }
 
 .nav-overlay {
-	background: rgba(255, 255, 255, 0.4);
+	background: rgba(255, 255, 255, 0.6);
 	z-index: 1;
 	transition: ease-in-out 0.1s;
 	-webkit-transition: ease-in-out 0.1s;
 	cursor: pointer;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.2);
 	}
 }
 
@@ -140,11 +144,11 @@ h4 {
 	width: 300px;
 }
 
-.achievements-screen, .settings-screen {
+#achievements-screen, #settings-screen {
 	display: none;
 }
 
-.achievements-screen {
+#achievements-screen {
 	margin: 10px 30px;
 
 	h2 {

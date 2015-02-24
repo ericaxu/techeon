@@ -256,19 +256,29 @@ UI.prototype.scrollCodebase = function(numOfLines) {
 	}
 };
 
+UI.prototype.setupNavClickHandler = function($link, $toShow) {
+	var $mainGameScreen = $('#main-game-screen');
+	var $navItems = $('.nav-item');
+	var $screens = $('.screen');
+
+	$link.on('click', function() {
+		if (!$(this).hasClass('active')) {
+			$navItems.removeClass('active');
+			$(this).addClass('active');
+			$screens.hide();
+			$toShow.show();
+		} else {
+			$(this).removeClass('active');
+			$screens.hide();
+			$mainGameScreen.show();
+		}
+	});
+
+};
+
 UI.prototype.setupNavClickHandlers = function() {
-	$('.nav-achievements').on('click', function() {
-		$('.screen, .navbar').hide();
-		$('.achievements-screen, .back').show();
-	});
-	$('.nav-settings').on('click', function() {
-		$('.screen, .navbar').hide();
-		$('.settings-screen, .back').show();
-	});
-	$('.back').on('click', function() {
-		$('.screen, .back').hide();
-		$('.main-game-screen, .navbar').show();
-	});
+	this.setupNavClickHandler($('.nav-achievements'), $('#achievements-screen'));
+	this.setupNavClickHandler($('.nav-settings'), $('#settings-screen'));
 };
 
 UI.prototype.fillAchievementInfo = function(achievement, $div) {
