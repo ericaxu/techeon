@@ -23,7 +23,7 @@ var UI = function(game, config) {
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
-	var linesOfCode = this.game.content.resources['code'].amount.Get();
+	var linesOfCode = this.game.GetResource('code').amount.Get();
 	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
 
 	if (linesOfCode > 0) {
@@ -37,7 +37,7 @@ UI.prototype.updateLinesOfCodeStats = function() {
 };
 
 UI.prototype.updateDollarStats = function() {
-	var dollars = this.game.content.resources['money'].amount.Get();
+	var dollars = this.game.GetResources('money').amount.Get();
 	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
 
 	if (dollars > 0) {
@@ -156,8 +156,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 };
 
 UI.prototype.updateGenerators = function() {
-	for (var name in this.game.content.generators) {
-		var generator = this.game.content.generators[name];
+	each(this.game.GetGenerators(), function(generator, name) {
 		var $generatorDiv = $('.generator-' + name);
 		// if it's not shown right now but it's available
 		if ($generatorDiv.length === 0 && generator.purchasable.Available()) {
@@ -176,14 +175,11 @@ UI.prototype.updateGenerators = function() {
 				$generatorDiv.addClass('unaffordable');
 			}
 		}
-	}
-
-	return this;
+	}, this);
 };
 
 UI.prototype.updateUpgrades = function() {
-	for (var name in this.game.content.upgrades) {
-		var upgrade = this.game.content.upgrades[name];
+	each(this.game.GetUpgrades(), function(upgrade, name) {
 		var $generatorDiv = $('.generator-' + name);
 		if ($generatorDiv.length === 0 && upgrade.purchasable.Available() && !upgrade.obtainable.GetObtained()) {
 			this.showPurchasable(upgrade, 'upgrade');
@@ -201,9 +197,7 @@ UI.prototype.updateUpgrades = function() {
 				$generatorDiv.remove();
 			}
 		}
-	}
-
-	return this;
+	}, this);
 };
 
 UI.prototype.setupPopup = function() {
@@ -327,10 +321,9 @@ UI.prototype.showAchievement = function(achievement, $container) {
 UI.prototype.showAchievements = function() {
 	var $achievementsList = $('.achievements-list');
 	$achievementsList.empty();
-	for (var key in this.game.content.achievements) {
-		var achievement = this.game.content.achievements[key];
+	each(this.game.GetAchievements(), function(achievement) {
 		this.showAchievement(achievement, $achievementsList);
-	}
+	}, this);
 };
 
 UI.prototype.setupKeypressListener = function() {
@@ -340,7 +333,7 @@ UI.prototype.setupKeypressListener = function() {
 	$(document).on('keyup', $.proxy(function(e) {
 		if (e.keyCode == this.mostRecentKeydown && isPrintable(e.keyCode)) {
 			this.scrollCodebase(1);
-			this.game.content.resources['code'].amount.Add(1);
+			this.game.GetResource('code').amount.Add(1);
 			this.updateLinesOfCodeStats(GAME);
 		}
 	}, this));
