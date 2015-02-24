@@ -33,12 +33,7 @@ extend(MapList, null, {
 		}
 	},
 	each: function(name, func, context) {
-		var list = this.data[name];
-		if (list) {
-			for (var i = 0; i < list.length; i++) {
-				func.call(context, list[i]);
-			}
-		}
+		each(this.data[name], func, context);
 	},
 	get: function() {
 		return this.data;
@@ -74,6 +69,7 @@ extend(Events, null, {
 		this.events.each(name, function(object) {
 			object.func.apply(object.context, args);
 		}, this);
+		args.unshift(name);
 		this.bridges.each(name, function(object) {
 			args[0] = object;
 			this.trigger.apply(this, args);

@@ -22,8 +22,7 @@ function each(obj, func, context) {
 			func.call(context, obj[i], i, obj);
 		}
 	}
-
-	if (obj instanceof Object) {
+	else if (obj instanceof Object) {
 		for(var key in obj) {
 			func.call(context, obj[key], key, obj);
 		}
