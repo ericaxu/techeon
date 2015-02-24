@@ -134,6 +134,9 @@ extend(Loader, null, {
 		}
 	},
 	LoadSingle: function(data, dest) {
+		if (data === undefined) {
+			return dest;
+		}
 		if (isObject(data) && isObject(dest)) {
 			if (dest.loader) {
 				dest.loader.Load(data);
@@ -361,7 +364,7 @@ var Amount = function(entity) {
 	this.maxAmount = 0.0;
 	this.totalAmount = 0.0;
 	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount');
-	this.entity.events.bridge('load', 'amount_changed');
+	this.entity.events.bridge('load', 'amount_update');
 };
 extend(Amount, Component, {
 	Get: function() {
@@ -399,7 +402,7 @@ extend(Amount, Component, {
 		this.TriggerChanged();
 	},
 	TriggerChanged: function() {
-		this.entity.events.trigger('amount_changed', this.entity);
+		this.entity.events.trigger('amount_update', this.entity);
 	}
 });
 
@@ -412,7 +415,9 @@ var Obtainable = function(entity) {
 	entity.loader.AddElement('obtainable');
 	this.obtained = false;
 	this.loader.AddElement('obtained');
-	this.entity.events.on('load', this.TriggerEvent, this);
+	this.entity.events.bridge('load', 'obtainable_update');
+	this.entity.events.bridge('obtain', 'obtainable_update');
+	this.entity.events.bridge('unobtain', 'obtainable_update');
 };
 extend(Obtainable, Component, {
 	SetObtained: function(value) {
@@ -421,18 +426,11 @@ extend(Obtainable, Component, {
 	},
 	Obtain: function() {
 		this.obtained = true;
-		this.TriggerEvent();
+		this.entity.events.trigger('obtain', this.entity);
 	},
 	UnObtain: function() {
 		this.obtained = false;
-		this.TriggerEvent();
-	},
-	TriggerEvent: function() {
-		if (this.obtained) {
-			this.entity.events.trigger('obtain', this.entity);
-		} else {
-			this.entity.events.trigger('unobtain', this.entity);
-		}
+		this.entity.events.trigger('unobtain', this.entity);
 	},
 	GetObtained: function() {
 		return this.obtained;
@@ -450,13 +448,14 @@ var Rewardable = function(entity) {
 extend(Rewardable, Component, {
 	AddReward: function(reward) {
 		this.rewards.push(reward);
+		this.entity.events.trigger('rewardable_update', this.entity);
 		return this.entity;
 	},
 	GiveRewards: function() {
 		for (var i = 0; i < this.rewards.length; i++) {
 			this.rewards[i].Reward();
 		}
-		this.entity.events.trigger('rewarded', this.entity);
+		this.entity.events.trigger('reward', this.entity);
 	}
 });
 

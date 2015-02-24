@@ -92,7 +92,7 @@ extend(Purchasable, Component, {
 	Available: function() {
 		for (var resource in this.restrictions) {
 			var restriction = this.restrictions[resource];
-			if (this.entity.game.data.resources[resource].amount.GetMax() < restriction) {
+			if (this.entity.game.GetResource(resource).amount.GetMax() < restriction) {
 				return false;
 			}
 		}
@@ -102,7 +102,7 @@ extend(Purchasable, Component, {
 		var price = this.GetBuyPrice();
 		for (var resource in price) {
 			var cost = price[resource];
-			if (this.entity.game.data.resources[resource].amount.Get() < cost) {
+			if (this.entity.game.GetResource(resource).amount.Get() < cost) {
 				return false;
 			}
 		}
@@ -120,7 +120,7 @@ extend(Purchasable, Component, {
 		}
 		var price = this.GetBuyPrice();
 		for (var resource in price) {
-			this.entity.game.data.resources[resource].amount.Remove(price[resource]);
+			this.entity.game.GetResource(resource).amount.Remove(price[resource]);
 		}
 		this.entity.events.trigger('buy', this.entity);
 	},
@@ -228,7 +228,7 @@ extend(ExponentialAmountPurchasable, Component, {
 		return this.sellPrice;
 	},
 	TriggerPriceChange: function() {
-		this.entity.events.trigger('price_changed', this.entity);
+		this.entity.events.trigger('purchasable_update', this.entity);
 	}
 });
 
@@ -356,11 +356,11 @@ extend(MultiplierReward, Reward, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
-	game.events.on('tick', this.OnTick, this);
+	game.SubscribePeriodic(20, this.Check, this)
 };
 extend(Achievement, Entity, {
-	OnTick: function() {
-		if (!this.obtainable.GetObtained() && this.game.Every(20)) {
+	Check: function() {
+		if (!this.obtainable.GetObtained()) {
 			this.CheckAchievement();
 		}
 	},
