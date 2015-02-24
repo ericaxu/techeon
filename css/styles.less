@@ -148,6 +148,10 @@ h4 {
 	width: 300px;
 }
 
+#main-screen {
+	position: relative;
+}
+
 #achievements-screen, #settings-screen {
 	display: none;
 }
@@ -415,14 +419,16 @@ h4 {
 
 /* Notification */
 .notification-container {
-	position: fixed;
-	top: 30px;
-	left: 30px;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 30px;
 	background: #FFF;
 }
 
 .notification {
 	position: relative;
+	margin: 0 auto;
 	width: 400px;
 	min-height: 50px;
 	padding: 20px;

@@ -3,7 +3,8 @@ var uiConfig = {
 	updateResourceFrequencyInTicks: 5,
 	updatePurchasablesFrequencyInTicks: 25,
 	pixelsBetweenTooltip: 0,
-	scrollCodebaseLimit: 50
+	scrollCodebaseLimit: 50,
+	notificationFadeDuration: 2000
 };
 
 var UI = function(game, config) {
@@ -235,7 +236,7 @@ UI.prototype.showNotification = function(title, text, icon) {
 
 	setTimeout(function() {
 		$notification.remove();
-	}, 2000);
+	}, this.config.notificationFadeDuration);
 };
 
 UI.prototype.scrollCodebase = function(numOfLines) {
