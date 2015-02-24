@@ -363,7 +363,7 @@ UI.prototype.init = function() {
 	this.updateGenerators();
 	this.updateUpgrades();
 	this.setupKeypressListener();
-	this.setupSaveGame();
+	//this.setupSaveGame();
 	this.showAchievements();
 	sh_highlightDocument();
 
@@ -375,7 +375,7 @@ UI.prototype.init = function() {
 		this.updateUpgrades();
 	}, this));
 
-	this.loadGame();
+	//this.loadGame();
 };
 
 var ui = new UI(GAME, uiConfig);
