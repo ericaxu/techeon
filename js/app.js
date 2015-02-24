@@ -25,17 +25,28 @@ var UI = function(game, config) {
 UI.prototype.updateLinesOfCodeStats = function() {
 	var linesOfCode = this.game.content.resources['code'].amount.Get();
 	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
-	this.scrollCodebase(linesOfCodePerSec / this.game.GetTicksPerSecond() * 5);
 
-	this.$numLinesOfCode.text(formatLinesOfCode(linesOfCode));
-	this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec));
+	if (linesOfCode > 0) {
+		this.$numLinesOfCode.text(formatLinesOfCode(linesOfCode));
+	}
+
+	if (linesOfCodePerSec > 0) {
+		this.scrollCodebase(linesOfCodePerSec / this.game.GetTicksPerSecond() * 5);
+		this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec) + ' / second');
+	}
 };
 
 UI.prototype.updateDollarStats = function() {
 	var dollars = this.game.content.resources['money'].amount.Get();
 	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
-	this.$numDollars.text(formatDollar(dollars));
-	this.$numDollarsPerSec.text(formatDollar(dollarsPerSec));
+
+	if (dollars > 0) {
+		this.$numDollars.text(formatDollar(dollars));
+	}
+
+	if (dollarsPerSec) {
+		this.$numDollarsPerSec.text(formatDollar(dollarsPerSec) + ' / second');
+	}
 };
 
 UI.prototype.updateResources = function() {
