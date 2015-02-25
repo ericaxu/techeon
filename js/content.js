@@ -11,7 +11,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 1 lines of code every 5 seconds.")
 			.describable.SetDescription("Don't really know anything and breaks the build occasionally.")
 			.purchasable.SetBuyPrice("money", 100)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
 			.SetRateSecond("code", 0.2)
 	);
 	game.data.generators.junior = game.AddGenerator(new Generator(game, "junior")
@@ -19,8 +18,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 1 lines of code per second.")
 			.describable.SetDescription("Fresh out of college, knows a bit coding.")
 			.purchasable.SetBuyPrice("money", 250)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("money", 100)
 			.SetRateSecond("code", 1)
 	);
 	game.data.generators.contractor = game.AddGenerator(new Generator(game, "contractor")
@@ -28,8 +25,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 5 lines of code per second.")
 			.describable.SetDescription("Like a normal employee, except you don't have to pay for his insurance.")
 			.purchasable.SetBuyPrice("money", 500)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("money", 300)
 			.SetRateSecond("code", 5)
 	);
 	game.data.generators.programmer = game.AddGenerator(new Generator(game, "programmer")
@@ -37,8 +32,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 15 lines of code per second.")
 			.describable.SetDescription("Coffee in, code out.")
 			.purchasable.SetBuyPrice("money", 1000)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("money", 600)
 			.SetRateSecond("code", 15)
 	);
 	game.data.generators.senior = game.AddGenerator(new Generator(game, "senior")
@@ -46,8 +39,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 35 lines of code per second.")
 			.describable.SetDescription("Has consumed more coffee and produced more code.")
 			.purchasable.SetBuyPrice("money", 2000)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("money", 1500)
 			.SetRateSecond("code", 35)
 	);
 	game.data.generators.architect = game.AddGenerator(new Generator(game, "architect")
@@ -55,8 +46,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 100 lines of code per second.")
 			.describable.SetDescription("A pro.")
 			.purchasable.SetBuyPrice("money", 5000)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("money", 3000)
 			.SetRateSecond("code", 100)
 	);
 	game.data.generators.teamlead = game.AddGenerator(new Generator(game, "teamlead")
@@ -64,8 +53,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 500 lines of code per second.")
 			.describable.SetDescription("Manages programmers.")
 			.purchasable.SetBuyPrice("money", 15000)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("money", 7500)
 			.SetRateSecond("code", 500)
 	);
 	game.data.generators.vpeng = game.AddGenerator(new Generator(game, "vpeng")
@@ -73,8 +60,6 @@ var GAME = (function() {
 			.describable.SetEffect("Produces 1000 lines of code per second.")
 			.describable.SetDescription("Codes really fast.")
 			.purchasable.SetBuyPrice("money", 50000)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("money", 20000)
 			.SetRateSecond("code", 1000)
 	);
 
@@ -84,7 +69,6 @@ var GAME = (function() {
 			.describable.SetEffect("Generates $1 per second.")
 			.describable.SetDescription("It\"s crazy how much money you can make with ads.")
 			.purchasable.SetBuyPrice("code", 15)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
 			.SetRateSecond("money", 1)
 	);
 	game.data.generators.vm = game.AddGenerator(new Generator(game, "vm")
@@ -92,8 +76,6 @@ var GAME = (function() {
 			.describable.SetEffect("Generates $5 per second.")
 			.describable.SetDescription("Just a powerful as a physical machine.")
 			.purchasable.SetBuyPrice("code", 50)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("code", 30)
 			.SetRateSecond("money", 5)
 	);
 	game.data.generators.bugfix = game.AddGenerator(new Generator(game, "bugfix")
@@ -101,8 +83,6 @@ var GAME = (function() {
 			.describable.SetEffect("Generates $12 per second.")
 			.describable.SetDescription("Who doesn't hate a buggy product?")
 			.purchasable.SetBuyPrice("code", 100)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("code", 70)
 			.SetRateSecond("money", 12)
 	);
 	game.data.generators.feature = game.AddGenerator(new Generator(game, "feature")
@@ -110,8 +90,6 @@ var GAME = (function() {
 			.describable.SetEffect("Generates $30 per second.")
 			.describable.SetDescription("Ship it! :squirrel:")
 			.purchasable.SetBuyPrice("code", 300)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("code", 200)
 			.SetRateSecond("money", 30)
 	);
 	game.data.generators.aisales = game.AddGenerator(new Generator(game, "aisales")
@@ -119,8 +97,6 @@ var GAME = (function() {
 			.describable.SetEffect("Generates $100 per second.")
 			.describable.SetDescription("Who needs a real person when AI can close deals too?")
 			.purchasable.SetBuyPrice("code", 1500)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("code", 1000)
 			.SetRateSecond("money", 100)
 	);
 	game.data.generators.analytics = game.AddGenerator(new Generator(game, "analytics")
@@ -128,8 +104,6 @@ var GAME = (function() {
 			.describable.SetEffect("Generates $1000 per second.")
 			.describable.SetDescription("Know your users.")
 			.purchasable.SetBuyPrice("code", 10000)
-			.purchasable.SetSellPriceBuyFactor("money", 0.75)
-			.purchasable.SetRestriction("code", 1000)
 			.SetRateSecond("money", 1000)
 	);
 
@@ -146,31 +120,27 @@ var GAME = (function() {
 			.describable.SetEffect("Able to hire people.")
 			.describable.SetDescription("Like a boss.")
 			.purchasable.SetBuyPrice("money", 200)
-			.purchasable.SetRestriction("money", 100)
 	);
 	game.data.upgrades.chips = game.AddUpgrade(new Upgrade(game, "chips")
 			.describable.SetTitle("Free chips")
 			.describable.SetEffect("Interns code 50% faster.")
 			.describable.SetDescription("Something for your interns to snack on. Be careful of greasy keyboards.")
 			.purchasable.SetBuyPrice("money", 500)
-			.purchasable.SetRestriction("money", 300)
-			.rewardable.AddReward(new MultiplierReward(game, "intern", "code", 0, 1.5))
+			.rewardable.AddReward(new MultiplierReward(game, "intern", 0, 1.5))
 	);
 	game.data.upgrades.coffee = game.AddUpgrade(new Upgrade(game, "coffee")
 			.describable.SetTitle("Free coffee")
 			.describable.SetEffect("Programmers code 50% faster.")
 			.describable.SetDescription("Programmers are creatures who convert coffee to code.")
 			.purchasable.SetBuyPrice("money", 1000)
-			.purchasable.SetRestriction("money", 750)
-			.rewardable.AddReward(new MultiplierReward(game, "programmer", "code", 0, 1.5))
+			.rewardable.AddReward(new MultiplierReward(game, "programmer", 0, 1.5))
 	);
 	game.data.upgrades.cateredlunch = game.AddUpgrade(new Upgrade(game, "cateredlunch")
 			.describable.SetTitle("Catered lunch")
 			.describable.SetEffect("Everyone codes 3% faster.")
 			.describable.SetDescription("Never bring lunch or eat out again.")
 			.purchasable.SetBuyPrice("money", 5000)
-			.purchasable.SetRestriction("money", 3000)
-			.rewardable.AddReward(new MultiplierReward(game, "programmer", "code", 0, 1.5))
+			.rewardable.AddReward(new MultiplierReward(game, "programmer", 0, 1.5))
 	);
 
 	//Achievements

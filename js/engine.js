@@ -357,6 +357,35 @@ extend(Describable, Component, {
 });
 
 /**
+ * Multiplier
+ */
+var Multiplier = function(entity) {
+	Component.call(this, entity);
+	entity.multiplier = this;
+	this.multiplier = 1;
+};
+extend(Multiplier, Component, {
+	Set: function(multiplier) {
+		this.multiplier = multiplier;
+		this.trigger('multiplier_change', this.entity);
+		return this.entity;
+	},
+	Add: function(value) {
+		this.multiplier += value;
+		this.trigger('multiplier_change', this.entity);
+		return this.entity;
+	},
+	Mult: function(value) {
+		this.multiplier *= value;
+		this.trigger('multiplier_change', this.entity);
+		return this.entity;
+	},
+	Get: function() {
+		return this.multiplier;
+	}
+});
+
+/**
  * Amount
  */
 var Amount = function(entity) {

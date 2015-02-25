@@ -25,16 +25,16 @@ extend(Game, GameEngine, {
 		return rate;
 	},
 	AddResource: function(entity) {
-		return this.AddEntity("resources", entity);
+		return this.AddEntity('resources', entity);
 	},
 	AddGenerator: function(entity) {
-		return this.AddEntity("generators", entity);
+		return this.AddEntity('generators', entity);
 	},
 	AddUpgrade: function(entity) {
-		return this.AddEntity("upgrades", entity);
+		return this.AddEntity('upgrades', entity);
 	},
 	AddAchievement: function(entity) {
-		return this.AddEntity("achievements", entity);
+		return this.AddEntity('achievements', entity);
 	},
 	GetResources: function() {
 		return this.content.resources;
@@ -62,6 +62,11 @@ extend(Game, GameEngine, {
 	}
 });
 
+var TUNING = {
+	PURCHASABLE_DEFAULT_SELL_FACTOR: 0.75,
+	PURCHASABLE_DEFAULT_RESTRICT_FACTOR: 0.8
+};
+
 /**
  * Purchasable
  */
@@ -77,14 +82,16 @@ var Purchasable = function(entity) {
 extend(Purchasable, Component, {
 	SetBuyPrice: function(resource, price) {
 		this.buyPrice[resource] = price;
+		if (!this.sellPrice[resource]) {
+			this.sellPrice[resource] = price * TUNING.PURCHASABLE_DEFAULT_SELL_FACTOR;
+		}
+		if (!this.restrictions[resource]) {
+			this.restrictions[resource] = price * TUNING.PURCHASABLE_DEFAULT_RESTRICT_FACTOR;
+		}
 		return this.entity;
 	},
 	SetSellPrice: function(resource, price) {
 		this.sellPrice[resource] = price;
-		return this.entity;
-	},
-	SetSellPriceBuyFactor: function(resource, factor) {
-		this.sellPrice[resource] = this.buyPrice[resource] * factor;
 		return this.entity;
 	},
 	SetRestriction: function(resource, restriction) {
@@ -242,6 +249,7 @@ extend(ExponentialAmountPurchasable, Component, {
 var Resource = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Amount);
+	this.AddComponent(Multiplier);
 };
 extend(Resource, Entity, {
 	Generate: function(amount) {
@@ -258,13 +266,16 @@ extend(Resource, Entity, {
 var Generator = function(game, name, manual) {
 	Entity.call(this, game, name);
 	this.AddComponent(ExponentialAmountPurchasable);
+	this.AddComponent(Multiplier);
+	this.bridge('multiplier_change', 'rate_change');
+	this.bridge('amount_change', 'rate_change');
+	this.bridge('rate_change', 'update');
 	this.manual = manual;
 	this.rates = {};
-	this.multipliers = {};
 	if (!this.manual) {
 		game.on('tick', this.OnTick, this);
 	}
-	this.loader.AddElement("rates").AddElement("multipliers");
+	this.loader.AddElement('rates').AddElement('multipliers');
 };
 extend(Generator, Entity, {
 	SetRateSecond: function(resource, rate) {
@@ -272,16 +283,23 @@ extend(Generator, Entity, {
 	},
 	SetRate: function(resource, rate) {
 		this.rates[resource] = rate;
-		this.multipliers[resource] = 1;
+		if (rate != 0) {
+			this.game.GetResource(resource).on('multiplier_change', this.RateChanged, this);
+		}
+		else {
+			this.game.GetResource(resource).off('multiplier_change', this.RateChanged);
+		}
 		return this;
+	},
+	RateChanged: function() {
+		this.trigger('rate_change', this);
 	},
 	GetRate: function(resource) {
 		var rate = this.rates[resource];
-		var multiplier = this.multipliers[resource];
-		if (!rate || !multiplier) {
+		if (!rate) {
 			return 0;
 		}
-		return this.amount.Get() * rate * multiplier;
+		return this.amount.Get() * rate * this.multiplier.Get() * this.game.GetResource(resource).multiplier.Get();
 	},
 	OnTick: function() {
 		for (var resource in this.rates) {
@@ -333,21 +351,19 @@ extend(BaseRateReward, Reward, {
 		this.game.trigger('reward_baserate', this, this.resource, this.amount);
 	}
 });
-var MultiplierReward = function(game, generator, resource, multiplier_add, multiplier_multiply) {
+var MultiplierReward = function(game, generator, multiplier_add, multiplier_multiply) {
 	Reward.call(this, game);
 	this.generator = generator;
-	this.resource = resource;
 	this.multiplier_add = multiplier_add;
 	this.multiplier_multiply = multiplier_multiply;
 };
 extend(MultiplierReward, Reward, {
 	Reward: function() {
-		var multipliers = this.game.data.generators[this.generator].multipliers;
 		if (this.multiplier_add) {
-			multipliers[this.resource] += this.multiplier_add;
+			this.game.GetGenerator(this.generator).multiplier.Add(this.multiplier_add);
 		}
 		if (this.multiplier_multiply) {
-			multipliers[this.resource] *= this.multiplier_multiply;
+			this.game.GetGenerator(this.generator).multiplier.Mult(this.multiplier_multiply);
 		}
 		this.game.trigger('reward_multiplier', this, this.resource);
 	}
