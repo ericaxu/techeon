@@ -351,19 +351,19 @@ extend(BaseRateReward, Reward, {
 		this.game.trigger('reward_baserate', this, this.resource, this.amount);
 	}
 });
-var MultiplierReward = function(game, generator, multiplier_add, multiplier_multiply) {
+var MultiplierReward = function(game, entity, multiplier_add, multiplier_multiply) {
 	Reward.call(this, game);
-	this.generator = generator;
+	this.entity = entity;
 	this.multiplier_add = multiplier_add;
 	this.multiplier_multiply = multiplier_multiply;
 };
 extend(MultiplierReward, Reward, {
 	Reward: function() {
 		if (this.multiplier_add) {
-			this.game.GetGenerator(this.generator).multiplier.Add(this.multiplier_add);
+			this.entity.multiplier.Add(this.multiplier_add);
 		}
 		if (this.multiplier_multiply) {
-			this.game.GetGenerator(this.generator).multiplier.Mult(this.multiplier_multiply);
+			this.entity.multiplier.Mult(this.multiplier_multiply);
 		}
 		this.game.trigger('reward_multiplier', this, this.resource);
 	}
