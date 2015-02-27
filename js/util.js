@@ -155,7 +155,7 @@ function formatNumWithCommas(x) {
 }
 
 function formatDollar(x) {
-	if (x < 100) {
+	if (x < 10) {
 		return '$ ' + readableBigNumber(x, 1);
 	} else {
 		return '$ ' + readableBigNumber(x);
@@ -164,7 +164,7 @@ function formatDollar(x) {
 }
 
 function formatLinesOfCode(x) {
-	if (x < 100) {
+	if (x < 10) {
 		return readableBigNumber(x, 1) + ' lines';
 	} else {
 		return readableBigNumber(x, 0) + ' lines';

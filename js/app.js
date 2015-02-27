@@ -152,7 +152,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 		//self.tooltipDisappearTimeout = setTimeout(function() {
 		//	$tooltip.offset({ left: 0, top: 0 }).hide();
 		//}, 100);
-		$tooltip.offset({ left: 0, top: 0 }).hide();
+		//$tooltip.offset({ left: 0, top: 0 }).hide();
 		$div.off('mousemove');
 	});
 };
@@ -330,16 +330,21 @@ UI.prototype.showAchievements = function() {
 	}, this);
 };
 
-UI.prototype.setupKeypressListener = function() {
-	$(document).on('keydown', $.proxy(function(e) {
-		this.mostRecentKeydown = e.keyCode;
-	}, this));
-	$(document).on('keyup', $.proxy(function(e) {
-		if (e.keyCode == this.mostRecentKeydown && isPrintable(e.keyCode)) {
-			this.scrollCodebase(1);
-			this.game.GetResource('code').amount.Add(1);
-			this.updateLinesOfCodeStats(GAME);
-		}
+UI.prototype.setupCodeClickListener = function() {
+	//$(document).on('keydown', $.proxy(function (e) {
+	//	this.mostRecentKeydown = e.keyCode;
+	//}, this));
+	//$(document).on('keyup', $.proxy(function (e) {
+	//	if (e.keyCode == this.mostRecentKeydown && isPrintable(e.keyCode)) {
+	//		this.scrollCodebase(1);
+	//		this.game.GetResource('code').amount.Add(1);
+	//		this.updateLinesOfCodeStats(GAME);
+	//	}
+	//}, this));
+	$('#write-code-button').on('click', $.proxy(function () {
+		this.scrollCodebase(1);
+		this.game.GetResource('code').amount.Add(1);
+		this.updateLinesOfCodeStats(GAME);
 	}, this));
 };
 
@@ -362,7 +367,7 @@ UI.prototype.init = function() {
 	this.setupNavClickHandlers();
 	this.updateGenerators();
 	this.updateUpgrades();
-	this.setupKeypressListener();
+	this.setupCodeClickListener();
 	//this.setupSaveGame();
 	this.showAchievements();
 	sh_highlightDocument();
