@@ -131,7 +131,7 @@ function readableBigNumber(x, digits) {
 	var quadrillion = trillion * 1000;
 
 	if (digits === undefined) {
-		var digits = 2;
+		digits = 0;
 	}
 
 	if (x > quadrillion) {
@@ -147,19 +147,24 @@ function readableBigNumber(x, digits) {
 		return formatNumWithCommas((x / million).toFixed(2)) + ' million';
 	}
 
-	return formatNumWithCommas(parseFloat(x.toFixed(digits)));
+	return formatNumWithCommas(x.toFixed(digits));
 }
 
 function formatNumWithCommas(x) {
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function formatDollar(x) {
-	return '$ ' + readableBigNumber(x);
+	if (x < 100) {
+		return '$ ' + readableBigNumber(x, 1);
+	} else {
+		return '$ ' + readableBigNumber(x);
+	}
+
 }
 
 function formatLinesOfCode(x) {
-	if (x < 10) {
+	if (x < 100) {
 		return readableBigNumber(x, 1) + ' lines';
 	} else {
 		return readableBigNumber(x, 0) + ' lines';

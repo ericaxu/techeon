@@ -1,6 +1,6 @@
 var uiConfig = {
 	saveInterval: 10000,
-	updateResourceFrequencyInTicks: 5,
+	updateResourceFrequencyInTicks: 1,
 	updatePurchasablesFrequencyInTicks: 25,
 	pixelsBetweenTooltip: 0,
 	scrollCodebaseLimit: 50,
