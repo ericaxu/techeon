@@ -54,8 +54,11 @@ var Events = function(owner) {
 	this.owner.unbridge = bind(this.unbridge, this);
 };
 extend(Events, null, {
-	on: function(name, func, context) {
-		this.events.add(name, {func: func, context: context});
+	on: function(name, func, context, every) {
+		if (!isInt(every) || every < 1) {
+			every = 1;
+		}
+		this.events.add(name, {func: func, context: context, every: every, current: 0});
 	},
 	off: function(name, func) {
 		this.events.removePredicate(name, function(obj) {
@@ -73,42 +76,16 @@ extend(Events, null, {
 		var name = args.shift();
 
 		this.events.each(name, function(object) {
-			object.func.apply(object.context, args);
+			object.current = (object.current + 1) % object.every;
+			if (object.current == 0) {
+				object.func.apply(object.context, args);
+			}
 		}, this);
 		args.unshift(name);
 		this.bridges.each(name, function(object) {
 			args[0] = object;
-			this.trigger.apply(this, args);
+			this.trigger(args);
 		}, this);
-	}
-});
-
-/**
- * TickEvents - Tick event system
- */
-var TickEvents = function(game) {
-	this.events = new MapList();
-	this.game = game;
-};
-extend(TickEvents, null, {
-	on: function(ticks, func, context) {
-		this.events.add(ticks, {func: func, context: context});
-	},
-	off: function(func) {
-		for (var ticks in this.events) {
-			this.events.removePredicate(ticks, function(obj) {
-				return obj.func == func;
-			});
-		}
-	},
-	tick: function() {
-		for (var ticks in this.events.get()) {
-			if (this.game.Every(ticks)) {
-				this.events.each(ticks, function(object) {
-					object.func.call(object.context, this.game);
-				}, this);
-			}
-		}
 	}
 });
 
@@ -191,7 +168,6 @@ var GameEngine = function() {
 	this.events = new Events(this);
 	this.loopTask = null;
 	this.time = 0;
-	this.tickSubscribers = new TickEvents(this);
 	this.SetTicksPerSecond(50);
 
 	this.tick = 0;
@@ -225,6 +201,8 @@ extend(GameEngine, null, {
 			this.time += this.timePerTick;
 		}
 
+		this.trigger('render', this);
+
 		this.trigger('post_loop', this);
 		this.loopTask = ctxSetTimeout(this.Loop, this.timePerTick, this);
 	},
@@ -232,19 +210,12 @@ extend(GameEngine, null, {
 		this.trigger('pre_tick', this);
 		this.tick++;
 		this.trigger('tick', this);
-		this.tickSubscribers.tick();
 		this.trigger('post_tick', this);
 	},
 	AddEntity: function(type, entity) {
 		this.content[type].push(entity);
 		this.data[type][entity.GetName()] = entity;
 		return entity;
-	},
-	SubscribePeriodic: function(ticks, func, context) {
-		this.tickSubscribers.on(ticks, func, context);
-	},
-	UnsubscribePeriodic: function(func) {
-		this.tickSubscribers.off(func);
 	},
 
 	//Helpers
@@ -456,7 +427,7 @@ var Obtainable = function(entity) {
 extend(Obtainable, Component, {
 	SetObtained: function(value) {
 		this.obtained = value;
-		if(value) {
+		if (value) {
 			this.everobtained = true;
 		}
 		return this.entity;
@@ -536,7 +507,7 @@ var AmountRestriction = function(game, entity, amount, current) {
 };
 extend(AmountRestriction, Restriction, {
 	Check: function() {
-		if(this.current) {
+		if (this.current) {
 			return this.entity.amount.Get() >= this.amount;
 		}
 		return this.entity.amount.GetMax() >= this.amount;
@@ -552,7 +523,7 @@ var ObtainableRestriction = function(game, entity, current) {
 };
 extend(ObtainableRestriction, Restriction, {
 	Check: function() {
-		if(this.current) {
+		if (this.current) {
 			return this.entity.obtainable.GetObtained();
 		}
 		return this.entity.obtainable.GetEverObtained();

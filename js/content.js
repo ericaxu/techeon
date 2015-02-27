@@ -160,7 +160,7 @@ var GAME = (function() {
 			.describable.SetDescription("Never bring lunch or eat out again.")
 			.purchasable.SetBuyPrice("money", 5000)
 			.purchasable.SetDefaultRestriction()
-			.rewardable.AddReward(new MultiplierReward(game, game.data.resources.code, 0, 1.5))
+			.rewardable.AddReward(new MultiplierReward(game, game.data.resources.code, 0.03, 0))
 	);
 
 	//Achievements

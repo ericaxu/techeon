@@ -375,12 +375,14 @@ extend(MultiplierReward, Reward, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
-	game.SubscribePeriodic(20, this.Check, this)
+	game.on('tick', this.Check, this)
 };
 extend(Achievement, Entity, {
 	Check: function() {
-		if (!this.obtainable.GetObtained()) {
-			this.CheckAchievement();
+		if (this.game.Every(20)) {
+			if (!this.obtainable.GetObtained()) {
+				this.CheckAchievement();
+			}
 		}
 	},
 	CheckAchievement: function() {

@@ -372,13 +372,13 @@ UI.prototype.init = function() {
 	this.showAchievements();
 	sh_highlightDocument();
 
-	this.game.SubscribePeriodic(this.config.updateResourceFrequencyInTicks, $.proxy(function() {
+	this.game.on('render', function() {
 		this.updateResources();
-	}, this));
-	this.game.SubscribePeriodic(this.config.updatePurchasablesFrequencyInTicks, $.proxy(function() {
+	}, this, this.config.updateResourceFrequencyInTicks);
+	this.game.on('render', function() {
 		this.updateGenerators();
 		this.updateUpgrades();
-	}, this));
+	}, this, this.config.updatePurchasablesFrequencyInTicks);
 
 	//this.loadGame();
 };
