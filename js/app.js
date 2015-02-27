@@ -123,7 +123,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 		$tooltipContent.empty();
 		addEl('h4', $tooltipContent, '', entity.describable.GetTitle());
 		addEl('p', $tooltipContent, '', entity.describable.GetDescription());
-		if (entity.amount !== undefined && entity.amount.GetMax() > 0) {
+		if (entity instanceof Upgrade || (entity.amount !== undefined && entity.amount.GetMax() > 0)) {
 			addEl('p', $tooltipContent, '', entity.describable.GetEffect());
 		}
 
