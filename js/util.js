@@ -159,7 +159,11 @@ function formatDollar(x) {
 }
 
 function formatLinesOfCode(x) {
-	return readableBigNumber(x, 0) + ' lines';
+	if (x < 10) {
+		return readableBigNumber(x, 1) + ' lines';
+	} else {
+		return readableBigNumber(x, 0) + ' lines';
+	}
 }
 
 function drawDoubleBorder($container) {
