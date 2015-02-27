@@ -447,7 +447,8 @@ var Obtainable = function(entity) {
 	entity.obtainable = this;
 	entity.loader.AddElement('obtainable');
 	this.obtained = false;
-	this.loader.AddElement('obtained');
+	this.everobtained = false;
+	this.loader.AddElement('obtained').AddElement('everobtained');
 	this.entity.bridge('load', 'update');
 	this.entity.bridge('obtain', 'update');
 	this.entity.bridge('unobtain', 'update');
@@ -455,10 +456,14 @@ var Obtainable = function(entity) {
 extend(Obtainable, Component, {
 	SetObtained: function(value) {
 		this.obtained = value;
+		if(value) {
+			this.everobtained = true;
+		}
 		return this.entity;
 	},
 	Obtain: function() {
 		this.obtained = true;
+		this.everobtained = true;
 		this.entity.trigger('obtain', this.entity);
 	},
 	UnObtain: function() {
@@ -467,6 +472,9 @@ extend(Obtainable, Component, {
 	},
 	GetObtained: function() {
 		return this.obtained;
+	},
+	GetEverObtained: function() {
+		return this.everobtained;
 	}
 });
 
@@ -502,5 +510,51 @@ var Reward = function(game) {
 extend(Reward, null, {
 	Reward: function() {
 
+	}
+});
+
+/**
+ * Restriction
+ */
+var Restriction = function(game, entity) {
+	this.game = game;
+	this.entity = entity;
+};
+extend(Restriction, null, {
+	Check: function() {
+		return true;
+	}
+});
+
+/**
+ * AmountRestriction
+ */
+var AmountRestriction = function(game, entity, amount, current) {
+	Restriction.call(this, game, entity);
+	this.amount = amount;
+	this.current = current;
+};
+extend(AmountRestriction, Restriction, {
+	Check: function() {
+		if(this.current) {
+			return this.entity.amount.Get() >= this.amount;
+		}
+		return this.entity.amount.GetMax() >= this.amount;
+	}
+});
+
+/**
+ * ObtainableRestriction
+ */
+var ObtainableRestriction = function(game, entity, current) {
+	Restriction.call(this, game, entity);
+	this.current = current;
+};
+extend(ObtainableRestriction, Restriction, {
+	Check: function() {
+		if(this.current) {
+			return this.entity.obtainable.GetObtained();
+		}
+		return this.entity.obtainable.GetEverObtained();
 	}
 });

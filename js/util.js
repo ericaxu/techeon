@@ -18,15 +18,24 @@ function extend(child, parent, prototype) {
 
 function each(obj, func, context) {
 	if (obj instanceof Array) {
-		for(var i = 0; i < obj.length; i++) {
-			func.call(context, obj[i], i, obj);
+		for (var i = 0; i < obj.length; i++) {
+			if (func.call(context, obj[i], i, obj) === false) {
+				return false;
+			}
 		}
 	}
 	else if (obj instanceof Object) {
-		for(var key in obj) {
-			func.call(context, obj[key], key, obj);
+		for (var key in obj) {
+			if (func.call(context, obj[key], key, obj) === false) {
+				return false;
+			}
 		}
 	}
+	return true;
+}
+
+function truefalse(input) {
+	return input ? true : false;
 }
 
 function inherit(child, parent) {
@@ -166,10 +175,10 @@ function drawDoubleBorder($container) {
 // determines if keycode represents a non-control character
 function isPrintable(keycode) {
 	var valid =
-		(keycode > 47 && keycode < 58)   || // number keys
-		keycode == 32 || keycode == 13   || // spacebar & return key(s) (if you want to allow carriage returns)
-		(keycode > 64 && keycode < 91)   || // letter keys
-		(keycode > 95 && keycode < 112)  || // numpad keys
+		(keycode > 47 && keycode < 58) || // number keys
+		keycode == 32 || keycode == 13 || // spacebar & return key(s) (if you want to allow carriage returns)
+		(keycode > 64 && keycode < 91) || // letter keys
+		(keycode > 95 && keycode < 112) || // numpad keys
 		(keycode > 185 && keycode < 193) || // ;=,-./` (in order)
 		(keycode > 218 && keycode < 223);   // [\]' (in order)
 

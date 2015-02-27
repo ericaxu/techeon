@@ -75,7 +75,7 @@ var Purchasable = function(entity) {
 	entity.purchasable = this;
 	this.buyPrice = {};
 	this.sellPrice = {};
-	this.restrictions = {};
+	this.restrictions = [];
 	this.entity.bridge('buy', 'update');
 	this.entity.bridge('sell', 'update');
 };
@@ -85,27 +85,27 @@ extend(Purchasable, Component, {
 		if (!this.sellPrice[resource]) {
 			this.sellPrice[resource] = price * TUNING.PURCHASABLE_DEFAULT_SELL_FACTOR;
 		}
-		if (!this.restrictions[resource]) {
-			this.restrictions[resource] = price * TUNING.PURCHASABLE_DEFAULT_RESTRICT_FACTOR;
-		}
+		return this.entity;
+	},
+	SetDefaultRestriction: function() {
+		each(this.buyPrice, function(price, resource) {
+			this.AddRestriction(new AmountRestriction(this.entity.game, this.entity.game.GetResource(resource),
+				price * TUNING.PURCHASABLE_DEFAULT_RESTRICT_FACTOR));
+		}, this);
+		return this.entity;
+	},
+	AddRestriction: function(restriction) {
+		this.restrictions.push(restriction);
 		return this.entity;
 	},
 	SetSellPrice: function(resource, price) {
 		this.sellPrice[resource] = price;
 		return this.entity;
 	},
-	SetRestriction: function(resource, restriction) {
-		this.restrictions[resource] = restriction;
-		return this.entity;
-	},
 	Available: function() {
-		for (var resource in this.restrictions) {
-			var restriction = this.restrictions[resource];
-			if (this.entity.game.GetResource(resource).amount.GetMax() < restriction) {
-				return false;
-			}
-		}
-		return true;
+		return each(this.restrictions, function(restriction) {
+			return truefalse(restriction.Check());
+		}, this);
 	},
 	CanBuy: function() {
 		var price = this.GetBuyPrice();
