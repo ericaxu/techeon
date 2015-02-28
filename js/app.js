@@ -126,10 +126,10 @@ UI.prototype.showPurchasable = function(entity, type) {
 		var $tooltipContent = $tooltip.find('.inner-border-2');
 		$tooltipContent.empty();
 		addEl('h4', $tooltipContent, '', entity.describable.GetTitle());
-		addEl('p', $tooltipContent, '', entity.describable.GetDescription());
 		if (entity instanceof Upgrade || (entity.amount !== undefined && entity.amount.GetMax() > 0)) {
-			addEl('p', $tooltipContent, '', entity.describable.GetEffect());
+			addEl('p', $tooltipContent, 'effect', entity.describable.GetEffect());
 		}
+		addEl('p', $tooltipContent, 'description', entity.describable.GetDescription());
 
 		if (type === 'feature') {
 			$tooltip.offset({ left: $div.outerWidth() + self.config.pixelsBetweenTooltip });
