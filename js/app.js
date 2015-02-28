@@ -82,6 +82,15 @@ UI.prototype.updatePurchasable = function(entity, type) {
 	}
 };
 
+UI.prototype.renderTooltip = function(entity, $container) {
+	$container.empty();
+	addEl('h4', $container, '', entity.describable.GetTitle());
+	if (entity instanceof Upgrade || (entity.amount !== undefined && entity.amount.GetMax() > 0)) {
+		addEl('p', $container, 'effect', entity.describable.GetEffect());
+	}
+	addEl('p', $container, 'description', entity.describable.GetDescription());
+};
+
 UI.prototype.showPurchasable = function(entity, type) {
 	var className = 'purchasable generator-' + entity.GetName();
 	if (!entity.purchasable.CanBuy()) {
@@ -112,52 +121,37 @@ UI.prototype.showPurchasable = function(entity, type) {
 
 	this.updatePurchasable(entity, type);
 
-	var self = this;
 	var $tooltip = $('.purchasable-tooltip-wrapper');
-	$div.off('mouseenter').on('mouseenter', function() {
-		//clearTimeout(self.tooltipDisappearTimeout);
-
+	var $tooltipContent = $tooltip.find('.inner-border-2');
+	var updateTooltip = $.proxy(function() {
+		this.renderTooltip(entity, $tooltipContent);
+	}, this);
+	$div.off('mouseenter').on('mouseenter', $.proxy(function() {
 		$div.off('mousemove').on('mousemove', function(e) {
 			var offsetTop = Math.min(Math.max(0, e.pageY - $tooltip.outerHeight() / 2), $(window).height() - $tooltip.outerHeight());
 			$tooltip.offset({ top: offsetTop });
 		});
 
-		// show tooltip
-		var $tooltipContent = $tooltip.find('.inner-border-2');
-		$tooltipContent.empty();
-		addEl('h4', $tooltipContent, '', entity.describable.GetTitle());
-		if (entity instanceof Upgrade || (entity.amount !== undefined && entity.amount.GetMax() > 0)) {
-			addEl('p', $tooltipContent, 'effect', entity.describable.GetEffect());
-		}
-		addEl('p', $tooltipContent, 'description', entity.describable.GetDescription());
+		this.renderTooltip(entity, $tooltipContent);
+
+		entity.on('amount_change', updateTooltip);
 
 		if (type === 'feature') {
-			$tooltip.offset({ left: $div.outerWidth() + self.config.pixelsBetweenTooltip });
+			$tooltip.offset({ left: $div.outerWidth() + this.config.pixelsBetweenTooltip });
 		} else if (type === 'team') {
-			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.config.pixelsBetweenTooltip });
+			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
 		} else if (type === 'upgrade') {
-			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - self.config.pixelsBetweenTooltip });
+			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
 		}
 
 		$tooltip.show();
 
-	});
-
-	//$tooltip.off('mouseenter').on('mouseenter', function() {
-	//	clearTimeout(self.tooltipDisappearTimeout);
-	//	$div.off('mousemove');
-	//});
-    //
-	//$tooltip.off('mouseleave').on('mouseleave', function() {
-	//	$(this).offset({ left: 0, top: 0 }).hide();
-	//});
+	}, this));
 
 	$div.off('mouseleave').on('mouseleave', function() {
-		//self.tooltipDisappearTimeout = setTimeout(function() {
-		//	$tooltip.offset({ left: 0, top: 0 }).hide();
-		//}, 100);
 		$tooltip.offset({ left: 0, top: 0 }).hide();
 		$div.off('mousemove');
+		entity.off('amount_change', updateTooltip);
 	});
 };
 

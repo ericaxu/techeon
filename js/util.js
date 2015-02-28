@@ -141,7 +141,8 @@ function readableBigNumber(x, digits) {
 		digits = 0;
 	}
 
-	x = parseFloat(x.toFixed(digits));
+	var factor = Math.pow(10, digits);
+	x = Math.round(x * factor) / factor;
 
 	if (x >= quadrillion) {
 		return formatNumWithCommas((x / quadrillion).toFixed(2)) + ' quadrillion';
