@@ -84,7 +84,7 @@ extend(Events, null, {
 		args.unshift(name);
 		this.bridges.each(name, function(object) {
 			args[0] = object;
-			this.trigger(args);
+			this.trigger.apply(this, args);
 		}, this);
 	}
 });
@@ -252,6 +252,7 @@ var Entity = function(game, name) {
 	this.components = [];
 	this.AddComponent(Describable);
 	new Loader(this);
+	this.bridge('load', 'update');
 };
 extend(Entity, null, {
 	AddComponent: function(component) {
@@ -338,6 +339,7 @@ var Multiplier = function(entity) {
 	Component.call(this, entity);
 	entity.multiplier = this;
 	this.multiplier = 1;
+	this.loader.AddElement('multiplier');
 };
 extend(Multiplier, Component, {
 	Set: function(multiplier) {
@@ -371,8 +373,8 @@ var Amount = function(entity) {
 	this.maxAmount = 0.0;
 	this.totalAmount = 0.0;
 	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount');
-	this.entity.bridge('load', 'update');
 	this.entity.bridge('amount_change', 'update');
+	this.prevAmount = 0.0;
 	this.approxAmount = 0.0;
 	this.approx = false;
 };
@@ -436,7 +438,10 @@ extend(Amount, Component, {
 		this.TriggerChanged();
 	},
 	TriggerChanged: function() {
-		this.entity.trigger('amount_change', this.entity);
+		if (this.prevAmount != this.amount) {
+			this.prevAmount = this.amount;
+			this.entity.trigger('amount_change', this.entity);
+		}
 	}
 });
 
@@ -450,7 +455,6 @@ var Obtainable = function(entity) {
 	this.obtained = false;
 	this.everobtained = false;
 	this.loader.AddElement('obtained').AddElement('everobtained');
-	this.entity.bridge('load', 'update');
 	this.entity.bridge('obtain', 'update');
 	this.entity.bridge('unobtain', 'update');
 };

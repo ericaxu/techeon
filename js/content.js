@@ -5,10 +5,15 @@ var GAME = (function() {
 	game.data.resources.money = game.AddResource(new Resource(game, "money")
 			.amount.StartApprox()
 			.SetRateFormatter(function(rate) {
-				return "Generates " + formatDollar(rate * game.GetTicksPerSecond()) + " per second";
+				return "Generates " + formatDollar(rate * game.GetTicksPerSecond()) + " / second";
 			})
 	);
-	game.data.resources.code = game.AddResource(new Resource(game, "code").amount.StartApprox());
+	game.data.resources.code = game.AddResource(new Resource(game, "code")
+		.amount.StartApprox()
+			.SetRateFormatter(function(rate) {
+				return "Produces " + formatLinesOfCodePerSec(rate * game.GetTicksPerSecond()) + " / second";
+			})
+	);
 
 	//Hires
 	game.data.generators.intern = game.AddGenerator(new Generator(game, "intern")
@@ -113,7 +118,7 @@ var GAME = (function() {
 	);
 
 	//Click
-	game.data.generators.click = game.AddGenerator(new ClickGenerator(game, "analytics", "code")
+	game.data.generators.click = game.AddGenerator(new ClickGenerator(game, "click", "code")
 			.describable.SetTitle("Click")
 			.describable.SetDescription("Dat finger.")
 			.SetRate("code", 1)

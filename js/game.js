@@ -280,6 +280,7 @@ var Generator = function(game, name, manual) {
 	this.AddComponent(Multiplier);
 	this.bridge('multiplier_change', 'rate_change');
 	this.bridge('amount_change', 'rate_change');
+	this.bridge('load', 'rate_change');
 	this.bridge('rate_change', 'update');
 	this.on('rate_change', this.UpdateEffect, this);
 	this.manual = manual;
@@ -313,11 +314,11 @@ extend(Generator, Entity, {
 		this.trigger('rate_change', this);
 	},
 	UpdateEffect: function() {
-		var rates = this.GetRate();
-		for (var resource in rates) {
+		this.describable.ClearEffects();
+		for (var resource in this.rates) {
 			var rateFormatter = this.game.GetResource(resource).rateFormatter;
 			if (rateFormatter) {
-				this.describable.AddEffect(rateFormatter(rates[resource]));
+				this.describable.AddEffect(rateFormatter(this.GetRate(resource)));
 			}
 		}
 	},
@@ -343,6 +344,7 @@ extend(Generator, Entity, {
 		}
 	}
 });
+
 var ClickGenerator = function(game, name, resource) {
 	Generator.call(this, game, name, true);
 	this.resource = resource;
