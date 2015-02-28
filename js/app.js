@@ -142,7 +142,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 
 		this.renderTooltip(entity, $tooltipContent);
 
-		entity.on('amount_change', updateTooltip);
+		entity.on('rate_change', updateTooltip);
 
 		if (type === 'feature') {
 			$tooltip.offset({ left: $div.outerWidth() + this.config.pixelsBetweenTooltip });
