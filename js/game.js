@@ -256,6 +256,7 @@ var Resource = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Amount);
 	this.AddComponent(Multiplier);
+	this.rateFormatter = null;
 };
 extend(Resource, Entity, {
 	Generate: function(amount) {
@@ -263,6 +264,10 @@ extend(Resource, Entity, {
 	},
 	Reward: function(amount) {
 		this.amount.Add(amount);
+	},
+	SetRateFormatter: function(rateFormatter) {
+		this.rateFormatter = rateFormatter;
+		return this;
 	}
 });
 
@@ -276,6 +281,7 @@ var Generator = function(game, name, manual) {
 	this.bridge('multiplier_change', 'rate_change');
 	this.bridge('amount_change', 'rate_change');
 	this.bridge('rate_change', 'update');
+	this.on('rate_change', this.UpdateEffect, this);
 	this.manual = manual;
 	this.rates = {};
 	this.generated = {};
@@ -305,6 +311,15 @@ extend(Generator, Entity, {
 	},
 	RateChanged: function() {
 		this.trigger('rate_change', this);
+	},
+	UpdateEffect: function() {
+		var rates = this.GetRate();
+		for (var resource in rates) {
+			var rateFormatter = this.game.GetResource(resource).rateFormatter;
+			if (rateFormatter) {
+				this.describable.AddEffect(rateFormatter(rates[resource]));
+			}
+		}
 	},
 	GetRate: function(resource) {
 		var rate = this.rates[resource];
