@@ -227,7 +227,7 @@ UI.prototype.setupPopup = function() {
 	});
 };
 
-UI.prototype.showNotification = function(title, text, icon) {
+UI.prototype.showNotification = function(title, text, icon, sticky) {
 	var $notification = addEl('div', this.$notifications, 'notification');
 	addEl('span', $notification, 'close-btn').on('click', function() {
 		$notification.remove();
@@ -240,9 +240,11 @@ UI.prototype.showNotification = function(title, text, icon) {
 	addEl('h4', $achievement, '', title);
 	addEl('p', $achievement, '', text);
 
-	setTimeout(function() {
-		$notification.remove();
-	}, this.config.notificationFadeDuration);
+	if (!sticky) {
+		setTimeout(function() {
+			$notification.remove();
+		}, this.config.notificationFadeDuration);
+	}
 };
 
 UI.prototype.scrollCodebase = function(numOfLines) {
