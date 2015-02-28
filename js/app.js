@@ -34,7 +34,7 @@ UI.prototype.updateLinesOfCodeStats = function() {
 	}
 
 	if (linesOfCodePerSec > 0) {
-		this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec) + ' / second');
+		this.$numLinesOfCodePerSec.text(formatLinesOfCodePerSec(linesOfCodePerSec) + ' / second');
 	}
 
 	this.lastNumOfLines = linesOfCode;

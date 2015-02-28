@@ -176,6 +176,14 @@ function formatLinesOfCode(x) {
 	return readableBigNumber(Math.ceil(x), 0) + ' lines';
 }
 
+function formatLinesOfCodePerSec(x) {
+	if (x < 10) {
+		return readableBigNumber(x, 1) + ' lines';
+	} else {
+		return readableBigNumber(x) + ' lines';
+	}
+}
+
 function drawDoubleBorder($container) {
 	var $outerBorder1 = addEl('div', $container, 'outer-border-1 fancy-border');
 	var $outerBorder2 = addEl('div', $outerBorder1, 'outer-border-2 fancy-border');
