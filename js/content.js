@@ -75,7 +75,7 @@ var GAME = (function() {
 	game.data.generators.ad = game.AddGenerator(new Generator(game, "ad")
 			.describable.SetTitle("Ads on your site")
 			.describable.SetEffect("Generates $1 per second.")
-			.describable.SetDescription("It\"s crazy how much money you can make with ads.")
+			.describable.SetDescription("It\'s crazy how much money you can make with ads.")
 			.purchasable.SetBuyPrice("code", 15)
 			.purchasable.SetDefaultRestriction()
 			.SetRateSecond("money", 1)
@@ -119,6 +119,14 @@ var GAME = (function() {
 			.purchasable.SetBuyPrice("code", 100000)
 			.purchasable.SetDefaultRestriction()
 			.SetRateSecond("money", 1000)
+	);
+
+	//Click
+	game.data.generators.click = game.AddGenerator(new ClickGenerator(game, "analytics", "code")
+			.describable.SetTitle("Click")
+			.describable.SetEffect("Generates 1 line per click.")
+			.describable.SetDescription("Dat finger.")
+			.SetRate("code", 1)
 	);
 
 	//Upgrades

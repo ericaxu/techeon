@@ -341,9 +341,7 @@ UI.prototype.setupCodeClickListener = function() {
 	//	}
 	//}, this));
 	$('#write-code-button').on('click', $.proxy(function () {
-		this.scrollCodebase(1);
-		this.game.GetResource('code').amount.Add(1);
-		this.updateLinesOfCodeStats(GAME);
+		this.game.GetGenerator('click').Click();
 	}, this));
 };
 

@@ -20,7 +20,9 @@ extend(Game, GameEngine, {
 	GetResourceRatesPerTick: function(resource) {
 		var rate = 0;
 		each(this.content.generators, function(generator) {
-			rate += generator.GetRate(resource);
+			if (!generator.IsManual()) {
+				rate += generator.GetRate(resource);
+			}
 		});
 		return rate;
 	},
@@ -96,6 +98,10 @@ extend(Purchasable, Component, {
 	},
 	AddRestriction: function(restriction) {
 		this.restrictions.push(restriction);
+		return this.entity;
+	},
+	ClearRestrictions: function() {
+		this.restrictions.clear();
 		return this.entity;
 	},
 	SetSellPrice: function(resource, price) {
@@ -272,21 +278,27 @@ var Generator = function(game, name, manual) {
 	this.bridge('rate_change', 'update');
 	this.manual = manual;
 	this.rates = {};
+	this.generated = {};
 	if (!this.manual) {
 		game.on('tick', this.OnTick, this);
 	}
-	this.loader.AddElement('rates').AddElement('multipliers');
+	this.loader.AddElement('rates').AddElement('multipliers').AddElement('generated');
 };
 extend(Generator, Entity, {
 	SetRateSecond: function(resource, rate) {
 		return this.SetRate(resource, this.game.GetRateTickFromSecond(rate));
 	},
 	SetRate: function(resource, rate) {
-		this.rates[resource] = rate;
 		if (rate != 0) {
+			this.rates[resource] = rate;
+			this.generated[resource] = 0;
 			this.game.GetResource(resource).on('multiplier_change', this.RateChanged, this);
 		}
 		else {
+			delete this.rates[resource];
+			if (this.generated[resource] == 0) {
+				delete this.generated[resource];
+			}
 			this.game.GetResource(resource).off('multiplier_change', this.RateChanged);
 		}
 		return this;
@@ -301,12 +313,32 @@ extend(Generator, Entity, {
 		}
 		return this.amount.Get() * rate * this.multiplier.Get() * this.game.GetResource(resource).multiplier.Get();
 	},
+	GetGenerated: function(resource) {
+		return this.generated[resource];
+	},
+	IsManual: function() {
+		return this.manual;
+	},
 	OnTick: function() {
 		for (var resource in this.rates) {
 			var result = this.GetRate(resource);
 			this.trigger('generate_resource', this, resource, result);
+			this.generated[resource] += result;
 			this.game.data.resources[resource].Generate(result);
 		}
+	}
+});
+var ClickGenerator = function(game, name, resource) {
+	Generator.call(this, game, name, true);
+	this.resource = resource;
+	game.on('tick', this.UpdateRate, this, 10);
+};
+extend(ClickGenerator, Generator, {
+	UpdateRate: function() {
+		this.amount.Set(Math.max(this.game.GetResourceRatesPerSecond(this.resource) / 5, 1));
+	},
+	Click: function() {
+		this.OnTick();
 	}
 });
 
