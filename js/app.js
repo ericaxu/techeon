@@ -163,7 +163,7 @@ UI.prototype.updatePurchasables = function() {
 	each(this.game.GetGenerators(), function(generator) {
 		var $generatorDiv = $('.purchasable-' + generator.GetName());
 		// if it's not shown right now but it's available
-		if ($generatorDiv.length === 0 && generator.purchasable.Available()) {
+		if ($generatorDiv.length === 0 && generator.restrictable.Available()) {
 			if (generator.purchasable.GetBuyPrice().code) {
 				this.showPurchasable(generator, 'feature');
 			} else if (generator.purchasable.GetBuyPrice().money) {
@@ -185,7 +185,7 @@ UI.prototype.updatePurchasables = function() {
 UI.prototype.updateUpgrades = function() {
 	each(this.game.GetUpgrades(), function(upgrade) {
 		var $generatorDiv = $('.purchasable-' + upgrade.GetName());
-		if ($generatorDiv.length === 0 && upgrade.purchasable.Available() && !upgrade.obtainable.GetObtained()) {
+		if ($generatorDiv.length === 0 && upgrade.restrictable.Available() && !upgrade.obtainable.GetObtained()) {
 			this.showPurchasable(upgrade, 'upgrade');
 		} else if ($generatorDiv.length > 0) {
 			// just unlocked previously unaffordable items
