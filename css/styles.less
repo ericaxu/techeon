@@ -64,7 +64,7 @@ html {
 }
 
 body {
-	display: table;
+//	display: table;
 	background: @background;
 	color: @dark-text;
 	width: 100%;
@@ -85,8 +85,8 @@ body {
 }
 
 .section {
-	display: table-cell;
-	vertical-align: top;
+//	display: table-cell;
+//	vertical-align: top;
 }
 
 h4 {
@@ -158,14 +158,17 @@ h4 {
 }
 
 #feature-container {
+	float: left;
 	border-right: 1px solid @border-color;
 }
 
 #team-container, #upgrade-container {
+	float: right;
 	border-left: 1px solid @border-color;
 }
 
 #main-screen {
+	margin: 0 602px 0 301px;
 	position: relative;
 }
 
