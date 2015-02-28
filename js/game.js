@@ -65,6 +65,9 @@ extend(Game, GameEngine, {
 });
 
 var TUNING = {
+	TICKS_PER_AVAILABLE_CHECK: 5,
+	TICKS_PER_ACHIEVEMENT_CHECK: 5,
+
 	PURCHASABLE_DEFAULT_SELL_FACTOR: 0.75,
 	PURCHASABLE_DEFAULT_RESTRICT_FACTOR: 0.8
 };
@@ -77,7 +80,6 @@ var Purchasable = function(entity) {
 	entity.purchasable = this;
 	this.buyPrice = {};
 	this.sellPrice = {};
-	this.restrictions = [];
 	this.entity.bridge('buy', 'update');
 	this.entity.bridge('sell', 'update');
 };
@@ -89,29 +91,9 @@ extend(Purchasable, Component, {
 		}
 		return this.entity;
 	},
-	SetDefaultRestriction: function() {
-		each(this.buyPrice, function(price, resource) {
-			this.AddRestriction(new AmountRestriction(this.entity.game, this.entity.game.GetResource(resource),
-				price * TUNING.PURCHASABLE_DEFAULT_RESTRICT_FACTOR));
-		}, this);
-		return this.entity;
-	},
-	AddRestriction: function(restriction) {
-		this.restrictions.push(restriction);
-		return this.entity;
-	},
-	ClearRestrictions: function() {
-		this.restrictions.clear();
-		return this.entity;
-	},
 	SetSellPrice: function(resource, price) {
 		this.sellPrice[resource] = price;
 		return this.entity;
-	},
-	Available: function() {
-		return each(this.restrictions, function(restriction) {
-			return truefalse(restriction.Check());
-		}, this);
 	},
 	CanBuy: function() {
 		var price = this.GetBuyPrice();
@@ -156,6 +138,63 @@ extend(Purchasable, Component, {
 		return true;
 	}
 });
+
+/**
+ * Restrictable
+ */
+var Restrictable = function(entity) {
+	Component.call(this, entity);
+	entity.restrictable = this;
+	this.restrictions = [];
+	this.available = false;
+	this.entity.bridge('available', 'update');
+	this.entity.bridge('unavailable', 'update');
+};
+extend(Restrictable, Component, {
+	Check: function() {
+		if (!this.available) {
+			this.available = each(this.restrictions, function(restriction) {
+				return truefalse(restriction.Check());
+			}, this);
+			this.entity.trigger('available', this.entity);
+		}
+	},
+	AddRestriction: function(restriction) {
+		this.restrictions.push(restriction);
+		this.entity.game.on('tick', this.Check, this, TUNING.TICKS_PER_AVAILABLE_CHECK);
+		return this.entity;
+	},
+	ClearRestrictions: function() {
+		this.restrictions.clear();
+		this.entity.game.off('tick', this.Check);
+		return this.entity;
+	},
+	Available: function() {
+		return this.available;
+	}
+});
+
+/**
+ * PurchasableRestrictable
+ */
+var PurchasableRestrictable = function(entity) {
+	Component.call(this, entity);
+	entity.AddComponent(Purchasable);
+	entity.AddComponent(Restrictable);
+	entity.purchasablerestrictable = this;
+};
+extend(PurchasableRestrictable, Component, {
+	AddDefaultPriceRestriction: function() {
+		each(this.entity.purchasable.GetBaseBuyPrice(), function(price, resource) {
+			this.entity.restrictable.AddRestriction(
+				new AmountRestriction(this.entity.game,
+					this.entity.game.GetResource(resource),
+					price * TUNING.PURCHASABLE_DEFAULT_RESTRICT_FACTOR));
+		}, this);
+		return this.entity;
+	}
+});
+
 
 /**
  * AmountPurchasable
@@ -276,8 +315,13 @@ extend(Resource, Entity, {
  */
 var Generator = function(game, name, manual) {
 	Entity.call(this, game, name);
-	this.AddComponent(ExponentialAmountPurchasable);
+	this.AddComponent(Amount);
 	this.AddComponent(Multiplier);
+	this.AddComponent(Purchasable);
+	this.AddComponent(Restrictable);
+	this.AddComponent(AmountPurchasable);
+	this.AddComponent(ExponentialAmountPurchasable);
+	this.AddComponent(PurchasableRestrictable);
 	this.bridge('multiplier_change', 'rate_change');
 	this.bridge('amount_change', 'rate_change');
 	this.bridge('load', 'rate_change');
@@ -364,8 +408,12 @@ extend(ClickGenerator, Generator, {
  */
 var Upgrade = function(game, name) {
 	Entity.call(this, game, name);
-	this.AddComponent(ObtainablePurchasable);
+	this.AddComponent(Obtainable);
+	this.AddComponent(Purchasable);
 	this.AddComponent(Rewardable);
+	this.AddComponent(Restrictable);
+	this.AddComponent(ObtainablePurchasable);
+	this.AddComponent(PurchasableRestrictable);
 	this.on('obtain', this.OnObtain, this);
 };
 extend(Upgrade, Entity, {
@@ -424,14 +472,12 @@ extend(MultiplierReward, Reward, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
-	game.on('tick', this.Check, this)
+	game.on('tick', this.Check, this, TUNING.TICKS_PER_ACHIEVEMENT_CHECK);
 };
 extend(Achievement, Entity, {
 	Check: function() {
-		if (this.game.Every(20)) {
-			if (!this.obtainable.GetObtained()) {
-				this.CheckAchievement();
-			}
+		if (!this.obtainable.GetObtained()) {
+			this.CheckAchievement();
 		}
 	},
 	CheckAchievement: function() {
