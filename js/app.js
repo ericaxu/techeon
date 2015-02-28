@@ -17,7 +17,8 @@ var UI = function(game, config) {
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
-	this.mostRecentKeydown = 0;
+	this.$codebase = $('#codebase > pre');
+	this.lastNumOfLines = 0;
 	this.config = config;
 
 	this.init();
@@ -29,12 +30,14 @@ UI.prototype.updateLinesOfCodeStats = function() {
 
 	if (linesOfCode > 0) {
 		this.$numLinesOfCode.text(formatLinesOfCode(linesOfCode));
+		this.scrollCodebase(linesOfCode);
 	}
 
 	if (linesOfCodePerSec > 0) {
-		this.scrollCodebase(linesOfCodePerSec / this.game.GetTicksPerSecond() * 5);
 		this.$numLinesOfCodePerSec.text(formatLinesOfCode(linesOfCodePerSec) + ' / second');
 	}
+
+	this.lastNumOfLines = linesOfCode;
 };
 
 UI.prototype.updateDollarStats = function() {
@@ -152,7 +155,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 		//self.tooltipDisappearTimeout = setTimeout(function() {
 		//	$tooltip.offset({ left: 0, top: 0 }).hide();
 		//}, 100);
-		//$tooltip.offset({ left: 0, top: 0 }).hide();
+		$tooltip.offset({ left: 0, top: 0 }).hide();
 		$div.off('mousemove');
 	});
 };
@@ -240,15 +243,16 @@ UI.prototype.showNotification = function(title, text, icon) {
 };
 
 UI.prototype.scrollCodebase = function(numOfLines) {
-	var $codebase = $('#codebase > pre');
-	numOfLines = Math.min(this.config.scrollCodebaseLimit, numOfLines);
-	for (var i = 0; i < numOfLines; i++) {
-		var newTop = parseInt($codebase.css('top')) - 20;
-		// cycle through the code again
+	var lastNumOfLines = Math.round(this.lastNumOfLines);
+	var thisNumOfLines = Math.round(numOfLines);
+
+	// scroll at most 1 line every time
+	if (thisNumOfLines > lastNumOfLines) {
+		var newTop = parseInt(this.$codebase.css('top')) - 20;
 		if (newTop <= -6380) {
 			newTop = -380;
 		}
-		$codebase.css('top', newTop + 'px');
+		this.$codebase.css('top', newTop + 'px');
 	}
 };
 
