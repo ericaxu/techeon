@@ -86,7 +86,15 @@ UI.prototype.renderTooltip = function(entity, $container) {
 	$container.empty();
 	addEl('h4', $container, '', entity.describable.GetTitle());
 	if (entity instanceof Upgrade || (entity.amount !== undefined && entity.amount.GetMax() > 0)) {
-		addEl('p', $container, 'effect', entity.describable.GetEffect());
+		var effects = entity.describable.GetEffects();
+		if (effects.length > 1) {
+			var $ul = addEl('ul', $container);
+			each(effects, function(effect) {
+				addEl('li', $ul, 'effect', effect);
+			})
+		} else {
+			addEl('p', $container, 'effect', effects[0]);
+		}
 	}
 	addEl('p', $container, 'description', entity.describable.GetDescription());
 };
