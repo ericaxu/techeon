@@ -146,7 +146,7 @@ var Restrictable = function(entity) {
 	Component.call(this, entity);
 	entity.restrictable = this;
 	this.restrictions = [];
-	this.available = false;
+	this.available = true;
 	this.entity.bridge('available', 'update');
 	this.entity.bridge('unavailable', 'update');
 };
@@ -388,6 +388,16 @@ extend(Generator, Entity, {
 		}
 	}
 });
+
+var CodeGenerator = function(game, name) {
+	Generator.call(this, game, name);
+};
+extend(CodeGenerator, Generator, {});
+
+var MoneyGenerator = function(game, name) {
+	Generator.call(this, game, name);
+};
+extend(MoneyGenerator, Generator, {});
 
 var ClickGenerator = function(game, name, resource) {
 	Generator.call(this, game, name, true);
