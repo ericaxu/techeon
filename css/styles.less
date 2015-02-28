@@ -78,7 +78,6 @@ body {
 .section {
 	display: table-cell;
 	vertical-align: top;
-	border-right: 1px solid @border-color;
 }
 
 h4 {
@@ -145,7 +144,16 @@ h4 {
 }
 
 #feature-container, #team-container, #upgrade-container {
+	visibility: hidden;
 	width: 300px;
+}
+
+#feature-container {
+	border-right: 1px solid @border-color;
+}
+
+#team-container, #upgrade-container {
+	border-left: 1px solid @border-color;
 }
 
 #main-screen {

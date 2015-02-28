@@ -96,6 +96,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 		var $container = this.$upgradeContainer;
 	}
 
+	$container.css('visibility', 'visible');
 	var $div = addEl('div', $container, className);
 	addEl('h4', $div);
 	addEl('div', $div, 'purchasable-owned-count');
