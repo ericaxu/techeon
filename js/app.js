@@ -25,7 +25,7 @@ var UI = function(game, config) {
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
-	var linesOfCode = this.game.GetResource('code').amount.Get();
+	var linesOfCode = this.game.GetResource('code').amount.GetApprox();
 	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
 
 	if (linesOfCode > 0) {
@@ -41,7 +41,7 @@ UI.prototype.updateLinesOfCodeStats = function() {
 };
 
 UI.prototype.updateDollarStats = function() {
-	var dollars = this.game.GetResource('money').amount.Get();
+	var dollars = this.game.GetResource('money').amount.GetApprox();
 	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
 
 	if (dollars > 0) {
@@ -77,7 +77,7 @@ UI.prototype.updatePurchasable = function(entity, type) {
 	$div.find('h4').text(entity.describable.GetTitle());
 	$div.find('.price').text(price);
 	if (entity.amount) {
-		var amount = entity.amount.Get() || '';
+		var amount = entity.amount.GetApprox() || '';
 		$div.find('.purchasable-owned-count').text(amount);
 	}
 };
