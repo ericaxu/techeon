@@ -1,3 +1,27 @@
+var CodeGenerator = function(game, name) {
+	Generator.call(this, game, name);
+};
+extend(CodeGenerator, Generator, {});
+
+var MoneyGenerator = function(game, name) {
+	Generator.call(this, game, name);
+};
+extend(MoneyGenerator, Generator, {});
+
+var ClickGenerator = function(game, name, resource) {
+	Generator.call(this, game, name, true);
+	this.resource = resource;
+	game.on('tick', this.UpdateRate, this, 10);
+};
+extend(ClickGenerator, Generator, {
+	UpdateRate: function() {
+		this.amount.Set(Math.max(this.game.GetResourceRatesPerSecond(this.resource) / 5, 1));
+	},
+	Click: function() {
+		this.OnTick();
+	}
+});
+
 var GAME = (function() {
 
 	var game = new Game();
@@ -16,56 +40,56 @@ var GAME = (function() {
 	);
 
 	//Hires
-	game.data.generators.intern = game.AddGenerator(new Generator(game, "intern")
+	game.data.generators.intern = game.AddGenerator(new CodeGenerator(game, "intern")
 			.describable.SetTitle("Intern")
 			.describable.SetDescription("Don't really know anything and breaks the build every day.")
 			.purchasable.SetBuyPrice("money", 100)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("code", 0.2)
 	);
-	game.data.generators.junior = game.AddGenerator(new Generator(game, "junior")
+	game.data.generators.junior = game.AddGenerator(new CodeGenerator(game, "junior")
 			.describable.SetTitle("Junior Programmer")
 			.describable.SetDescription("Fresh out of college, will code for food.")
 			.purchasable.SetBuyPrice("money", 500)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("code", 1)
 	);
-	game.data.generators.contractor = game.AddGenerator(new Generator(game, "contractor")
+	game.data.generators.contractor = game.AddGenerator(new CodeGenerator(game, "contractor")
 			.describable.SetTitle("Contractor")
 			.describable.SetDescription("Like a normal employee, except you don't have to pay for his insurance.")
 			.purchasable.SetBuyPrice("money", 2000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("code", 5)
 	);
-	game.data.generators.programmer = game.AddGenerator(new Generator(game, "programmer")
+	game.data.generators.programmer = game.AddGenerator(new CodeGenerator(game, "programmer")
 			.describable.SetTitle("Programmer")
 			.describable.SetDescription("Coffee in, code out.")
 			.purchasable.SetBuyPrice("money", 10000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("code", 15)
 	);
-	game.data.generators.senior = game.AddGenerator(new Generator(game, "senior")
+	game.data.generators.senior = game.AddGenerator(new CodeGenerator(game, "senior")
 			.describable.SetTitle("Senior Programmer")
 			.describable.SetDescription("No no no, you're doing it all wrong!")
 			.purchasable.SetBuyPrice("money", 50000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("code", 35)
 	);
-	game.data.generators.architect = game.AddGenerator(new Generator(game, "architect")
+	game.data.generators.architect = game.AddGenerator(new CodeGenerator(game, "architect")
 			.describable.SetTitle("Software Architect")
 			.describable.SetDescription("A pro.")
 			.purchasable.SetBuyPrice("money", 200000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("code", 100)
 	);
-	game.data.generators.teamlead = game.AddGenerator(new Generator(game, "teamlead")
+	game.data.generators.teamlead = game.AddGenerator(new CodeGenerator(game, "teamlead")
 			.describable.SetTitle("Team Lead")
 			.describable.SetDescription("Manages programmers, and code on spare time (Yes they have a lot of spare time).")
 			.purchasable.SetBuyPrice("money", 1000000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("code", 500)
 	);
-	game.data.generators.vpeng = game.AddGenerator(new Generator(game, "vpeng")
+	game.data.generators.vpeng = game.AddGenerator(new CodeGenerator(game, "vpeng")
 			.describable.SetTitle("VP of Engineering")
 			.describable.SetDescription("Codes really fast.")
 			.purchasable.SetBuyPrice("money", 5000000)
@@ -74,42 +98,42 @@ var GAME = (function() {
 	);
 
 	//Features
-	game.data.generators.ad = game.AddGenerator(new Generator(game, "ad")
+	game.data.generators.ad = game.AddGenerator(new MoneyGenerator(game, "ad")
 			.describable.SetTitle("Ads on your site")
 			.describable.SetDescription("It\'s crazy how much money you can make with ads.")
 			.purchasable.SetBuyPrice("code", 15)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("money", 1)
 	);
-	game.data.generators.vm = game.AddGenerator(new Generator(game, "vm")
+	game.data.generators.vm = game.AddGenerator(new MoneyGenerator(game, "vm")
 			.describable.SetTitle("Virtual machine")
 			.describable.SetDescription("Just a powerful as a physical machine.")
 			.purchasable.SetBuyPrice("code", 100)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("money", 5)
 	);
-	game.data.generators.bugfix = game.AddGenerator(new Generator(game, "bugfix")
+	game.data.generators.bugfix = game.AddGenerator(new MoneyGenerator(game, "bugfix")
 			.describable.SetTitle("Bugfix")
 			.describable.SetDescription("Who doesn't hate a buggy product?")
 			.purchasable.SetBuyPrice("code", 600)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("money", 12)
 	);
-	game.data.generators.feature = game.AddGenerator(new Generator(game, "feature")
+	game.data.generators.feature = game.AddGenerator(new MoneyGenerator(game, "feature")
 			.describable.SetTitle("New feature")
 			.describable.SetDescription("Ship it! :squirrel:")
 			.purchasable.SetBuyPrice("code", 2500)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("money", 30)
 	);
-	game.data.generators.aisales = game.AddGenerator(new Generator(game, "aisales")
+	game.data.generators.aisales = game.AddGenerator(new MoneyGenerator(game, "aisales")
 			.describable.SetTitle("AI salesperson")
 			.describable.SetDescription("Who needs a real person when AI can close deals too?")
 			.purchasable.SetBuyPrice("code", 12000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.SetRateSecond("money", 100)
 	);
-	game.data.generators.analytics = game.AddGenerator(new Generator(game, "analytics")
+	game.data.generators.analytics = game.AddGenerator(new MoneyGenerator(game, "analytics")
 			.describable.SetTitle("Analytics software")
 			.describable.SetDescription("Know your users.")
 			.purchasable.SetBuyPrice("code", 100000)

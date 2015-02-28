@@ -152,21 +152,29 @@ var Restrictable = function(entity) {
 };
 extend(Restrictable, Component, {
 	Check: function() {
-		if (!this.available) {
-			this.available = each(this.restrictions, function(restriction) {
-				return truefalse(restriction.Check());
-			}, this);
-			this.entity.trigger('available', this.entity);
+		var available = each(this.restrictions, function(restriction) {
+			return truefalse(restriction.Check());
+		}, this);
+		if (this.available != available) {
+			this.available = available;
+			if(available) {
+				this.entity.trigger('available', this.entity);
+			}
+			else {
+				this.entity.trigger('unavailable', this.entity);
+			}
 		}
 	},
 	AddRestriction: function(restriction) {
 		this.restrictions.push(restriction);
 		this.entity.game.on('tick', this.Check, this, TUNING.TICKS_PER_AVAILABLE_CHECK);
+		this.Check();
 		return this.entity;
 	},
 	ClearRestrictions: function() {
 		this.restrictions.clear();
 		this.entity.game.off('tick', this.Check);
+		this.Check();
 		return this.entity;
 	},
 	Available: function() {
@@ -386,30 +394,6 @@ extend(Generator, Entity, {
 			this.generated[resource] += result;
 			this.game.data.resources[resource].Generate(result);
 		}
-	}
-});
-
-var CodeGenerator = function(game, name) {
-	Generator.call(this, game, name);
-};
-extend(CodeGenerator, Generator, {});
-
-var MoneyGenerator = function(game, name) {
-	Generator.call(this, game, name);
-};
-extend(MoneyGenerator, Generator, {});
-
-var ClickGenerator = function(game, name, resource) {
-	Generator.call(this, game, name, true);
-	this.resource = resource;
-	game.on('tick', this.UpdateRate, this, 10);
-};
-extend(ClickGenerator, Generator, {
-	UpdateRate: function() {
-		this.amount.Set(Math.max(this.game.GetResourceRatesPerSecond(this.resource) / 5, 1));
-	},
-	Click: function() {
-		this.OnTick();
 	}
 });
 
