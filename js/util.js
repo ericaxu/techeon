@@ -141,16 +141,18 @@ function readableBigNumber(x, digits) {
 		digits = 0;
 	}
 
-	if (x > quadrillion) {
+	x = parseFloat(x.toFixed(digits));
+
+	if (x >= quadrillion) {
 		return formatNumWithCommas((x / quadrillion).toFixed(2)) + ' quadrillion';
 	}
-	if (x > trillion) {
+	if (x >= trillion) {
 		return formatNumWithCommas((x / trillion).toFixed(2)) + ' trillion';
 	}
-	if (x > billion) {
+	if (x >= billion) {
 		return formatNumWithCommas((x / billion).toFixed(2)) + ' billion';
 	}
-	if (x > million) {
+	if (x >= million) {
 		return formatNumWithCommas((x / million).toFixed(2)) + ' million';
 	}
 
@@ -171,11 +173,7 @@ function formatDollar(x) {
 }
 
 function formatLinesOfCode(x) {
-	if (x < 10) {
-		return readableBigNumber(x, 1) + ' lines';
-	} else {
-		return readableBigNumber(x, 0) + ' lines';
-	}
+	return readableBigNumber(Math.ceil(x), 0) + ' lines';
 }
 
 function drawDoubleBorder($container) {
