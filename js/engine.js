@@ -369,10 +369,36 @@ var Amount = function(entity) {
 	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount');
 	this.entity.bridge('load', 'update');
 	this.entity.bridge('amount_change', 'update');
+	this.approxAmount = 0.0;
+	this.approx = false;
 };
 extend(Amount, Component, {
 	Get: function() {
 		return this.amount;
+	},
+	StartApprox: function() {
+		if (this.approx) {
+			this.entity.game.off('tick', this.UpdateApprox);
+		}
+		this.approx = true;
+		this.entity.game.on('tick', this.UpdateApprox, this);
+		return this.entity;
+	},
+	StopApprox: function() {
+		if (this.approx) {
+			this.entity.game.off('tick', this.UpdateApprox);
+		}
+		this.approx = false;
+		return this.entity;
+	},
+	UpdateApprox: function() {
+		this.approxAmount = approximateTo(this.approxAmount, this.amount, 0.5);
+	},
+	GetApprox: function() {
+		if (!this.approx) {
+			return this.amount;
+		}
+		return this.approxAmount;
 	},
 	Set: function(value) {
 		this.amount = value;

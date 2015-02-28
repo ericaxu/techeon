@@ -2,8 +2,8 @@ var GAME = (function() {
 
 	var game = new Game();
 
-	game.data.resources.money = game.AddResource(new Resource(game, "money"));
-	game.data.resources.code = game.AddResource(new Resource(game, "code"));
+	game.data.resources.money = game.AddResource(new Resource(game, "money").amount.StartApprox());
+	game.data.resources.code = game.AddResource(new Resource(game, "code").amount.StartApprox());
 
 	//Hires
 	game.data.generators.intern = game.AddGenerator(new Generator(game, "intern")

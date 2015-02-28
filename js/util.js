@@ -94,6 +94,10 @@ function isInt(n) {
 	return Number(n) === n && n % 1 === 0;
 }
 
+function approximateTo(from, to, factor) {
+	return from + ((to - from) * factor);
+}
+
 function currentTimeMS() {
 	return new Date().getTime();
 }
