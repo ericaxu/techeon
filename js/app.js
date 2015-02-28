@@ -17,7 +17,7 @@ var UI = function(game, config) {
 	this.$teamContainer = $('#team-container');
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
-	this.$codebase = $('#codebase > pre');
+	this.$codebase = $('#codebase-content');
 	this.lastNumOfLines = 0;
 	this.config = config;
 
@@ -53,13 +53,8 @@ UI.prototype.updateDollarStats = function() {
 	}
 };
 
-UI.prototype.updateResources = function() {
-	this.updateLinesOfCodeStats();
-	this.updateDollarStats();
-};
-
 UI.prototype.updatePurchasable = function(entity, type) {
-	var className = '.generator-' + entity.GetName();
+	var className = '.purchasable-' + entity.GetName();
 
 	if (type == 'feature') {
 		var price = formatLinesOfCode(entity.purchasable.GetBuyPrice().code);
@@ -100,7 +95,7 @@ UI.prototype.renderTooltip = function(entity, $container) {
 };
 
 UI.prototype.showPurchasable = function(entity, type) {
-	var className = 'purchasable generator-' + entity.GetName();
+	var className = 'purchasable purchasable-' + entity.GetName();
 	if (!entity.purchasable.CanBuy()) {
 		className += ' unaffordable';
 	}
@@ -121,13 +116,14 @@ UI.prototype.showPurchasable = function(entity, type) {
 	$div.on('click', $.proxy(function() {
 		if (entity.purchasable.CanBuy()) {
 			entity.purchasable.Buy();
-			this.updateGenerators();
+			this.updatePurchasables();
 			this.updateUpgrades();
 			this.updatePurchasable(entity, type);
 		}
 	}, this));
 
 	this.updatePurchasable(entity, type);
+	entity.on('rate_change', this.updatePurchasable, this);
 
 	var $tooltip = $('.purchasable-tooltip-wrapper');
 	var $tooltipContent = $tooltip.find('.inner-border-2');
@@ -163,9 +159,9 @@ UI.prototype.showPurchasable = function(entity, type) {
 	});
 };
 
-UI.prototype.updateGenerators = function() {
+UI.prototype.updatePurchasables = function() {
 	each(this.game.GetGenerators(), function(generator) {
-		var $generatorDiv = $('.generator-' + generator.GetName());
+		var $generatorDiv = $('.purchasable-' + generator.GetName());
 		// if it's not shown right now but it's available
 		if ($generatorDiv.length === 0 && generator.purchasable.Available()) {
 			if (generator.purchasable.GetBuyPrice().code) {
@@ -188,7 +184,7 @@ UI.prototype.updateGenerators = function() {
 
 UI.prototype.updateUpgrades = function() {
 	each(this.game.GetUpgrades(), function(upgrade) {
-		var $generatorDiv = $('.generator-' + upgrade.GetName());
+		var $generatorDiv = $('.purchasable-' + upgrade.GetName());
 		if ($generatorDiv.length === 0 && upgrade.purchasable.Available() && !upgrade.obtainable.GetObtained()) {
 			this.showPurchasable(upgrade, 'upgrade');
 		} else if ($generatorDiv.length > 0) {
@@ -233,7 +229,7 @@ UI.prototype.showNotification = function(title, text, icon, sticky) {
 		$notification.remove();
 	});
 	addEl('img', $notification, '', '', {
-		src: 'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg',
+		src: icon,
 		alt: title
 	});
 	var $achievement = addEl('div', $notification);
@@ -325,8 +321,11 @@ UI.prototype.showAchievement = function(achievement, $container) {
 		}
 	}, this);
 	achievement.events.on('obtain', function(achievement) {
-		this.showNotification('Achievement Unlocked', achievement.describable.GetTitle() + ': ' +
-		achievement.describable.GetDescription(), '');
+		this.showNotification(
+			'Achievement Unlocked',
+			achievement.describable.GetTitle() + ': ' + achievement.describable.GetDescription(),
+			'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg'
+		);
 		$achievementsNav.show();
 	}, this);
 };
@@ -372,7 +371,7 @@ UI.prototype.setupSaveGame = function() {
 UI.prototype.init = function() {
 	this.setupPopup();
 	this.setupNavClickHandlers();
-	this.updateGenerators();
+	this.updatePurchasables();
 	this.updateUpgrades();
 	this.setupCodeClickListener();
 	//this.setupSaveGame();
@@ -380,10 +379,11 @@ UI.prototype.init = function() {
 	sh_highlightDocument();
 
 	this.game.on('render', function() {
-		this.updateResources();
+		this.updateLinesOfCodeStats();
+		this.updateDollarStats();
 	}, this, this.config.updateResourceFrequencyInTicks);
 	this.game.on('render', function() {
-		this.updateGenerators();
+		this.updatePurchasables();
 		this.updateUpgrades();
 	}, this, this.config.updatePurchasablesFrequencyInTicks);
 
