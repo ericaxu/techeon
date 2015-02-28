@@ -65,8 +65,6 @@ extend(Game, GameEngine, {
 });
 
 var TUNING = {
-	TICKS_PER_RESTRICTABLE_CHECK: 5,
-	TICKS_PER_PURCHASABLE_CHECK: 5,
 	TICKS_PER_ACHIEVEMENT_CHECK: 5,
 
 	PURCHASABLE_DEFAULT_SELL_FACTOR: 0.75,
@@ -86,7 +84,7 @@ var Purchasable = function(entity) {
 	this.entity.bridge('sell', 'update');
 	this.entity.bridge('affordable', 'update');
 	this.entity.bridge('unaffordable', 'update');
-	this.entity.game.on('tick', this.CheckAffordable, this, TUNING.TICKS_PER_PURCHASABLE_CHECK);
+	this.entity.game.on('tick', this.UpdateAffordable, this);
 };
 extend(Purchasable, Component, {
 	SetBuyPrice: function(resource, price) {
@@ -100,8 +98,10 @@ extend(Purchasable, Component, {
 		this.sellPrice[resource] = price;
 		return this.entity;
 	},
-	CheckAffordable: function() {
-		var affordable = this.Affordable();
+	UpdateAffordable: function() {
+		var affordable = each(this.GetBuyPrice(), function(value, resource) {
+			return this.entity.game.GetResource(resource).amount.Get() >= value;
+		}, this);
 		if (this.affordable != affordable) {
 			this.affordable = affordable;
 			if (affordable) {
@@ -112,13 +112,7 @@ extend(Purchasable, Component, {
 		}
 	},
 	Affordable: function() {
-		var price = this.GetBuyPrice();
-		for (var resource in price) {
-			if (this.entity.game.GetResource(resource).amount.Get() < price[resource]) {
-				return false;
-			}
-		}
-		return true;
+		return this.affordable;
 	},
 	GetBaseBuyPrice: function() {
 		return this.buyPrice;
@@ -135,7 +129,6 @@ extend(Purchasable, Component, {
 			this.entity.game.GetResource(resource).amount.Remove(price[resource]);
 		}
 		this.entity.trigger('buy', this.entity);
-		this.CheckAffordable();
 	},
 	GetBaseSellPrice: function() {
 		return this.sellPrice;
@@ -165,11 +158,13 @@ var Restrictable = function(entity) {
 	this.available = true;
 	this.entity.bridge('available', 'update');
 	this.entity.bridge('unavailable', 'update');
-	this.entity.game.on('tick', this.CheckAvailable, this, TUNING.TICKS_PER_RESTRICTABLE_CHECK);
+	this.entity.game.on('tick', this.UpdateAvailable, this);
 };
 extend(Restrictable, Component, {
-	CheckAvailable: function() {
-		var available = this.Available();
+	UpdateAvailable: function() {
+		var available = each(this.restrictions, function(restriction) {
+			return truefalse(restriction.Check());
+		}, this);
 		if (this.available != available) {
 			this.available = available;
 			if (available) {
@@ -181,19 +176,15 @@ extend(Restrictable, Component, {
 	},
 	AddRestriction: function(restriction) {
 		this.restrictions.push(restriction);
-		this.CheckAvailable();
 		return this.entity;
 	},
 	ClearRestrictions: function() {
 		this.restrictions.clear();
 		this.entity.game.off('tick', this.Check);
-		this.CheckAvailable();
 		return this.entity;
 	},
 	Available: function() {
-		return each(this.restrictions, function(restriction) {
-			return truefalse(restriction.Check());
-		}, this);
+		return this.available;
 	}
 });
 
@@ -278,9 +269,9 @@ var ExponentialAmountPurchasable = function(entity) {
 	this.entity.exponentialamountpurchasable = this;
 	this.entity.purchasable.GetSellPrice = bind(this.GetSellPrice, this);
 	this.entity.purchasable.GetBuyPrice = bind(this.GetBuyPrice, this);
-	this.entity.on('buy', this.TriggerPriceChange, this);
-	this.entity.on('sell', this.TriggerPriceChange, this);
-	this.entity.on('load', this.TriggerPriceChange, this);
+	this.entity.bridge('buy', 'price_change');
+	this.entity.bridge('sell', 'price_change');
+	this.entity.bridge('load', 'price_change');
 	this.entity.bridge('price_change', 'update');
 
 	this.buyPrice = {};
@@ -304,9 +295,6 @@ extend(ExponentialAmountPurchasable, Component, {
 			this.sellPrice[key] = Math.ceil(price[key] * Math.pow(this.factor, this.entity.amount.Get()));
 		}
 		return this.sellPrice;
-	},
-	TriggerPriceChange: function() {
-		this.entity.trigger('price_change', this.entity);
 	}
 });
 
