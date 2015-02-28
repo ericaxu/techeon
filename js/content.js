@@ -11,6 +11,7 @@ extend(MoneyGenerator, Generator, {});
 var ClickGenerator = function(game, name, resource) {
 	Generator.call(this, game, name, true);
 	this.resource = resource;
+	this.clicked = false;
 	game.on('tick', this.UpdateRate, this, 10);
 };
 extend(ClickGenerator, Generator, {
@@ -18,7 +19,13 @@ extend(ClickGenerator, Generator, {
 		this.amount.Set(Math.max(this.game.GetResourceRatesPerSecond(this.resource) / 5, 1));
 	},
 	Click: function() {
-		this.OnTick();
+		this.clicked = true;
+	},
+	OnTick: function() {
+		if (this.clicked) {
+			Generator.prototype.OnTick.call(this);
+			this.clicked = false;
+		}
 	}
 });
 
@@ -170,7 +177,7 @@ var GAME = (function() {
 			.purchasable.SetBuyPrice("money", 500)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.intern, 1))
-			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.intern, 0, 1.5))
+			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.intern, 0.5, 0))
 	);
 	game.data.upgrades.coffee = game.AddUpgrade(new Upgrade(game, "coffee")
 			.describable.SetTitle("Free coffee")
@@ -179,7 +186,7 @@ var GAME = (function() {
 			.purchasable.SetBuyPrice("money", 1000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.programmer, 1))
-			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.programmer, 0, 1.5))
+			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.programmer, 0.5, 0))
 	);
 	game.data.upgrades.cateredlunch = game.AddUpgrade(new Upgrade(game, "cateredlunch")
 			.describable.SetTitle("Catered lunch")

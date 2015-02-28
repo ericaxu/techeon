@@ -338,9 +338,7 @@ var Generator = function(game, name, manual) {
 	this.manual = manual;
 	this.rates = {};
 	this.generated = {};
-	if (!this.manual) {
-		game.on('tick', this.OnTick, this);
-	}
+	game.on('tick', this.OnTick, this);
 	this.loader.AddElement('rates').AddElement('multipliers').AddElement('generated');
 };
 extend(Generator, Entity, {
