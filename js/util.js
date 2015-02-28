@@ -169,7 +169,6 @@ function formatDollar(x) {
 	} else {
 		return '$ ' + readableBigNumber(x);
 	}
-
 }
 
 function formatLinesOfCode(x) {
