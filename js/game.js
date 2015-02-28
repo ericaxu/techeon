@@ -65,7 +65,8 @@ extend(Game, GameEngine, {
 });
 
 var TUNING = {
-	TICKS_PER_AVAILABLE_CHECK: 5,
+	TICKS_PER_RESTRICTABLE_CHECK: 5,
+	TICKS_PER_PURCHASABLE_CHECK: 5,
 	TICKS_PER_ACHIEVEMENT_CHECK: 5,
 
 	PURCHASABLE_DEFAULT_SELL_FACTOR: 0.75,
@@ -80,8 +81,12 @@ var Purchasable = function(entity) {
 	entity.purchasable = this;
 	this.buyPrice = {};
 	this.sellPrice = {};
+	this.affordable = false;
 	this.entity.bridge('buy', 'update');
 	this.entity.bridge('sell', 'update');
+	this.entity.bridge('affordable', 'update');
+	this.entity.bridge('unaffordable', 'update');
+	this.entity.game.on('tick', this.CheckAffordable, this, TUNING.TICKS_PER_PURCHASABLE_CHECK);
 };
 extend(Purchasable, Component, {
 	SetBuyPrice: function(resource, price) {
@@ -95,11 +100,21 @@ extend(Purchasable, Component, {
 		this.sellPrice[resource] = price;
 		return this.entity;
 	},
-	CanBuy: function() {
+	CheckAffordable: function() {
+		var affordable = this.Affordable();
+		if (this.affordable != affordable) {
+			this.affordable = affordable;
+			if (affordable) {
+				this.entity.trigger('affordable', this.entity);
+			} else {
+				this.entity.trigger('unaffordable', this.entity);
+			}
+		}
+	},
+	Affordable: function() {
 		var price = this.GetBuyPrice();
 		for (var resource in price) {
-			var cost = price[resource];
-			if (this.entity.game.GetResource(resource).amount.Get() < cost) {
+			if (this.entity.game.GetResource(resource).amount.Get() < price[resource]) {
 				return false;
 			}
 		}
@@ -112,7 +127,7 @@ extend(Purchasable, Component, {
 		return this.GetBaseBuyPrice();
 	},
 	Buy: function() {
-		if (!this.CanBuy()) {
+		if (!this.Affordable()) {
 			return;
 		}
 		var price = this.GetBuyPrice();
@@ -120,6 +135,7 @@ extend(Purchasable, Component, {
 			this.entity.game.GetResource(resource).amount.Remove(price[resource]);
 		}
 		this.entity.trigger('buy', this.entity);
+		this.CheckAffordable();
 	},
 	GetBaseSellPrice: function() {
 		return this.sellPrice;
@@ -149,36 +165,35 @@ var Restrictable = function(entity) {
 	this.available = true;
 	this.entity.bridge('available', 'update');
 	this.entity.bridge('unavailable', 'update');
+	this.entity.game.on('tick', this.CheckAvailable, this, TUNING.TICKS_PER_RESTRICTABLE_CHECK);
 };
 extend(Restrictable, Component, {
-	Check: function() {
-		var available = each(this.restrictions, function(restriction) {
-			return truefalse(restriction.Check());
-		}, this);
+	CheckAvailable: function() {
+		var available = this.Available();
 		if (this.available != available) {
 			this.available = available;
-			if(available) {
+			if (available) {
 				this.entity.trigger('available', this.entity);
-			}
-			else {
+			} else {
 				this.entity.trigger('unavailable', this.entity);
 			}
 		}
 	},
 	AddRestriction: function(restriction) {
 		this.restrictions.push(restriction);
-		this.entity.game.on('tick', this.Check, this, TUNING.TICKS_PER_AVAILABLE_CHECK);
-		this.Check();
+		this.CheckAvailable();
 		return this.entity;
 	},
 	ClearRestrictions: function() {
 		this.restrictions.clear();
 		this.entity.game.off('tick', this.Check);
-		this.Check();
+		this.CheckAvailable();
 		return this.entity;
 	},
 	Available: function() {
-		return this.available;
+		return each(this.restrictions, function(restriction) {
+			return truefalse(restriction.Check());
+		}, this);
 	}
 });
 

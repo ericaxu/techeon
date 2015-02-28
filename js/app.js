@@ -96,7 +96,7 @@ UI.prototype.renderTooltip = function(entity, $container) {
 
 UI.prototype.showPurchasable = function(entity, type) {
 	var className = 'purchasable purchasable-' + entity.GetName();
-	if (!entity.purchasable.CanBuy()) {
+	if (!entity.purchasable.Affordable()) {
 		className += ' unaffordable';
 	}
 
@@ -114,7 +114,7 @@ UI.prototype.showPurchasable = function(entity, type) {
 	addEl('div', $div, 'purchasable-owned-count');
 	addEl('div', $div, 'price');
 	$div.on('click', $.proxy(function() {
-		if (entity.purchasable.CanBuy()) {
+		if (entity.purchasable.Affordable()) {
 			entity.purchasable.Buy();
 			this.updatePurchasables();
 			this.updateUpgrades();
@@ -171,11 +171,11 @@ UI.prototype.updatePurchasables = function() {
 			}
 		} else if ($generatorDiv.length > 0) {
 			// just unlocked previously unaffordable items
-			if ($generatorDiv.hasClass('unaffordable') && generator.purchasable.CanBuy()) {
+			if ($generatorDiv.hasClass('unaffordable') && generator.purchasable.Affordable()) {
 				$generatorDiv.removeClass('unaffordable');
 			}
 			// no longer have enough money to buy it
-			else if (!$generatorDiv.hasClass('unaffordable') && !generator.purchasable.CanBuy()) {
+			else if (!$generatorDiv.hasClass('unaffordable') && !generator.purchasable.Affordable()) {
 				$generatorDiv.addClass('unaffordable');
 			}
 		}
@@ -189,11 +189,11 @@ UI.prototype.updateUpgrades = function() {
 			this.showPurchasable(upgrade, 'upgrade');
 		} else if ($generatorDiv.length > 0) {
 			// just unlocked previously unaffordable items
-			if ($generatorDiv.hasClass('unaffordable') && upgrade.purchasable.CanBuy()) {
+			if ($generatorDiv.hasClass('unaffordable') && upgrade.purchasable.Affordable()) {
 				$generatorDiv.removeClass('unaffordable');
 			}
 			// no longer have enough money to buy it
-			else if (!$generatorDiv.hasClass('unaffordable') && !upgrade.purchasable.CanBuy()) {
+			else if (!$generatorDiv.hasClass('unaffordable') && !upgrade.purchasable.Affordable()) {
 				$generatorDiv.addClass('unaffordable');
 			}
 			// upgrade already used
