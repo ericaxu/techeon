@@ -371,16 +371,19 @@ extend(Generator, Entity, {
 		for (var resource in this.rates) {
 			var rateFormatter = this.game.GetResource(resource).rateFormatter;
 			if (rateFormatter) {
-				this.describable.AddEffect(rateFormatter(this.GetRate(resource)));
+				this.describable.AddEffect(rateFormatter(this.GetSingleRate(resource)));
 			}
 		}
 	},
-	GetRate: function(resource) {
+	GetSingleRate: function(resource) {
 		var rate = this.rates[resource];
 		if (!rate) {
 			return 0;
 		}
-		return this.amount.Get() * rate * this.multiplier.Get() * this.game.GetResource(resource).multiplier.Get();
+		return rate * this.multiplier.Get() * this.game.GetResource(resource).multiplier.Get();
+	},
+	GetRate: function(resource) {
+		return this.amount.Get() * this.GetSingleRate(resource);
 	},
 	GetGenerated: function(resource) {
 		return this.generated[resource];
