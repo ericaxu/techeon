@@ -53,30 +53,6 @@ UI.prototype.updateDollarStats = function() {
 	}
 };
 
-UI.prototype.updatePurchasable = function(entity, type) {
-	var className = '.purchasable-' + entity.GetName();
-
-	if (type == 'feature') {
-		var price = formatLinesOfCode(entity.purchasable.GetBuyPrice().code);
-	} else if (type == 'team') {
-		var price = formatDollar(entity.purchasable.GetBuyPrice().money);
-	} else if (type == 'upgrade') {
-		if ($.isEmptyObject(entity.purchasable.GetBuyPrice())) {
-			var price = 'Free';
-		} else {
-			var price = formatDollar(entity.purchasable.GetBuyPrice().money);
-		}
-	}
-
-	var $div = $(className);
-	$div.find('h4').text(entity.describable.GetTitle());
-	$div.find('.price').text(price);
-	if (entity.amount) {
-		var amount = entity.amount.GetApprox() || '';
-		$div.find('.purchasable-owned-count').text(amount);
-	}
-};
-
 UI.prototype.renderTooltip = function(entity, $container) {
 	$container.empty();
 	addEl('h4', $container, '', entity.describable.GetTitle());
@@ -94,113 +70,118 @@ UI.prototype.renderTooltip = function(entity, $container) {
 	addEl('p', $container, 'description', entity.describable.GetDescription());
 };
 
-UI.prototype.showPurchasable = function(entity, type) {
-	var className = 'purchasable purchasable-' + entity.GetName();
-	if (!entity.purchasable.Affordable()) {
-		className += ' unaffordable';
+UI.prototype.formatPrice = function(entity) {
+	if (entity instanceof MoneyGenerator) {
+		var price = formatLinesOfCode(entity.purchasable.GetBuyPrice().code);
+	} else if (entity instanceof CodeGenerator) {
+		var price = formatDollar(entity.purchasable.GetBuyPrice().money);
+	} else if (entity instanceof Upgrade) {
+		if ($.isEmptyObject(entity.purchasable.GetBuyPrice())) {
+			var price = 'Free';
+		} else {
+			var price = formatDollar(entity.purchasable.GetBuyPrice().money);
+		}
 	}
 
-	if (type == 'feature') {
+	return price;
+};
+
+UI.prototype.setupPurchasable = function(entity) {
+	if (entity instanceof MoneyGenerator) {
 		var $container = this.$featureContainer;
-	} else if (type == 'team') {
+	} else if (entity instanceof CodeGenerator) {
 		var $container = this.$teamContainer;
-	} else if (type == 'upgrade') {
+	} else if (entity instanceof Upgrade) {
 		var $container = this.$upgradeContainer;
 	}
 
-	$container.css('visibility', 'visible');
-	var $div = addEl('div', $container, className);
-	addEl('h4', $div);
-	addEl('div', $div, 'purchasable-owned-count');
-	addEl('div', $div, 'price');
-	$div.on('click', $.proxy(function() {
-		if (entity.purchasable.Affordable()) {
-			entity.purchasable.Buy();
-			this.updatePurchasables();
-			this.updateUpgrades();
-			this.updatePurchasable(entity, type);
+	if ($container) {
+		var className = entity.purchasable.Affordable() ? 'purchasable' : 'purchasable unaffordable';
+		var $div = addEl('div', $container, className).hide();
+
+		function showPurchasable(entity) {
+			$container.css('visibility', 'visible');
+			addEl('h4', $div, '', entity.describable.GetTitle());
+			var $ownedCount = addEl('div', $div, 'purchasable-owned-count');
+			addEl('div', $div, 'price', this.formatPrice(entity));
+			$div.on('click', $.proxy(function() {
+				entity.purchasable.Buy();
+			}, this));
+
+			if (entity.amount) {
+				var amount = entity.amount.GetApprox() || '';
+				$ownedCount.text(amount);
+			}
+			var $tooltip = $('.purchasable-tooltip-wrapper');
+			var $tooltipContent = $tooltip.find('.inner-border-2');
+			var updateTooltip = $.proxy(function() {
+				this.renderTooltip(entity, $tooltipContent);
+			}, this);
+
+			$div.on('mouseenter', $.proxy(function() {
+				$div.off('mousemove').on('mousemove', function(e) {
+					var offsetTop = Math.min(Math.max(0, e.pageY - $tooltip.outerHeight() / 2), $(window).height() - $tooltip.outerHeight());
+					$tooltip.offset({ top: offsetTop });
+				});
+				this.renderTooltip(entity, $tooltipContent);
+				entity.on('rate_change', updateTooltip);
+				if (entity instanceof MoneyGenerator) {
+					$tooltip.offset({ left: $div.outerWidth() + this.config.pixelsBetweenTooltip });
+				} else if (entity instanceof CodeGenerator) {
+					$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
+				} else if (entity instanceof Upgrade) {
+					$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
+				}
+				$tooltip.show();
+			}, this));
+
+			$div.on('mouseleave', function() {
+				$tooltip.offset({ left: 0, top: 0 }).hide();
+				$div.off('mousemove');
+				entity.off('amount_change', updateTooltip);
+			});
+
+			$div.show();
 		}
-	}, this));
 
-	this.updatePurchasable(entity, type);
-	entity.on('rate_change', this.updatePurchasable, this);
+		function updatePurchasable(entity) {
+			if (entity.amount) {
+				var amount = entity.amount.GetApprox() || '';
+				$div.find('.purchasable-owned-count').text(amount);
+			}
+			$div.find('.price').text(this.formatPrice(entity));
+		}
 
-	var $tooltip = $('.purchasable-tooltip-wrapper');
-	var $tooltipContent = $tooltip.find('.inner-border-2');
-	var updateTooltip = $.proxy(function() {
-		this.renderTooltip(entity, $tooltipContent);
-	}, this);
-	$div.off('mouseenter').on('mouseenter', $.proxy(function() {
-		$div.off('mousemove').on('mousemove', function(e) {
-			var offsetTop = Math.min(Math.max(0, e.pageY - $tooltip.outerHeight() / 2), $(window).height() - $tooltip.outerHeight());
-			$tooltip.offset({ top: offsetTop });
+		if (entity.restrictable.Available()) {
+			showPurchasable.call(this, entity);
+		}
+
+		entity.on('available', showPurchasable, this);
+		entity.on('affordable', function() {
+			$div.removeClass('unaffordable');
+		}, this);
+		entity.on('unaffordable', function() {
+			$div.addClass('unaffordable');
 		});
+		entity.on('rate_change', updatePurchasable, this);
 
-		this.renderTooltip(entity, $tooltipContent);
-
-		entity.on('rate_change', updateTooltip);
-
-		if (type === 'feature') {
-			$tooltip.offset({ left: $div.outerWidth() + this.config.pixelsBetweenTooltip });
-		} else if (type === 'team') {
-			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
-		} else if (type === 'upgrade') {
-			$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
+		if (entity instanceof Upgrade) {
+			entity.on('obtain', function() {
+				$div.hide();
+			});
 		}
-
-		$tooltip.show();
-
-	}, this));
-
-	$div.off('mouseleave').on('mouseleave', function() {
-		$tooltip.offset({ left: 0, top: 0 }).hide();
-		$div.off('mousemove');
-		entity.off('amount_change', updateTooltip);
-	});
+	}
 };
 
-UI.prototype.updatePurchasables = function() {
+UI.prototype.setupGenerators = function() {
 	each(this.game.GetGenerators(), function(generator) {
-		var $generatorDiv = $('.purchasable-' + generator.GetName());
-		// if it's not shown right now but it's available
-		if ($generatorDiv.length === 0 && generator.restrictable.Available()) {
-			if (generator.purchasable.GetBuyPrice().code) {
-				this.showPurchasable(generator, 'feature');
-			} else if (generator.purchasable.GetBuyPrice().money) {
-				this.showPurchasable(generator, 'team');
-			}
-		} else if ($generatorDiv.length > 0) {
-			// just unlocked previously unaffordable items
-			if ($generatorDiv.hasClass('unaffordable') && generator.purchasable.Affordable()) {
-				$generatorDiv.removeClass('unaffordable');
-			}
-			// no longer have enough money to buy it
-			else if (!$generatorDiv.hasClass('unaffordable') && !generator.purchasable.Affordable()) {
-				$generatorDiv.addClass('unaffordable');
-			}
-		}
+		this.setupPurchasable(generator);
 	}, this);
 };
 
-UI.prototype.updateUpgrades = function() {
+UI.prototype.setupUpgrades = function() {
 	each(this.game.GetUpgrades(), function(upgrade) {
-		var $generatorDiv = $('.purchasable-' + upgrade.GetName());
-		if ($generatorDiv.length === 0 && upgrade.restrictable.Available() && !upgrade.obtainable.GetObtained()) {
-			this.showPurchasable(upgrade, 'upgrade');
-		} else if ($generatorDiv.length > 0) {
-			// just unlocked previously unaffordable items
-			if ($generatorDiv.hasClass('unaffordable') && upgrade.purchasable.Affordable()) {
-				$generatorDiv.removeClass('unaffordable');
-			}
-			// no longer have enough money to buy it
-			else if (!$generatorDiv.hasClass('unaffordable') && !upgrade.purchasable.Affordable()) {
-				$generatorDiv.addClass('unaffordable');
-			}
-			// upgrade already used
-			else if (upgrade.obtainable.GetObtained()) {
-				$generatorDiv.remove();
-			}
-		}
+		this.setupPurchasable(upgrade);
 	}, this);
 };
 
@@ -371,8 +352,8 @@ UI.prototype.setupSaveGame = function() {
 UI.prototype.init = function() {
 	this.setupPopup();
 	this.setupNavClickHandlers();
-	this.updatePurchasables();
-	this.updateUpgrades();
+	this.setupGenerators();
+	this.setupUpgrades();
 	this.setupCodeClickListener();
 	//this.setupSaveGame();
 	this.showAchievements();
@@ -382,10 +363,6 @@ UI.prototype.init = function() {
 		this.updateLinesOfCodeStats();
 		this.updateDollarStats();
 	}, this, this.config.updateResourceFrequencyInTicks);
-	this.game.on('render', function() {
-		this.updatePurchasables();
-		this.updateUpgrades();
-	}, this, this.config.updatePurchasablesFrequencyInTicks);
 
 	//this.loadGame();
 };

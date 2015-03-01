@@ -109,7 +109,7 @@ var GAME = (function() {
 			.describable.SetTitle("Ads on your site")
 			.describable.SetDescription("It\'s crazy how much money you can make with ads.")
 			.purchasable.SetBuyPrice("code", 15)
-			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.GetResource('code'), 1))
 			.SetRateSecond("money", 1)
 	);
 	game.data.generators.vm = game.AddGenerator(new MoneyGenerator(game, "vm")
