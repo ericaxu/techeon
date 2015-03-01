@@ -155,7 +155,7 @@ var Restrictable = function(entity) {
 	Component.call(this, entity);
 	entity.restrictable = this;
 	this.restrictions = [];
-	this.available = true;
+	this.available = false;
 	this.entity.bridge('available', 'update');
 	this.entity.bridge('unavailable', 'update');
 	this.entity.game.on('tick', this.UpdateAvailable, this);
