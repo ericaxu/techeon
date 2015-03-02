@@ -470,9 +470,14 @@ extend(MultiplierReward, Reward, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
+};
+extend(Achievement, Entity, {});
+
+var AutocheckAchievement = function(game, name) {
+	Achievement.call(this, game, name);
 	game.on('tick', this.Check, this, TUNING.TICKS_PER_ACHIEVEMENT_CHECK);
 };
-extend(Achievement, Entity, {
+extend(AutocheckAchievement, Achievement, {
 	Check: function() {
 		if (!this.obtainable.GetObtained()) {
 			this.CheckAchievement();
@@ -484,14 +489,25 @@ extend(Achievement, Entity, {
 });
 
 var AmountAchievement = function(game, name, entity, value) {
-	Achievement.call(this, game, name);
+	AutocheckAchievement.call(this, game, name);
 	this.entity = entity;
 	this.value = value;
 };
-extend(AmountAchievement, Achievement, {
+extend(AmountAchievement, AutocheckAchievement, {
 	CheckAchievement: function() {
 		if (this.entity.amount.GetMax() >= this.value) {
 			this.obtainable.Obtain();
 		}
+	}
+});
+
+var ObtainableAchievement = function(game, name, entity) {
+	Achievement.call(this, game, name);
+	this.entity = entity;
+	this.entity.on('obtain', this.OnObtain, this);
+};
+extend(ObtainableAchievement, Achievement, {
+	OnObtain: function() {
+		this.obtainable.Obtain();
 	}
 });
