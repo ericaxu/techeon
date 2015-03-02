@@ -197,7 +197,8 @@ var GAME = (function() {
 			.rewardable.AddReward(new MultiplierReward(game, game.data.resources.code, 0.03, 0))
 	);
 
-	//Achievements
+	// Achievements
+	// $$$
 	game.data.upgrades.millionaire = game.AddAchievement(new AmountAchievement(game, "millionaire", game.data.resources.money, 1000000)
 			.describable.SetTitle("Millionaire")
 			.describable.SetDescription("Get all the chicks you want.")
@@ -209,6 +210,122 @@ var GAME = (function() {
 	game.data.upgrades.trillionaire = game.AddAchievement(new AmountAchievement(game, "trillionaire", game.data.resources.money, 1000000000000)
 			.describable.SetTitle("Trillionaire")
 			.describable.SetDescription("(Bill Gates + Mark Zuckerberg + Sean Parker + Elon Musk) * 7.899")
+	);
+
+	// Interns
+	game.data.upgrades.intern1 = game.AddAchievement(new AmountAchievement(game, "intern1", game.data.generators.intern, 1)
+			.describable.SetTitle("The Internship")
+			.describable.SetDescription("Have 1 intern.")
+	);
+	game.data.upgrades.intern50 = game.AddAchievement(new AmountAchievement(game, "intern50", game.data.generators.intern, 50)
+			.describable.SetTitle("Class of 2015")
+			.describable.SetDescription("Have 50 interns.")
+	);
+	game.data.upgrades.intern100 = game.AddAchievement(new AmountAchievement(game, "intern100", game.data.generators.intern, 100)
+			.describable.SetTitle("Intern catastrophe")
+			.describable.SetDescription("Have 100 interns.")
+	);
+	game.data.upgrades.intern150 = game.AddAchievement(new AmountAchievement(game, "intern150", game.data.generators.intern, 150)
+			.describable.SetTitle("Internapocalypse")
+			.describable.SetDescription("Have 150 interns.")
+	);
+	game.data.upgrades.intern200 = game.AddAchievement(new AmountAchievement(game, "intern200", game.data.generators.intern, 200)
+			.describable.SetTitle("University campus")
+			.describable.SetDescription("Have 200 interns.")
+	);
+
+	// Junior
+	game.data.upgrades.junior1 = game.AddAchievement(new AmountAchievement(game, "junior1", game.data.generators.junior, 1)
+			.describable.SetTitle("Fresh grad")
+			.describable.SetDescription("Have 1 junior programmer.")
+	);
+	game.data.upgrades.junior50 = game.AddAchievement(new AmountAchievement(game, "junior50", game.data.generators.junior, 50)
+			.describable.SetTitle("Young Professionals")
+			.describable.SetDescription("Have 50 junior programmers.")
+	);
+	game.data.upgrades.junior100 = game.AddAchievement(new AmountAchievement(game, "junior100", game.data.generators.junior, 100)
+			.describable.SetTitle("Hacky code")
+			.describable.SetDescription("Have 100 junior programmers.")
+	);
+
+	// Contractor
+	game.data.upgrades.contractor1 = game.AddAchievement(new AmountAchievement(game, "contractor1", game.data.generators.contractor, 1)
+			.describable.SetTitle("Working remote")
+			.describable.SetDescription("Have 1 contractor.")
+	);
+	game.data.upgrades.contractor50 = game.AddAchievement(new AmountAchievement(game, "contractor50", game.data.generators.contractor, 50)
+			.describable.SetTitle("Outsourced")
+			.describable.SetDescription("Have 50 contractors.")
+	);
+
+	// Programmer
+	game.data.upgrades.programmer1 = game.AddAchievement(new AmountAchievement(game, "programmer1", game.data.generators.programmer, 1)
+			.describable.SetTitle("Ready to code")
+			.describable.SetDescription("Have 1 programmer.")
+	);
+	game.data.upgrades.programmer50 = game.AddAchievement(new AmountAchievement(game, "programmer50", game.data.generators.programmer, 50)
+			.describable.SetTitle("Code monkeys")
+			.describable.SetDescription("Have 50 programmers.")
+	);
+
+	// Senior
+	game.data.upgrades.senior1 = game.AddAchievement(new AmountAchievement(game, "senior1", game.data.generators.senior, 1)
+			.describable.SetTitle("Slow and steady")
+			.describable.SetDescription("Have 1 senior programmer.")
+	);
+
+	// Architect
+	game.data.upgrades.architect1 = game.AddAchievement(new AmountAchievement(game, "architect1", game.data.generators.architect, 1)
+			.describable.SetTitle("Refactor")
+			.describable.SetDescription("Have 1 software architect.")
+	);
+	game.data.upgrades.architect50 = game.AddAchievement(new AmountAchievement(game, "architect50", game.data.generators.architect, 50)
+			.describable.SetTitle("Young Professionals")
+			.describable.SetDescription("Have 50 software architects.")
+	);
+	game.data.upgrades.architect100 = game.AddAchievement(new AmountAchievement(game, "architect100", game.data.generators.architect, 100)
+			.describable.SetTitle("Hacky code")
+			.describable.SetDescription("Have 100 software architects.")
+	);
+
+	// Team leads
+	game.data.upgrades.teamlead1 = game.AddAchievement(new AmountAchievement(game, "teamlead1", game.data.generators.teamlead, 1)
+			.describable.SetTitle("Leadership")
+			.describable.SetDescription("Have 1 team lead.")
+	);
+	game.data.upgrades.teamlead50 = game.AddAchievement(new AmountAchievement(game, "teamlead50", game.data.generators.teamlead, 50)
+			.describable.SetTitle("50 shades of grey")
+			.describable.SetDescription("Have 50 team leads.")
+	);
+	game.data.upgrades.teamlead100 = game.AddAchievement(new AmountAchievement(game, "teamlead100", game.data.generators.teamlead, 100)
+			.describable.SetTitle("Too many teams")
+			.describable.SetDescription("Have 100 team leads.")
+	);
+	game.data.upgrades.teamlead150 = game.AddAchievement(new AmountAchievement(game, "teamlead150", game.data.generators.teamlead, 150)
+			.describable.SetTitle("A team for almost everything")
+			.describable.SetDescription("Have 150 team leads.")
+	);
+	game.data.upgrades.teamlead200 = game.AddAchievement(new AmountAchievement(game, "teamlead200", game.data.generators.teamlead, 200)
+			.describable.SetTitle("Who are we leading, anyway?")
+			.describable.SetDescription("Have 200 team leads.")
+	);
+
+	// VP
+	game.data.upgrades.vpeng1 = game.AddAchievement(new AmountAchievement(game, "vpeng1", game.data.generators.vpeng, 1)
+			.describable.SetTitle("The one and only")
+			.describable.SetDescription("Have 1 VP of Engineering.")
+	);
+	game.data.upgrades.vpeng10 = game.AddAchievement(new AmountAchievement(game, "vpeng10", game.data.generators.vpeng, 10)
+			.describable.SetTitle("10 and counting")
+			.describable.SetDescription("Have 10 VPs of Engineering.")
+	);
+	game.data.upgrades.vpeng50 = game.AddAchievement(new AmountAchievement(game, "vpeng50", game.data.generators.vpeng, 50)
+			.describable.SetTitle("50 under 50")
+			.describable.SetDescription("Have 50 VPs of Engineering.")
+	);
+	game.data.upgrades.vpeng100 = game.AddAchievement(new AmountAchievement(game, "vpeng100", game.data.generators.vpeng, 100)
+			.describable.SetTitle("VPs, VPs everywhere")
+			.describable.SetDescription("Have 100 VPs of Engineering.")
 	);
 
 	return game;
