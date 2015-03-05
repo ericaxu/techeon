@@ -149,46 +149,6 @@ extend(Purchasable, Component, {
 });
 
 /**
- * Restrictable
- */
-var Restrictable = function(entity) {
-	Component.call(this, entity);
-	entity.restrictable = this;
-	this.restrictions = [];
-	this.available = false;
-	this.entity.bridge('available', 'update');
-	this.entity.bridge('unavailable', 'update');
-	this.entity.game.on('tick', this.UpdateAvailable, this);
-};
-extend(Restrictable, Component, {
-	UpdateAvailable: function() {
-		var available = each(this.restrictions, function(restriction) {
-			return truefalse(restriction.Check());
-		}, this);
-		if (this.available != available) {
-			this.available = available;
-			if (available) {
-				this.entity.trigger('available', this.entity);
-			} else {
-				this.entity.trigger('unavailable', this.entity);
-			}
-		}
-	},
-	AddRestriction: function(restriction) {
-		this.restrictions.push(restriction);
-		return this.entity;
-	},
-	ClearRestrictions: function() {
-		this.restrictions.clear();
-		this.entity.game.off('tick', this.Check);
-		return this.entity;
-	},
-	Available: function() {
-		return this.available;
-	}
-});
-
-/**
  * PurchasableRestrictable
  */
 var PurchasableRestrictable = function(entity) {
@@ -203,6 +163,7 @@ extend(PurchasableRestrictable, Component, {
 			this.entity.restrictable.AddRestriction(
 				new AmountRestriction(this.entity.game,
 					this.entity.game.GetResource(resource),
+					2,
 					price * TUNING.PURCHASABLE_DEFAULT_RESTRICT_FACTOR));
 		}, this);
 		return this.entity;

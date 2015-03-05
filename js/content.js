@@ -59,6 +59,7 @@ var GAME = (function() {
 			.describable.SetDescription("Fresh out of college, will code for food.")
 			.purchasable.SetBuyPrice("money", 500)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.intern, 1, 1))
 			.SetRateSecond("code", 1)
 	);
 	game.data.generators.contractor = game.AddGenerator(new CodeGenerator(game, "contractor")
@@ -66,6 +67,7 @@ var GAME = (function() {
 			.describable.SetDescription("Like a normal employee, except you don't have to pay for his insurance.")
 			.purchasable.SetBuyPrice("money", 2000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.junior, 1, 1))
 			.SetRateSecond("code", 5)
 	);
 	game.data.generators.programmer = game.AddGenerator(new CodeGenerator(game, "programmer")
@@ -73,6 +75,7 @@ var GAME = (function() {
 			.describable.SetDescription("Coffee in, code out.")
 			.purchasable.SetBuyPrice("money", 10000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.contractor, 1, 1))
 			.SetRateSecond("code", 15)
 	);
 	game.data.generators.senior = game.AddGenerator(new CodeGenerator(game, "senior")
@@ -80,6 +83,7 @@ var GAME = (function() {
 			.describable.SetDescription("No no no, you're doing it all wrong!")
 			.purchasable.SetBuyPrice("money", 50000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.programmer, 1, 1))
 			.SetRateSecond("code", 35)
 	);
 	game.data.generators.architect = game.AddGenerator(new CodeGenerator(game, "architect")
@@ -87,6 +91,7 @@ var GAME = (function() {
 			.describable.SetDescription("A pro.")
 			.purchasable.SetBuyPrice("money", 200000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.senior, 1, 1))
 			.SetRateSecond("code", 100)
 	);
 	game.data.generators.teamlead = game.AddGenerator(new CodeGenerator(game, "teamlead")
@@ -94,6 +99,7 @@ var GAME = (function() {
 			.describable.SetDescription("Manages programmers, and code on spare time (Yes they have a lot of spare time).")
 			.purchasable.SetBuyPrice("money", 1000000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.architect, 1, 1))
 			.SetRateSecond("code", 500)
 	);
 	game.data.generators.vpeng = game.AddGenerator(new CodeGenerator(game, "vpeng")
@@ -101,6 +107,7 @@ var GAME = (function() {
 			.describable.SetDescription("Codes really fast.")
 			.purchasable.SetBuyPrice("money", 5000000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.teamlead, 1, 1))
 			.SetRateSecond("code", 1000)
 	);
 
@@ -109,7 +116,7 @@ var GAME = (function() {
 			.describable.SetTitle("Web app")
 			.describable.SetDescription("HTML 5, CSS 3, and JavaScript.")
 			.purchasable.SetBuyPrice("code", 15)
-			.restrictable.AddRestriction(new AmountRestriction(game, game.GetResource('code'), 1))
+			.restrictable.AddRestriction(new AmountRestriction(game, game.GetResource('code'), 1, 1))
 			.SetRateSecond("money", 1)
 	);
 	game.data.generators.abtesting = game.AddGenerator(new MoneyGenerator(game, "abtesting")
@@ -117,6 +124,7 @@ var GAME = (function() {
 			.describable.SetDescription("User preferences proven by analytics.")
 			.purchasable.SetBuyPrice("code", 100)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.webapp, 1, 1))
 			.SetRateSecond("money", 5)
 	);
 	game.data.generators.emailcampaign = game.AddGenerator(new MoneyGenerator(game, "emailcampaign")
@@ -124,6 +132,7 @@ var GAME = (function() {
 			.describable.SetDescription("The fine line between email campaign and spamming.")
 			.purchasable.SetBuyPrice("code", 600)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.abtesting, 1, 1))
 			.SetRateSecond("money", 12)
 	);
 	game.data.generators.desktop = game.AddGenerator(new MoneyGenerator(game, "desktop")
@@ -131,6 +140,7 @@ var GAME = (function() {
 			.describable.SetDescription("Applications that won't run on a Chromebook.")
 			.purchasable.SetBuyPrice("code", 2500)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.emailcampaign, 1, 1))
 			.SetRateSecond("money", 30)
 	);
 	game.data.generators.mobileapp = game.AddGenerator(new MoneyGenerator(game, "mobileapp")
@@ -138,6 +148,7 @@ var GAME = (function() {
 			.describable.SetDescription("The reason why your phone battery never lasts for more than one day.")
 			.purchasable.SetBuyPrice("code", 12000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.desktop, 1, 1))
 			.SetRateSecond("money", 100)
 	);
 	game.data.generators.seoalgo = game.AddGenerator(new MoneyGenerator(game, "seoalgo")
@@ -145,6 +156,7 @@ var GAME = (function() {
 			.describable.SetDescription("A thousand ways to fool a search engine.")
 			.purchasable.SetBuyPrice("code", 100000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.mobileapp, 1, 1))
 			.SetRateSecond("money", 1000)
 	);
 	game.data.generators.aisales = game.AddGenerator(new MoneyGenerator(game, "aisales")
@@ -152,6 +164,7 @@ var GAME = (function() {
 			.describable.SetDescription("Why hire a human salesperson when robots can close deals too?")
 			.purchasable.SetBuyPrice("code", 1000000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.seoalgo, 1, 1))
 			.SetRateSecond("money", 12000)
 	);
 	game.data.generators.catvidgen = game.AddGenerator(new MoneyGenerator(game, "catvidgen")
@@ -159,6 +172,7 @@ var GAME = (function() {
 			.describable.SetDescription("Because this is the merriest way to make money.")
 			.purchasable.SetBuyPrice("code", 10000000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.aisales, 1, 1))
 			.SetRateSecond("money", 999999)
 	);
 
@@ -190,7 +204,7 @@ var GAME = (function() {
 			.describable.SetDescription("Something for your interns to snack on. Be careful of greasy keyboards.")
 			.purchasable.SetBuyPrice("money", 500)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
-			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.intern, 1))
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.intern, 1, 2))
 			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.intern, 0.5, 0))
 	);
 	game.data.upgrades.coffee = game.AddUpgrade(new Upgrade(game, "coffee")
@@ -199,7 +213,7 @@ var GAME = (function() {
 			.describable.SetDescription("Programmers are creatures who convert coffee to code.")
 			.purchasable.SetBuyPrice("money", 1000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
-			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.programmer, 1))
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.programmer, 1, 2))
 			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.programmer, 0.5, 0))
 	);
 	game.data.upgrades.coffee = game.AddUpgrade(new Upgrade(game, "coffee")
@@ -208,7 +222,7 @@ var GAME = (function() {
 			.describable.SetDescription("Programmers are creatures who convert coffee to code.")
 			.purchasable.SetBuyPrice("money", 1000)
 			.purchasablerestrictable.AddDefaultPriceRestriction()
-			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.programmer, 1))
+			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.programmer, 1, 2))
 			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.programmer, 0.5, 0))
 	);
 	game.data.upgrades.cateredlunch = game.AddUpgrade(new Upgrade(game, "cateredlunch")

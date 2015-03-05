@@ -152,11 +152,21 @@ UI.prototype.setupPurchasable = function(entity) {
 			$div.find('.price').text(this.formatPrice(entity));
 		}
 
-		if (entity.restrictable.Available()) {
-			showPurchasable.call(this, entity);
+		//TODO: Fix this
+		var shown = false;
+		function updatePurchasableAvailability(entity) {
+			if (!shown && entity.restrictable.GetLevel() >= 2) {
+				shown = true;
+				showPurchasable.call(this, entity);
+			} else if (entity.restrictable.GetLevel() >= 1) {
+				//showPurchasable.call(this, entity);
+				//TODO: Show black shadow?
+			}
 		}
 
-		entity.on('available', showPurchasable, this);
+		updatePurchasableAvailability.call(this, entity);
+
+		entity.on('available_change', updatePurchasableAvailability, this);
 		entity.on('affordable', function() {
 			$div.removeClass('unaffordable');
 		}, this);

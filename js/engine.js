@@ -519,23 +519,65 @@ extend(Reward, null, {
 });
 
 /**
+ * Restrictable
+ */
+var Restrictable = function(entity) {
+	Component.call(this, entity);
+	entity.restrictable = this;
+	this.restrictions = [];
+	this.level = 0;
+	this.entity.bridge('available_change', 'update');
+	this.entity.bridge('available_change', 'update');
+	this.entity.game.on('tick', this.UpdateAvailable, this);
+};
+extend(Restrictable, Component, {
+	UpdateAvailable: function() {
+		var level = Number.MAX_VALUE;
+		each(this.restrictions, function(restriction) {
+			if (!restriction.Check()) {
+				level = Math.min(level, restriction.GetLevel());
+			}
+		}, this);
+		if (this.level != level) {
+			this.level = level;
+			this.entity.trigger('available_change', this.entity);
+		}
+	},
+	AddRestriction: function(restriction) {
+		this.restrictions.push(restriction);
+		return this.entity;
+	},
+	ClearRestrictions: function() {
+		this.restrictions.clear();
+		return this.entity;
+	},
+	GetLevel: function() {
+		return this.level;
+	}
+});
+
+/**
  * Restriction
  */
-var Restriction = function(game, entity) {
+var Restriction = function(game, entity, level) {
 	this.game = game;
 	this.entity = entity;
+	this.level = level;
 };
 extend(Restriction, null, {
 	Check: function() {
 		return true;
+	},
+	GetLevel: function() {
+		return this.level;
 	}
 });
 
 /**
  * AmountRestriction
  */
-var AmountRestriction = function(game, entity, amount, current) {
-	Restriction.call(this, game, entity);
+var AmountRestriction = function(game, entity, level, amount, current) {
+	Restriction.call(this, game, entity, level);
 	this.amount = amount;
 	this.current = current;
 };
@@ -551,8 +593,8 @@ extend(AmountRestriction, Restriction, {
 /**
  * ObtainableRestriction
  */
-var ObtainableRestriction = function(game, entity, current) {
-	Restriction.call(this, game, entity);
+var ObtainableRestriction = function(game, entity, level, current) {
+	Restriction.call(this, game, entity, level);
 	this.current = current;
 };
 extend(ObtainableRestriction, Restriction, {
