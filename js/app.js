@@ -184,8 +184,16 @@ UI.prototype.setupPurchasable = function(entity) {
 };
 
 UI.prototype.setupGenerators = function() {
+	this.$teamContainer.hide();
 	each(this.game.GetGenerators(), function(generator) {
 		this.setupPurchasable(generator);
+	}, this);
+	this.game.data.upgrades.hire.on('update', function(hire) {
+		if(hire.obtainable.GetObtained()) {
+			this.$teamContainer.show();
+		} else {
+			this.$teamContainer.hide();
+		}
 	}, this);
 };
 

@@ -535,7 +535,7 @@ extend(Restrictable, Component, {
 		var level = Number.MAX_VALUE;
 		each(this.restrictions, function(restriction) {
 			if (!restriction.Check()) {
-				level = Math.min(level, restriction.GetLevel());
+				level = Math.min(level, restriction.GetLevel() - 1);
 			}
 		}, this);
 		if (this.level != level) {

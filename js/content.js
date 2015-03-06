@@ -51,7 +51,7 @@ var GAME = (function() {
 			.describable.SetTitle("Intern")
 			.describable.SetDescription("Don't really know anything and breaks the build every day.")
 			.purchasable.SetBuyPrice("money", 100)
-			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.restrictable.AddRestriction(new AmountRestriction(game, game.GetResource('money'), 1, 1))
 			.SetRateSecond("code", 0.2)
 	);
 	game.data.generators.junior = game.AddGenerator(new CodeGenerator(game, "junior")
@@ -195,8 +195,8 @@ var GAME = (function() {
 			.describable.SetTitle("Job postings")
 			.describable.AddEffect("Able to hire people.")
 			.describable.SetDescription("Like a boss.")
-			.purchasable.SetBuyPrice("money", 200)
-			.purchasablerestrictable.AddDefaultPriceRestriction()
+			.purchasable.SetBuyPrice("money", 100)
+			.restrictable.AddRestriction(new AmountRestriction(game, game.GetResource('money'), 1, 1))
 	);
 	game.data.upgrades.chips = game.AddUpgrade(new Upgrade(game, "chips")
 			.describable.SetTitle("Free chips")
@@ -206,15 +206,6 @@ var GAME = (function() {
 			.purchasablerestrictable.AddDefaultPriceRestriction()
 			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.intern, 1, 2))
 			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.intern, 0.5, 0))
-	);
-	game.data.upgrades.coffee = game.AddUpgrade(new Upgrade(game, "coffee")
-			.describable.SetTitle("Free coffee")
-			.describable.AddEffect("Programmers code 50% faster.")
-			.describable.SetDescription("Programmers are creatures who convert coffee to code.")
-			.purchasable.SetBuyPrice("money", 1000)
-			.purchasablerestrictable.AddDefaultPriceRestriction()
-			.restrictable.AddRestriction(new AmountRestriction(game, game.data.generators.programmer, 1, 2))
-			.rewardable.AddReward(new MultiplierReward(game, game.data.generators.programmer, 0.5, 0))
 	);
 	game.data.upgrades.coffee = game.AddUpgrade(new Upgrade(game, "coffee")
 			.describable.SetTitle("Free coffee")
