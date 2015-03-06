@@ -56,15 +56,16 @@ UI.prototype.updateDollarStats = function() {
 UI.prototype.renderTooltip = function(entity, $container) {
 	$container.empty();
 	addEl('h4', $container, '', entity.describable.GetTitle());
-	if (entity instanceof Upgrade || (entity.amount !== undefined && entity.amount.GetMax() > 0)) {
+	if (entity.amount === undefined || entity.amount.GetMax() > 1) {
 		var effects = entity.describable.GetEffects();
-		if (effects.length > 1) {
+		if (effects.length == 1) {
+			addEl('p', $container, 'effect', effects[0]);
+		}
+		else if (effects.length > 1) {
 			var $ul = addEl('ul', $container);
 			each(effects, function(effect) {
 				addEl('li', $ul, 'effect', effect);
-			})
-		} else {
-			addEl('p', $container, 'effect', effects[0]);
+			});
 		}
 	}
 	addEl('p', $container, 'description', entity.describable.GetDescription());
@@ -121,22 +122,22 @@ UI.prototype.setupPurchasable = function(entity) {
 			$div.on('mouseenter', $.proxy(function() {
 				$div.off('mousemove').on('mousemove', function(e) {
 					var offsetTop = Math.min(Math.max(0, e.pageY - $tooltip.outerHeight() / 2), $(window).height() - $tooltip.outerHeight());
-					$tooltip.offset({ top: offsetTop });
+					$tooltip.offset({top: offsetTop});
 				});
 				this.renderTooltip(entity, $tooltipContent);
 				entity.on('rate_change', updateTooltip);
 				if (entity instanceof MoneyGenerator) {
-					$tooltip.offset({ left: $div.outerWidth() + this.config.pixelsBetweenTooltip });
+					$tooltip.offset({left: $div.outerWidth() + this.config.pixelsBetweenTooltip});
 				} else if (entity instanceof CodeGenerator) {
-					$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
+					$tooltip.offset({left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip});
 				} else if (entity instanceof Upgrade) {
-					$tooltip.offset({ left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip });
+					$tooltip.offset({left: $div.offset().left - $tooltip.outerWidth() - this.config.pixelsBetweenTooltip});
 				}
 				$tooltip.show();
 			}, this));
 
 			$div.on('mouseleave', function() {
-				$tooltip.offset({ left: 0, top: 0 }).hide();
+				$tooltip.offset({left: 0, top: 0}).hide();
 				$div.off('mousemove');
 				entity.off('amount_change', updateTooltip);
 			});
@@ -154,6 +155,7 @@ UI.prototype.setupPurchasable = function(entity) {
 
 		//TODO: Fix this
 		var shown = false;
+
 		function updatePurchasableAvailability(entity) {
 			if (!shown && entity.restrictable.GetLevel() >= 2) {
 				shown = true;
@@ -189,7 +191,7 @@ UI.prototype.setupGenerators = function() {
 		this.setupPurchasable(generator);
 	}, this);
 	this.game.data.upgrades.hire.on('update', function(hire) {
-		if(hire.obtainable.GetObtained()) {
+		if (hire.obtainable.GetObtained()) {
 			this.$teamContainer.show();
 		} else {
 			this.$teamContainer.hide();
@@ -206,18 +208,18 @@ UI.prototype.setupUpgrades = function() {
 UI.prototype.setupPopup = function() {
 	// Closing popup
 	var $popup = $('.popup');
-	$('.wrapper, .close-btn').on('click', function () {
+	$('.wrapper, .close-btn').on('click', function() {
 		$popup.hide();
 	});
 
 	// Allow user to close popup with ESC key
-	$(document).keydown(function (e) {
+	$(document).keydown(function(e) {
 		if (e.keyCode == 27) {
 			$popup.hide();
 		}
 	});
 
-	$('.popup-content').click(function (e) {
+	$('.popup-content').click(function(e) {
 		e.stopPropagation();
 	});
 };
@@ -288,23 +290,21 @@ UI.prototype.fillAchievementInfo = function(achievement, $div) {
 		alt: achievement.describable.GetTitle()
 	});
 	var $tooltip = $('.purchasable-tooltip-wrapper');
-	$div.off('mouseenter').on('mouseenter', function() {
+	$div.off('mouseenter').on('mouseenter', $.proxy(function() {
 		$div.off('mousemove').on('mousemove', function(e) {
 			var offsetTop = Math.min(Math.max(0, e.pageY - $tooltip.outerHeight() / 2), $(window).height() - $tooltip.outerHeight());
 			var offsetLeft = Math.min(Math.max(0, e.pageX + 30), $(window).width() - $tooltip.outerWidth());
-			$tooltip.offset({ top: offsetTop, left: offsetLeft });
+			$tooltip.offset({top: offsetTop, left: offsetLeft});
 		});
 
 		// show tooltip
 		var $tooltipContent = $tooltip.find('.inner-border-2');
-		$tooltipContent.empty();
-		addEl('h4', $tooltipContent, '', achievement.describable.GetTitle());
-		addEl('p', $tooltipContent, '', achievement.describable.GetDescription());
+		this.renderTooltip(achievement, $tooltipContent);
 		$tooltip.show();
-	});
+	}, this));
 
 	$div.off('mouseleave').on('mouseleave', function() {
-		$tooltip.offset({ left: 0, top: 0 }).hide();
+		$tooltip.offset({left: 0, top: 0}).hide();
 		$div.off('mousemove');
 	});
 };
@@ -348,7 +348,7 @@ UI.prototype.setupCodeClickListener = function() {
 	//		this.updateLinesOfCodeStats(GAME);
 	//	}
 	//}, this));
-	$('#write-code-button').on('click', $.proxy(function () {
+	$('#write-code-button').on('click', $.proxy(function() {
 		this.game.GetGenerator('click').Click();
 	}, this));
 };

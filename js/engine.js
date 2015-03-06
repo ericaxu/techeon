@@ -285,6 +285,7 @@ var Describable = function(entity) {
 	Component.call(this, entity);
 	entity.describable = this;
 	this.title = '';
+	this.plural = '';
 	this.effects = [];
 	this.description = '';
 	this.detail = '';
@@ -293,6 +294,7 @@ var Describable = function(entity) {
 extend(Describable, Component, {
 	SetTitle: function(title) {
 		this.title = title;
+		this.plural = title + 's';
 		return this.entity;
 	},
 	GetTitle: function() {
@@ -329,6 +331,13 @@ extend(Describable, Component, {
 	},
 	GetIcon: function() {
 		return this.icon;
+	},
+	SetPlural: function(plural) {
+		this.plural = plural;
+		return this.entity;
+	},
+	GetPlural: function() {
+		return this.plural;
 	}
 });
 

@@ -459,6 +459,11 @@ extend(AmountAchievement, AutocheckAchievement, {
 		if (this.entity.amount.GetMax() >= this.value) {
 			this.obtainable.Obtain();
 		}
+	},
+	AddDefaultEffect: function() {
+		var name = (this.value > 1 ? this.entity.describable.GetPlural() : this.entity.describable.GetTitle());
+		this.describable.AddEffect('Purchase ' + this.value + ' ' + name + '.');
+		return this;
 	}
 });
 
