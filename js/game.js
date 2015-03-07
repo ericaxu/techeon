@@ -347,6 +347,9 @@ extend(Generator, Entity, {
 			var rateFormatter = this.game.GetResource(resource).rateFormatter;
 			if (rateFormatter) {
 				this.describable.AddEffect(rateFormatter(this.GetSingleRate(resource)));
+				if (this.amount.Get() > 1) {
+					this.describable.AddEffect("Total " + rateFormatter(this.GetRate(resource)));
+				}
 			}
 		}
 	},
