@@ -131,7 +131,7 @@ function addEl(tag, parent, className, text, attr) {
 	return $el;
 }
 
-function readableBigNumber(x, digits) {
+function readableBigNumber(x, digits, overridedigits) {
 	var million = 1000000;
 	var billion = million * 1000;
 	var trillion = billion * 1000;
@@ -141,20 +141,24 @@ function readableBigNumber(x, digits) {
 		digits = 0;
 	}
 
+	if (overridedigits === undefined) {
+		overridedigits = 2;
+	}
+
 	var factor = Math.pow(10, digits);
 	x = Math.round(x * factor) / factor;
 
 	if (x >= quadrillion) {
-		return formatNumWithCommas((x / quadrillion).toFixed(2)) + ' quadrillion';
+		return formatNumWithCommas((x / quadrillion).toFixed(overridedigits)) + ' quadrillion';
 	}
 	if (x >= trillion) {
-		return formatNumWithCommas((x / trillion).toFixed(2)) + ' trillion';
+		return formatNumWithCommas((x / trillion).toFixed(overridedigits)) + ' trillion';
 	}
 	if (x >= billion) {
-		return formatNumWithCommas((x / billion).toFixed(2)) + ' billion';
+		return formatNumWithCommas((x / billion).toFixed(overridedigits)) + ' billion';
 	}
 	if (x >= million) {
-		return formatNumWithCommas((x / million).toFixed(2)) + ' million';
+		return formatNumWithCommas((x / million).toFixed(overridedigits)) + ' million';
 	}
 
 	return formatNumWithCommas(x.toFixed(digits));
@@ -162,6 +166,14 @@ function readableBigNumber(x, digits) {
 
 function formatNumWithCommas(x) {
 	return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatDollar(x) {
+	if (x < 10) {
+		return '$ ' + readableBigNumber(x, 1);
+	} else {
+		return '$ ' + readableBigNumber(x);
+	}
 }
 
 function formatDollar(x) {

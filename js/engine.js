@@ -292,6 +292,14 @@ var Describable = function(entity) {
 	this.icon = '';
 };
 extend(Describable, Component, {
+	Set: function(title, description, effect) {
+		this.SetTitle(title);
+		this.SetDescription(description);
+		if (effect) {
+			this.AddEffect(effect);
+		}
+		return this.entity;
+	},
 	SetTitle: function(title) {
 		this.title = title;
 		this.plural = title + 's';

@@ -407,20 +407,14 @@ extend(BaseRateReward, Reward, {
 		this.game.trigger('reward_baserate', this, this.resource, this.amount);
 	}
 });
-var MultiplierReward = function(game, entity, multiplier_add, multiplier_multiply) {
+var MultiplierReward = function(game, entity, multiplier) {
 	Reward.call(this, game);
 	this.entity = entity;
-	this.multiplier_add = multiplier_add;
-	this.multiplier_multiply = multiplier_multiply;
+	this.multiplier = multiplier;
 };
 extend(MultiplierReward, Reward, {
 	Reward: function() {
-		if (this.multiplier_add) {
-			this.entity.multiplier.Add(this.multiplier_add);
-		}
-		if (this.multiplier_multiply) {
-			this.entity.multiplier.Mult(this.multiplier_multiply);
-		}
+		this.entity.multiplier.Mult(this.multiplier);
 		this.game.trigger('reward_multiplier', this, this.resource);
 	}
 });
@@ -460,9 +454,19 @@ extend(AmountAchievement, AutocheckAchievement, {
 			this.obtainable.Obtain();
 		}
 	},
-	AddDefaultEffect: function() {
+	AddDefaultPurchaseEffect: function() {
 		var name = (this.value > 1 ? this.entity.describable.GetPlural() : this.entity.describable.GetTitle());
 		this.describable.AddEffect('Purchase ' + this.value + ' ' + name + '.');
+		return this;
+	},
+	AddDefaultProduceEffect: function() {
+		var name = (this.value > 1 ? this.entity.describable.GetPlural() : this.entity.describable.GetTitle());
+		if(name == '$') {
+			this.describable.AddEffect('Make $ ' + readableBigNumber(this.value, 0, 0) + '.');
+		}
+		else {
+			this.describable.AddEffect('Produce ' + readableBigNumber(Math.ceil(this.value), 0, 0) + ' ' + name + '.');
+		}
 		return this;
 	}
 });
