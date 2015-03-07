@@ -226,7 +226,8 @@ extend(ObtainablePurchasable, Component, {
  */
 var ExponentialAmountPurchasable = function(entity) {
 	Component.call(this, entity);
-	entity.AddComponent(AmountPurchasable);
+	entity.AddComponent(Amount);
+	entity.AddComponent(Purchasable);
 	this.entity.exponentialamountpurchasable = this;
 	this.entity.purchasable.GetSellPrice = bind(this.GetSellPrice, this);
 	this.entity.purchasable.GetBuyPrice = bind(this.GetBuyPrice, this);
@@ -242,6 +243,7 @@ var ExponentialAmountPurchasable = function(entity) {
 extend(ExponentialAmountPurchasable, Component, {
 	SetExponentialFactor: function(factor) {
 		this.factor = factor;
+		return this.entity;
 	},
 	GetBuyPrice: function() {
 		var price = this.entity.purchasable.GetBaseBuyPrice();
@@ -445,25 +447,13 @@ extend(ModifierReward, Reward, {
 	Reward: function() {
 		this.entity.modifiable.AddModifier(this.modifier);
 		this.game.trigger('reward_modifier', this, this.entity, this.modifier);
-		if(this.upgrade) {
+		if (this.upgrade) {
 			this.entity.on('modifier_remove', function(entity, modifier) {
-				if(modifier === this.modifier) {
+				if (modifier === this.modifier) {
 					this.upgrade.obtainable.UnObtain();
 				}
 			}, this);
 		}
-	}
-});
-
-var WhippingModifier = function(game, ticks) {
-	Modifier.call(this, game, "whipped", ticks);
-};
-extend(WhippingModifier, Modifier, {
-	Activate: function(entity) {
-		entity.multiplier.Mult(20);
-	},
-	Deactivate: function(entity) {
-		entity.multiplier.Mult(1/20);
 	}
 });
 

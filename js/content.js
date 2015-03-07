@@ -3,6 +3,19 @@ var CodeGenerator = function(game, name) {
 };
 extend(CodeGenerator, Generator, {});
 
+var InternGenerator = function(game, name) {
+	CodeGenerator.call(this, game, name);
+	this.escaped = 0;
+	this.loader.AddElement('escaped');
+	this.on('escape', this.Escaped, this);
+};
+extend(InternGenerator, CodeGenerator, {
+	Escaped: function() {
+		this.escaped++;
+		this.trigger('update', this);
+	}
+});
+
 var MoneyGenerator = function(game, name) {
 	Generator.call(this, game, name);
 };
@@ -25,6 +38,59 @@ extend(ClickGenerator, Generator, {
 		if (this.clicked) {
 			Generator.prototype.OnTick.call(this, true);
 			this.clicked = false;
+		}
+	}
+});
+
+var WhippingModifier = function(game, ticks, tickrate, callback) {
+	Modifier.call(this, game, 'whipped', ticks);
+	this.multiplier = 1;
+	this.tickrate = tickrate;
+	this.callback = callback;
+};
+extend(WhippingModifier, Modifier, {
+	SetLevel: function(multiplier) {
+		this.multiplier = multiplier;
+	},
+	Activate: function(entity) {
+		entity.multiplier.Mult(this.multiplier);
+	},
+	Deactivate: function(entity) {
+		entity.multiplier.Div(this.multiplier);
+	},
+	Tick: function(modifiable) {
+		var ticks = modifiable.modifiers[this.name];
+		if (this.callback && ticks % this.tickrate == 0) {
+			this.callback(this.game);
+		}
+		return Modifier.prototype.Tick.call(this, modifiable);
+	}
+});
+
+var WhippingAchievement = function(game, name, entity, count) {
+	Achievement.call(this, game, name);
+	this.entity = entity;
+	this.count = count;
+	this.entity.on('modifier_add', this.Check, this);
+};
+extend(WhippingAchievement, Achievement, {
+	Check: function() {
+		if (this.entity.modifiable.ModifierTimeCount("whipped") >= this.count) {
+			this.obtainable.Obtain();
+		}
+	}
+});
+
+var EscapeAchievement = function(game, name, entity, count) {
+	Achievement.call(this, game, name);
+	this.entity = entity;
+	this.count = count;
+	this.entity.on('update', this.Check, this);
+};
+extend(EscapeAchievement, Achievement, {
+	Check: function() {
+		if (this.entity.escaped >= this.count) {
+			this.obtainable.Obtain();
 		}
 	}
 });
@@ -59,7 +125,7 @@ var GAME = (function() {
 
 		//Hires
 		{
-			generators.intern = game.AddGenerator(new CodeGenerator(game, "intern")
+			generators.intern = game.AddGenerator(new InternGenerator(game, "intern")
 					.describable.Set("Intern", "Don't really know anything and breaks the build every day.")
 					.purchasable.SetBuyPrice("money", 100)
 					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 1, 1))
@@ -282,14 +348,15 @@ var GAME = (function() {
 					restrictamount: 30,
 					multiplier: 2
 				},
-				new Upgrade(game, "overtime")
-					.describable.SetTitle("Paid Overtime")
-					.describable.AddEffect("Interns starts coding with 1 more line per second.")
-					.describable.SetDescription("Overtime is paid 1.5x regular wages. Interns have student loans to pay. Win-win?")
-					.purchasable.SetBuyPrice("money", 1000000)
+				new Upgrade(game, "internwhip")
+					.describable.Set("Whip the interns", "In reality, you're really just whipping the ground to scare them to work faster.",
+					"Interns code 20 times faster for 10 minutes, but there's a small chance for an intern to escape every minute.")
+					.purchasable.SetBuyPrice("money", 2000)
 					.restrictable.AddRestriction(new AmountRestriction(game, generators.intern, 2, 40))
-					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 2, 1000000 / 2))
-					.rewardable.AddReward(new BaseRateReward(game, generators.intern, "code", game.GetRateTickFromSecond(1)))
+					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 2, 2000 / 2))
+					.AddComponent(Amount)
+					.AddComponent(ExponentialAmountPurchasable)
+					.exponentialamountpurchasable.SetExponentialFactor(4)
 				,
 				{
 					name: "sode",
@@ -300,6 +367,15 @@ var GAME = (function() {
 					restrictamount: 50,
 					multiplier: 2
 				},
+				new Upgrade(game, "overtime")
+					.describable.SetTitle("Paid Overtime")
+					.describable.AddEffect("Interns starts coding with 1 more line per second.")
+					.describable.SetDescription("Overtime is paid 1.5x regular wages. Interns have student loans to pay. Win-win?")
+					.purchasable.SetBuyPrice("money", 1000000)
+					.restrictable.AddRestriction(new AmountRestriction(game, generators.intern, 2, 60))
+					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 2, 1000000 / 2))
+					.rewardable.AddReward(new BaseRateReward(game, generators.intern, "code", game.GetRateTickFromSecond(1)))
+				,
 				{
 					name: "uniform",
 					title: "Free Intern Uniforms",
@@ -354,14 +430,6 @@ var GAME = (function() {
 					restrictamount: 140,
 					multiplier: 2
 				},
-				new Upgrade(game, "internwhip")
-					.describable.SetTitle("Whip the interns")
-					.describable.AddEffect("Interns code 20 times faster for 10 minutes, but there's a small chance for an intern to escape every minute.")
-					.describable.SetDescription("Interns temporarily becomes whipped interns.")
-					.purchasable.SetBuyPrice("money", 2000)
-					.restrictable.AddRestriction(new AmountRestriction(game, generators.intern, 2, 150))
-					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 2, 2000 / 2))
-				,
 				{
 					name: "scholarships",
 					title: "Scholarships",
@@ -374,7 +442,13 @@ var GAME = (function() {
 			]);
 
 			upgrades.internwhip.rewardable.AddReward(new ModifierReward(game, generators.intern,
-				new WhippingModifier(game, 5 * game.GetTicksPerSecond()), upgrades.internwhip));
+				new WhippingModifier(game, 10 * 60 * game.tps, game.tps * 60, function(game) {
+					var intern = game.data.generators.intern;
+					if (randomInt(9) == 0) {
+						intern.amount.Remove(1);
+						intern.trigger('escape', intern);
+					}
+				}), upgrades.internwhip));
 
 			createMultiplierUpgrades(generators.newgrad, [
 				{
@@ -813,8 +887,7 @@ var GAME = (function() {
 			var name = entity.GetName();
 			each(objects, function(object) {
 				var achievement = game.AddAchievement(new AmountAchievement(game, name + object.amount, entity, object.amount)
-						.describable.SetTitle(object.title)
-						.describable.SetDescription(object.description)
+						.describable.Set(object.title, object.description)
 				);
 				if (generate) {
 					achievement.AddDefaultProduceEffect();
@@ -858,7 +931,7 @@ var GAME = (function() {
 					title: "Think Like a Person",
 					description: "Achieve artificial human intelligence."
 				},
-				{amount: 3300000000000, title: "Human", description: "Size of the human DNA"}
+				{amount: 3300000000000, title: "Human", description: "Size of the human DNA."}
 			], true);
 		}
 
@@ -871,6 +944,35 @@ var GAME = (function() {
 				{amount: 150, title: "Internapocalypse", description: ""},
 				{amount: 200, title: "University Campus", description: ""}
 			]);
+			game.AddAchievement(new WhippingAchievement(game, "whip1", generators.intern, 1)
+					.describable.Set("There's A First In Everything", "Ouch!", "Whip the interns.")
+			);
+			game.AddAchievement(new WhippingAchievement(game, "whip10", generators.intern, 10)
+					.describable.Set("Faster!", "Ouch!", "Whip interns 10 times.")
+			);
+			game.AddAchievement(new WhippingAchievement(game, "whip50", generators.intern, 50)
+					.describable.Set("Intern Protest", "Ouch!", "Whip interns 50 times.")
+			);
+			game.AddAchievement(new WhippingAchievement(game, "whip100", generators.intern, 100)
+					.describable.Set("Intern Revolution", "Ouch!", "Whip interns 100 times.")
+			);
+
+			game.AddAchievement(new EscapeAchievement(game, "escape1", generators.intern, 1)
+					.describable.Set("The Great Escape", "I sure hope it doesn't impact our reputation.", "Have 1 intern escape.")
+			);
+			game.AddAchievement(new EscapeAchievement(game, "escape10", generators.intern, 10)
+					.describable.Set("Prison Break", "We're losing the herd.", "Have 10 interns escape.")
+			);
+			game.AddAchievement(new EscapeAchievement(game, "escape20", generators.intern, 20)
+					.describable.Set("Run Forrest Run", "Run for it!", "Have 20 interns escape.")
+			);
+			game.AddAchievement(new EscapeAchievement(game, "escape40", generators.intern, 40)
+					.describable.Set("Catch Me If You Can", "Pesky interns!", "Have 40 interns escape.")
+			);
+			game.AddAchievement(new EscapeAchievement(game, "escape100", generators.intern, 100)
+					.describable.Set("I'm sorry", "This isn't fun anymore", "Have 100 interns escape.")
+			);
+
 			createAmountAchievements(generators.newgrad, [
 				{amount: 1, title: "Fresh Grad", description: ""},
 				{amount: 50, title: "Hacky Code", description: ""},
@@ -988,6 +1090,10 @@ var GAME = (function() {
 		if (modifier.name == "whipped") {
 			console.log("Play sound 'whip'");
 		}
+	}, this);
+
+	game.GetGenerator("intern").on("escape", function(entity) {
+		console.log("Notify: An intern has escaped!");
 	}, this);
 
 	return game;

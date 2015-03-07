@@ -109,6 +109,13 @@ function ctxSetTimeout(func, timeout, context) {
 	return setTimeout(callback, timeout);
 }
 
+function randomInt(start, end) {
+	if(end === undefined) {
+		return Math.floor(Math.random() * (start + 1));
+	}
+	return Math.floor(Math.random() * (end - start + 1) + start);
+}
+
 function addEl(tag, parent, className, text, attr) {
 	var $el = $('<' + tag + '/>');
 

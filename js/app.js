@@ -59,7 +59,7 @@ UI.prototype.updateDollarStats = function() {
 UI.prototype.renderTooltip = function(entity, $container) {
 	$container.empty();
 	addEl('h4', $container, '', entity.describable.GetTitle());
-	if (entity.amount === undefined || entity.amount.GetMax() > 0) {
+	if (entity instanceof Upgrade || entity.amount === undefined || entity.amount.GetMax() > 0) {
 		var effects = entity.describable.GetEffects();
 		if (effects.length == 1) {
 			addEl('p', $container, 'effect', effects[0]);

@@ -232,6 +232,7 @@ extend(GameEngine, null, {
 	},
 	SetTicksPerSecond: function(ticksPerSecond) {
 		this.tickPerSecond = ticksPerSecond;
+		this.tps = ticksPerSecond;
 		this.timePerTick = 1000 / ticksPerSecond;
 	},
 	GetTicksPerSecond: function() {
@@ -374,6 +375,11 @@ extend(Multiplier, Component, {
 	},
 	Mult: function(value) {
 		this.multiplier *= value;
+		this.entity.trigger('multiplier_change', this.entity);
+		return this.entity;
+	},
+	Div: function(value) {
+		this.multiplier /= value;
 		this.entity.trigger('multiplier_change', this.entity);
 		return this.entity;
 	},
@@ -575,7 +581,8 @@ var Modifiable = function(entity) {
 	Component.call(this, entity);
 	entity.modifiable = this;
 	this.modifiers = {};
-	this.loader.AddElement('modifiers');
+	this.timecount = {};
+	this.loader.AddElement('modifiers').AddElement('timecount');
 	this.entity.bridge('modifier_add', 'update');
 	this.entity.bridge('modifier_remove', 'update');
 	this.entity.game.on('tick', this.CheckModifiers, this);
@@ -583,25 +590,31 @@ var Modifiable = function(entity) {
 };
 extend(Modifiable, Component, {
 	AddModifier: function(modifier) {
-		modifier.Attach(this.entity, this.modifiers, this.attachedModifiers);
+		modifier.Attach(this);
 		this.entity.trigger('modifier_add', this.entity, modifier);
 	},
 	RemoveModifier: function(modifier) {
-		modifier.Detach(this.entity, this.modifiers, this.attachedModifiers);
+		modifier.Detach(this);
 		this.entity.trigger('modifier_remove', this.entity, modifier);
 	},
 	CheckModifiers: function() {
 		each(this.attachedModifiers, function(modifier) {
-			if (!modifier.Tick(this.modifiers)) {
+			if (!modifier.Tick(this)) {
 				this.RemoveModifier(modifier);
 			}
 		}, this);
 	},
 	HasModifier: function(modifier) {
 		if (this.attachedModifiers[modifier]) {
-			return this.attachedModifiers[modifier].Check(this.modifiers);
+			return this.attachedModifiers[modifier].Check(this);
 		}
 		return false;
+	},
+	ModifierTimeCount: function(modifier) {
+		if (this.timecount[modifier]) {
+			return this.timecount[modifier];
+		}
+		return 0;
 	}
 });
 
@@ -614,15 +627,20 @@ var Modifier = function(game, name, ticks) {
 	this.ticks = ticks;
 };
 extend(Modifier, null, {
-	Attach: function(entity, tracker, attached) {
-		tracker[this.name] = this.ticks;
-		attached[this.name] = this;
-		this.Activate(entity);
+	Attach: function(modifiable) {
+		modifiable.modifiers[this.name] = this.ticks;
+		modifiable.attachedModifiers[this.name] = this;
+		if (!modifiable.timecount[this.name]) {
+			modifiable.timecount[this.name] = 0;
+		}
+		modifiable.timecount[this.name] += 1;
+
+		this.Activate(modifiable.entity);
 	},
-	Detach: function(entity, tracker, attached) {
-		delete tracker[this.name];
-		delete attached[this.name];
-		this.Deactivate(entity);
+	Detach: function(modifiable) {
+		delete modifiable.modifiers[this.name];
+		delete modifiable.attachedModifiers[this.name];
+		this.Deactivate(modifiable.entity);
 	},
 	Activate: function(entity) {
 
@@ -630,12 +648,12 @@ extend(Modifier, null, {
 	Deactivate: function(entity) {
 
 	},
-	Tick: function(tracker) {
-		tracker[this.name]--;
-		return this.Check(tracker);
+	Tick: function(modifiable) {
+		modifiable.modifiers[this.name]--;
+		return this.Check(modifiable);
 	},
-	Check: function(tracker) {
-		return tracker[this.name] > 0;
+	Check: function(modifiable) {
+		return modifiable.modifiers[this.name] > 0;
 	}
 });
 
