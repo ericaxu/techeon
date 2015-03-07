@@ -16,14 +16,14 @@ var ClickGenerator = function(game, name, resource) {
 };
 extend(ClickGenerator, Generator, {
 	UpdateRate: function() {
-		this.amount.Set(Math.max(this.game.GetResourceRatesPerSecond(this.resource) / 5, 1));
+		this.amount.Set(Math.max(this.resource.amount.GetRate() / 5, 1));
 	},
 	Click: function() {
 		this.clicked = true;
 	},
 	OnTick: function() {
 		if (this.clicked) {
-			Generator.prototype.OnTick.call(this);
+			Generator.prototype.OnTick.call(this, true);
 			this.clicked = false;
 		}
 	}
@@ -40,7 +40,6 @@ var GAME = (function() {
 		resources.money = game.AddResource(new Resource(game, "money")
 				.describable.SetTitle("$")
 				.describable.SetPlural("$")
-				.amount.StartApprox()
 				.SetRateFormatter(function(rate) {
 					return "Generates " + formatDollar(rate * game.GetTicksPerSecond()) + " per second.";
 				})
@@ -48,7 +47,6 @@ var GAME = (function() {
 		resources.code = game.AddResource(new Resource(game, "code")
 				.describable.SetTitle("line of code")
 				.describable.SetPlural("lines of code")
-				.amount.StartApprox()
 				.SetRateFormatter(function(rate) {
 					return "Produces " + formatLinesOfCodePerSec(rate * game.GetTicksPerSecond()) + " per second.";
 				})
@@ -66,9 +64,10 @@ var GAME = (function() {
 					.purchasable.SetBuyPrice("money", 100)
 					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 1, 1))
 					.SetRateSecond("code", 0.2)
+					.AddComponent(Modifiable)
 			);
-			generators.junior = game.AddGenerator(new CodeGenerator(game, "junior")
-					.describable.Set("Junior Programmer", "Fresh out of college, will code for food.")
+			generators.newgrad = game.AddGenerator(new CodeGenerator(game, "newgrad")
+					.describable.Set("New Grad", "Fresh out of college, will code for food.")
 					.purchasable.SetBuyPrice("money", 500)
 					.purchasablerestrictable.AddDefaultPriceRestriction()
 					.restrictable.AddRestriction(new AmountRestriction(game, generators.intern, 1, 1))
@@ -78,7 +77,7 @@ var GAME = (function() {
 					.describable.Set("Contractor", "Like a normal employee, except you don't have to pay for his insurance.")
 					.purchasable.SetBuyPrice("money", 2000)
 					.purchasablerestrictable.AddDefaultPriceRestriction()
-					.restrictable.AddRestriction(new AmountRestriction(game, generators.junior, 1, 1))
+					.restrictable.AddRestriction(new AmountRestriction(game, generators.newgrad, 1, 1))
 					.SetRateSecond("code", 15)
 			);
 			generators.programmer = game.AddGenerator(new CodeGenerator(game, "programmer")
@@ -182,7 +181,7 @@ var GAME = (function() {
 
 		//Click
 		{
-			generators.click = game.AddGenerator(new ClickGenerator(game, "click", "code")
+			generators.click = game.AddGenerator(new ClickGenerator(game, "click", resources.code)
 					.describable.Set("Clicker", "Dat finger.")
 					.SetRate("code", 1)
 			);
@@ -199,14 +198,14 @@ var GAME = (function() {
 					.describable.SetTitle("Free Stuff")
 					.describable.AddEffect("Gives you some free stuff.")
 					.describable.SetDescription("Swag.")
-					.rewardable.AddReward(new ResourceReward(game, resources.code, 1000000))
-					.rewardable.AddReward(new ResourceReward(game, resources.money, 2000000))
+					.rewardable.AddReward(new ResourceReward(game, resources.code, 1000000000000))
+					.rewardable.AddReward(new ResourceReward(game, resources.money, 2000000000000))
 			);
 			upgrades.hire = game.AddUpgrade(new Upgrade(game, "hire")
 					.describable.SetTitle("Job Postings")
-					.describable.AddEffect("Able to hire people.")
+					.describable.AddEffect("Unleashes the recruiting pipeline.")
 					.describable.SetDescription("Like a boss.")
-					.purchasable.SetBuyPrice("money", 100)
+					.purchasable.SetBuyPrice("money", 50)
 					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 1, 1))
 			);
 		}
@@ -226,8 +225,31 @@ var GAME = (function() {
 		};
 		var createMultiplierUpgrades = function(entity, objects) {
 			each(objects, function(object) {
+				if (object instanceof Upgrade) {
+					game.AddUpgrade(object);
+					return;
+				}
+				var effect;
+				if (entity instanceof CodeGenerator) {
+					var speed = ((object.multiplier - 1) * 100) + "% faster";
+					if (object.multiplier == 2) {
+						speed = "twice as fast";
+					}
+					if (object.multiplier == 3) {
+						speed = "three times as fast";
+					}
+					if (object.multiplier == 4) {
+						speed = "four times as fast";
+					}
+					effect = entity.describable.GetPlural() + " code " + speed + ".";
+				}
+				else if (entity instanceof MoneyGenerator) {
+					effect = entity.describable.GetPlural() + " generate " +
+					(object.multiplier == 2 ? "twice" : ((object.multiplier - 1) * 100) + "%") + " their income.";
+				}
+
 				var upgrade = game.AddUpgrade(new Upgrade(game, object.name)
-						.describable.Set(object.title, object.description, object.effect)
+						.describable.Set(object.title, object.description, effect)
 						.purchasable.SetBuyPrice(object.resource, object.price)
 						.purchasablerestrictable.AddDefaultPriceRestriction()
 						.restrictable.AddRestriction(new AmountRestriction(game, entity, 2, object.restrictamount))
@@ -243,48 +265,463 @@ var GAME = (function() {
 		{
 			createMultiplierUpgrades(generators.intern, [
 				{
-					name: "chips",
-					title: "Free Chips",
-					effect: "Interns code 50% faster.",
-					description: "Something for your interns to snack on. Be careful of greasy keyboards.",
+					name: "swagstickers",
+					title: "Swag Laptop Stickers",
+					description: "Fill those laptop backs!",
 					resource: "money",
 					price: 500,
-					restrictamount: 1,
+					restrictamount: 10,
 					multiplier: 1.5
 				},
 				{
-					name: "instantnoodles",
-					title: "Free Instant Noodles",
-					effect: "Interns code twice as fast.",
-					description: "Smells like college food.",
+					name: "chips",
+					title: "Free Chips",
+					description: "Something for your interns to snack on. Be careful of greasy keyboards.",
+					resource: "money",
+					price: 500,
+					restrictamount: 30,
+					multiplier: 2
+				},
+				new Upgrade(game, "overtime")
+					.describable.SetTitle("Paid Overtime")
+					.describable.AddEffect("Interns starts coding with 1 more line per second.")
+					.describable.SetDescription("Overtime is paid 1.5x regular wages. Interns have student loans to pay. Win-win?")
+					.purchasable.SetBuyPrice("money", 1000000)
+					.restrictable.AddRestriction(new AmountRestriction(game, generators.intern, 2, 40))
+					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 2, 1000000 / 2))
+					.rewardable.AddReward(new BaseRateReward(game, generators.intern, "code", game.GetRateTickFromSecond(1)))
+				,
+				{
+					name: "sode",
+					title: "Free Soda",
+					description: "It's also called 'pop' in Canada.",
+					resource: "money",
+					price: 500,
+					restrictamount: 50,
+					multiplier: 2
+				},
+				{
+					name: "uniform",
+					title: "Free Intern Uniforms",
+					description: "The official intern uniform.",
+					resource: "money",
+					price: 500,
+					restrictamount: 70,
+					multiplier: 2
+				},
+				{
+					name: "texbooks",
+					title: "Free Textbook Lending",
+					description: "Any textbook you need.",
+					resource: "money",
+					price: 500,
+					restrictamount: 90,
+					multiplier: 2
+				},
+				new Upgrade(game, "monthlyhackathon")
+					.describable.SetTitle("Monthly Intern Hackathons")
+					.describable.AddEffect("Interns starts coding with 10 more line per second.")
+					.describable.SetDescription("The panel of judges will give away 3 prizes at the end of each event.")
+					.purchasable.SetBuyPrice("money", 100000000)
+					.restrictable.AddRestriction(new AmountRestriction(game, generators.intern, 2, 100))
+					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 2, 100000000 / 2))
+					.rewardable.AddReward(new BaseRateReward(game, generators.intern, "code", game.GetRateTickFromSecond(10)))
+				,
+				{
+					name: "hackbook",
+					title: "Hackbook pro",
+					description: "A powerful laptop for a good cause.",
+					resource: "money",
+					price: 500,
+					restrictamount: 110,
+					multiplier: 2
+				},
+				{
+					name: "internevents",
+					title: "Intern Events",
+					description: "Road trips sounds nice. Let's also try skydiving.",
+					resource: "money",
+					price: 500,
+					restrictamount: 120,
+					multiplier: 2
+				},
+				{
+					name: "parentday",
+					title: "Parent day",
+					description: "Impress your parents with this free pair of round trip plane tickets & luxurious hotel arrangements for a visit to your workplace.",
+					resource: "money",
+					price: 500,
+					restrictamount: 140,
+					multiplier: 2
+				},
+				new Upgrade(game, "internwhip")
+					.describable.SetTitle("Whip the interns")
+					.describable.AddEffect("Interns code 20 times faster for 10 minutes, but there's a small chance for an intern to escape every minute.")
+					.describable.SetDescription("Interns temporarily becomes whipped interns.")
+					.purchasable.SetBuyPrice("money", 2000)
+					.restrictable.AddRestriction(new AmountRestriction(game, generators.intern, 2, 150))
+					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 2, 2000 / 2))
+				,
+				{
+					name: "scholarships",
+					title: "Scholarships",
+					description: "We'll also fund your education.",
+					resource: "money",
+					price: 500,
+					restrictamount: 160,
+					multiplier: 2
+				}
+			]);
+
+			upgrades.internwhip.rewardable.AddReward(new ModifierReward(game, generators.intern,
+				new WhippingModifier(game, 5 * game.GetTicksPerSecond()), upgrades.internwhip));
+
+			createMultiplierUpgrades(generators.newgrad, [
+				{
+					name: "swagpingpong",
+					title: "Swag Ping-Pong Balls",
+					description: "Some ping-pong balls with the company logo printed.",
+					resource: "money",
+					price: 500,
+					restrictamount: 10,
+					multiplier: 1.5
+				},
+				{
+					name: "gymmember",
+					title: "Free Gym Membership",
+					description: "Workout around the block.",
 					resource: "money",
 					price: 500,
 					restrictamount: 40,
 					multiplier: 2
 				},
 				{
-					name: "sode",
-					title: "Free Soda",
-					effect: "Interns code twice as fast.",
-					description: "It's also called 'pop' in Canada.",
+					name: "swagtshirt",
+					title: "Swag T-Shirts",
+					description: "Good quality tech company t-shirts.",
+					resource: "money",
+					price: 500,
+					restrictamount: 80,
+					multiplier: 2
+				},
+				{
+					name: "dualmonitor",
+					title: "Dual Monitor Setup",
+					description: "Two is better than one.",
 					resource: "money",
 					price: 500,
 					restrictamount: 120,
 					multiplier: 2
-				}
-			]);
-			createMultiplierUpgrades(generators.programmer, [
+				},
 				{
-					name: "coffee",
-					title: "Free Coffee",
-					effect: "Programmers code twice as fast.",
-					description: "Convert coffee to code.",
+					name: "onsitegym",
+					title: "Free Onsite Gym",
+					description: "Yoga classes included.",
 					resource: "money",
-					price: 1000,
-					restrictamount: 1,
+					price: 500,
+					restrictamount: 160,
 					multiplier: 2
 				}
 			]);
+
+			createMultiplierUpgrades(generators.contractor, [
+				{
+					name: "skypebusiness",
+					title: "Skype Business License",
+					description: "Now you can group conference call!",
+					resource: "money",
+					price: 500,
+					restrictamount: 10,
+					multiplier: 1.5
+				},
+				{
+					name: "freedeliveredlunch",
+					title: "Free Delivered Lunch",
+					description: "Here's some free food.",
+					resource: "money",
+					price: 500,
+					restrictamount: 40,
+					multiplier: 2
+				},
+				{
+					name: "freedropbox",
+					title: "Free Dropbox Pro",
+					description: "Sync those files!",
+					resource: "money",
+					price: 500,
+					restrictamount: 80,
+					multiplier: 2
+				},
+				{
+					name: "frequentflier",
+					title: "Frequent Flier Program",
+					description: "For those who needs to fly into the office.",
+					resource: "money",
+					price: 500,
+					restrictamount: 120,
+					multiplier: 2
+				},
+				{
+					name: "healthinsurance",
+					title: "Health Insurance",
+					description: "In the end... they're still like employees",
+					resource: "money",
+					price: 500,
+					restrictamount: 160,
+					multiplier: 2
+				}
+			]);
+
+			createMultiplierUpgrades(generators.programmer, [
+				{
+					name: "dollarkeyboards",
+					title: "Dedicated '$' Keyboards",
+					description: "Designed for PHP developers by PHP developers.",
+					resource: "money",
+					price: 500,
+					restrictamount: 10,
+					multiplier: 1.5
+				},
+				{
+					name: "coffee",
+					title: "Free Coffee",
+					description: "Convert coffee to code.",
+					resource: "money",
+					price: 500,
+					restrictamount: 40,
+					multiplier: 2
+				},
+				{
+					name: "intellij",
+					title: "IntelliJ Licenses",
+					description: "Seriously, try it.",
+					resource: "money",
+					price: 500,
+					restrictamount: 80,
+					multiplier: 2
+				},
+				{
+					name: "ssds",
+					title: "SSDs",
+					description: "Blazing fast boot speeds.",
+					resource: "money",
+					price: 500,
+					restrictamount: 120,
+					multiplier: 2
+				},
+				{
+					name: "transportation",
+					title: "Commuter Stipend",
+					description: "Flights are not included.",
+					resource: "money",
+					price: 500,
+					restrictamount: 160,
+					multiplier: 2
+				}
+			]);
+
+			createMultiplierUpgrades(generators.senior, [
+				{
+					name: "organicfruits",
+					title: "Organic Fruits",
+					description: "Fresh locally-sourced apples, oranges and bananas.",
+					resource: "money",
+					price: 500,
+					restrictamount: 10,
+					multiplier: 1.5
+				},
+				{
+					name: "kidtowork",
+					title: "Take Your Kid To Work Days",
+					description: "\"Officer, we swear that this is not child labor.\"",
+					resource: "money",
+					price: 500,
+					restrictamount: 40,
+					multiplier: 2
+				},
+				{
+					name: "familyhealthinsurance",
+					title: "Family Health Insurance",
+					description: "Now that my family is insured.",
+					resource: "money",
+					price: 500,
+					restrictamount: 80,
+					multiplier: 2
+				},
+				{
+					name: "daycare",
+					title: "Day Care Program",
+					description: "No need to worry about kids during summer breaks.",
+					resource: "money",
+					price: 500,
+					restrictamount: 120,
+					multiplier: 2
+				},
+				{
+					name: "pension",
+					title: "Pension Plan",
+					description: "Planning for retirement already?",
+					resource: "money",
+					price: 500,
+					restrictamount: 160,
+					multiplier: 2
+				}
+			]);
+
+			createMultiplierUpgrades(generators.architect, [
+				{
+					name: "whiteboard",
+					title: "Whiteboards",
+					description: "Large whiteboards are ideal for drawing diagrams.",
+					resource: "money",
+					price: 500,
+					restrictamount: 10,
+					multiplier: 1.5
+				},
+				{
+					name: "freebeer",
+					title: "Free Beer",
+					description: "Get the perfect blood alcohol level for coding.",
+					resource: "money",
+					price: 500,
+					restrictamount: 40,
+					multiplier: 2
+				},
+				{
+					name: "ergokeyboard",
+					title: "Ergonomic Keyboard",
+					description: "The only place where one keyboard may come in two pieces.",
+					resource: "money",
+					price: 500,
+					restrictamount: 80,
+					multiplier: 2
+				},
+				{
+					name: "standingdesk",
+					title: "Standing Desks",
+					description: "They said it would reduce back pain.",
+					resource: "money",
+					price: 500,
+					restrictamount: 120,
+					multiplier: 2
+				},
+				{
+					name: "pto",
+					title: "Paid Time Off",
+					description: "I mean, you don't need to redesign the whole system every day, right?",
+					resource: "money",
+					price: 500,
+					restrictamount: 160,
+					multiplier: 2
+				}
+			]);
+
+			createMultiplierUpgrades(generators.teamlead, [
+				{
+					name: "cocktail",
+					title: "Free Cocktails",
+					description: "An all inclusive experience, bartender included. Great selection of more than 30 drinks!",
+					resource: "money",
+					price: 500,
+					restrictamount: 10,
+					multiplier: 1.5
+				},
+				{
+					name: "onsitemassages",
+					title: "Onsite Massages",
+					description: "Professional stress reliever.",
+					resource: "money",
+					price: 500,
+					restrictamount: 40,
+					multiplier: 2
+				},
+				{
+					name: "ergochairs",
+					title: "Ergonomic Office Chairs",
+					description: "We're really tired of beanbags.",
+					resource: "money",
+					price: 500,
+					restrictamount: 80,
+					multiplier: 2
+				},
+				{
+					name: "petworkplace",
+					title: "Pet Friendly Workplace",
+					description: "Office dogs, anyone?",
+					resource: "money",
+					price: 500,
+					restrictamount: 120,
+					multiplier: 2
+				},
+				{
+					name: "petinsurance",
+					title: "Pet Insurance Policy",
+					description: "Peace of mind for your pets.",
+					resource: "money",
+					price: 500,
+					restrictamount: 160,
+					multiplier: 2
+				}
+			]);
+
+			createMultiplierUpgrades(generators.startup, [
+				{
+					name: "trophyofrecognition",
+					title: "Trophy of Recognition",
+					description: "Giving some respect goes a long way.",
+					resource: "money",
+					price: 500,
+					restrictamount: 10,
+					multiplier: 1.5
+				},
+				{
+					name: "themedoffice",
+					title: "Themed Office Area",
+					description: "A big sign saying: \"[Startup Name Here] team\".",
+					resource: "money",
+					price: 500,
+					restrictamount: 40,
+					multiplier: 2
+				},
+				{
+					name: "teamtrips",
+					title: "Team trips",
+					description: "Ski trips, anyone?",
+					resource: "money",
+					price: 500,
+					restrictamount: 80,
+					multiplier: 2
+				},
+				{
+					name: "stockoptions",
+					title: "Stock Options",
+					description: "Sharing is caring!",
+					resource: "money",
+					price: 500,
+					restrictamount: 120,
+					multiplier: 2
+				},
+				{
+					name: "dedicatedprojectfunding",
+					title: "Dedicated Project Funding",
+					description: "Be your own boss, kinda.",
+					resource: "money",
+					price: 500,
+					restrictamount: 160,
+					multiplier: 2
+				}
+			]);
+
+			//others
+			//- Instant Noodles
+			//- Mcdonalds
+			//- Catered Lunch
+			//- In-house Cafe
+			//- In-house Kitchen
+			//- Five Star Chef
+			//- Holiday Party
+			//- Halloween Party
+			//- Thanksgiving Dinner
 
 			upgrades.cateredlunch = game.AddUpgrade(new Upgrade(game, "cateredlunch")
 					.describable.SetTitle("Catered lunch")
@@ -298,6 +735,30 @@ var GAME = (function() {
 
 		//Features
 		{
+			/*
+			 free hosting
+			 dedicated server
+			 AWS
+			 CDN
+			 The Cloud TM
+
+			 SQLite
+			 MySQL
+			 Oracle
+			 Hadoop
+			 Data-center
+			 DDoS Protection
+			 XSS Detector
+			 SQL Injection Protection
+			 SSL Certificate
+			 Daily Backups
+
+			 Social Media Ads
+			 Search Engine Ads
+			 Targeted Ads
+
+			 */
+
 			createMultiplierUpgrades(generators.webapp, [
 				{
 					name: "onlineads",
@@ -381,7 +842,7 @@ var GAME = (function() {
 			], true);
 
 			createAmountAchievements(resources.code, [
-				{amount: 1, title: "Finger Warm-up Exercise", description: ""},
+				{amount: 10, title: "Hello world", description: ""},
 				{amount: 100000, title: "One Hundred-Thousand Lines", description: "Size of Photoshop 1.0."},
 				{amount: 1000000, title: "Lines by the Millions", description: "Size of Age of empires online."},
 				{amount: 10000000, title: "Age of Browsers", description: "Size of Firefox."},
@@ -410,7 +871,7 @@ var GAME = (function() {
 				{amount: 150, title: "Internapocalypse", description: ""},
 				{amount: 200, title: "University Campus", description: ""}
 			]);
-			createAmountAchievements(generators.junior, [
+			createAmountAchievements(generators.newgrad, [
 				{amount: 1, title: "Fresh Grad", description: ""},
 				{amount: 50, title: "Hacky Code", description: ""},
 				{amount: 100, title: "Junior Junior", description: ""},
@@ -522,6 +983,12 @@ var GAME = (function() {
 
 		}
 	}
+
+	game.GetGenerator("intern").on("modifier_add", function(entity, modifier) {
+		if (modifier.name == "whipped") {
+			console.log("Play sound 'whip'");
+		}
+	}, this);
 
 	return game;
 })();

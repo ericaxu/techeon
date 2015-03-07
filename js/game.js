@@ -268,10 +268,12 @@ var Resource = function(game, name) {
 	this.AddComponent(Amount);
 	this.AddComponent(Multiplier);
 	this.rateFormatter = null;
+	this.amount.StartApprox();
+	this.amount.TrackTickRate();
 };
 extend(Resource, Entity, {
 	Generate: function(amount) {
-		this.amount.Add(amount);
+		this.amount.Generate(amount);
 	},
 	Reward: function(amount) {
 		this.amount.Add(amount);
@@ -303,7 +305,7 @@ var Generator = function(game, name, manual) {
 	this.rates = {};
 	this.generated = {};
 	game.on('tick', this.OnTick, this);
-	this.loader.AddElement('rates').AddElement('multipliers').AddElement('generated');
+	this.loader.AddElement('generated');
 };
 extend(Generator, Entity, {
 	SetRateSecond: function(resource, rate) {
@@ -312,7 +314,9 @@ extend(Generator, Entity, {
 	SetRate: function(resource, rate) {
 		if (rate != 0) {
 			this.rates[resource] = rate;
-			this.generated[resource] = 0;
+			if (!this.generated[resource]) {
+				this.generated[resource] = 0;
+			}
 			this.game.GetResource(resource).on('multiplier_change', this.RateChanged, this);
 		}
 		else {
@@ -322,6 +326,14 @@ extend(Generator, Entity, {
 			}
 			this.game.GetResource(resource).off('multiplier_change', this.RateChanged);
 		}
+		this.RateChanged();
+		return this;
+	},
+	AddRate: function(resource, rate) {
+		if (rate != 0) {
+			this.rates[resource] += rate;
+		}
+		this.RateChanged();
 		return this;
 	},
 	RateChanged: function() {
@@ -352,12 +364,17 @@ extend(Generator, Entity, {
 	IsManual: function() {
 		return this.manual;
 	},
-	OnTick: function() {
+	OnTick: function(no_generate) {
 		for (var resource in this.rates) {
 			var result = this.GetRate(resource);
 			this.trigger('generate_resource', this, resource, result);
 			this.generated[resource] += result;
-			this.game.data.resources[resource].Generate(result);
+			if (no_generate === true) {
+				this.game.data.resources[resource].Reward(result);
+			}
+			else {
+				this.game.data.resources[resource].Generate(result);
+			}
 		}
 	}
 });
@@ -403,8 +420,8 @@ var BaseRateReward = function(game, generator, resource, amount) {
 };
 extend(BaseRateReward, Reward, {
 	Reward: function() {
-		this.game.data.generators[this.generator].rates[this.resource] += this.amount;
-		this.game.trigger('reward_baserate', this, this.resource, this.amount);
+		this.generator.AddRate(this.resource, this.amount);
+		this.game.trigger('reward_baserate', this, this.generator, this.resource, this.amount);
 	}
 });
 var MultiplierReward = function(game, entity, multiplier) {
@@ -415,7 +432,38 @@ var MultiplierReward = function(game, entity, multiplier) {
 extend(MultiplierReward, Reward, {
 	Reward: function() {
 		this.entity.multiplier.Mult(this.multiplier);
-		this.game.trigger('reward_multiplier', this, this.resource);
+		this.game.trigger('reward_multiplier', this, this.entity, this.multiplier);
+	}
+});
+var ModifierReward = function(game, entity, modifier, upgrade) {
+	Reward.call(this, game);
+	this.entity = entity;
+	this.modifier = modifier;
+	this.upgrade = upgrade;
+};
+extend(ModifierReward, Reward, {
+	Reward: function() {
+		this.entity.modifiable.AddModifier(this.modifier);
+		this.game.trigger('reward_modifier', this, this.entity, this.modifier);
+		if(this.upgrade) {
+			this.entity.on('modifier_remove', function(entity, modifier) {
+				if(modifier === this.modifier) {
+					this.upgrade.obtainable.UnObtain();
+				}
+			}, this);
+		}
+	}
+});
+
+var WhippingModifier = function(game, ticks) {
+	Modifier.call(this, game, "whipped", ticks);
+};
+extend(WhippingModifier, Modifier, {
+	Activate: function(entity) {
+		entity.multiplier.Mult(20);
+	},
+	Deactivate: function(entity) {
+		entity.multiplier.Mult(1/20);
 	}
 });
 
@@ -461,7 +509,7 @@ extend(AmountAchievement, AutocheckAchievement, {
 	},
 	AddDefaultProduceEffect: function() {
 		var name = (this.value > 1 ? this.entity.describable.GetPlural() : this.entity.describable.GetTitle());
-		if(name == '$') {
+		if (name == '$') {
 			this.describable.AddEffect('Make $ ' + readableBigNumber(this.value, 0, 0) + '.');
 		}
 		else {

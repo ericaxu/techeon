@@ -239,6 +239,9 @@ extend(GameEngine, null, {
 	},
 	GetRateTickFromSecond: function(second_rate) {
 		return second_rate / this.GetTicksPerSecond();
+	},
+	GetRateSecondFromTick: function(tick_rate) {
+		return tick_rate * this.GetTicksPerSecond();
 	}
 });
 
@@ -389,10 +392,13 @@ var Amount = function(entity) {
 	this.amount = 0.0;
 	this.maxAmount = 0.0;
 	this.totalAmount = 0.0;
-	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount');
+	this.rate = 0.0;
+	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount').AddElement('rate');
 	this.entity.bridge('amount_change', 'update');
 	this.prevAmount = 0.0;
 	this.approxAmount = 0.0;
+	this.lastRate = 0.0;
+	this.trackingRate = false;
 	this.approx = false;
 };
 extend(Amount, Component, {
@@ -439,6 +445,12 @@ extend(Amount, Component, {
 	GetTotal: function() {
 		return this.totalAmount;
 	},
+	Generate: function(value) {
+		this.Add(value);
+		if (this.trackingRate) {
+			this.rate += value;
+		}
+	},
 	Add: function(value) {
 		this.amount += value;
 		this.totalAmount += value;
@@ -459,6 +471,27 @@ extend(Amount, Component, {
 			this.prevAmount = this.amount;
 			this.entity.trigger('amount_change', this.entity);
 		}
+	},
+	TrackTickRate: function() {
+		this.entity.game.on('tick', this.Tick, this);
+		this.trackingRate = true;
+	},
+	Tick: function() {
+		var rateChanged = false;
+		if (!this.lastRate == this.rate) {
+			rateChanged = true;
+		}
+		this.lastRate = this.rate;
+		this.rate = 0;
+		if (rateChanged) {
+			this.entity.trigger('rate_changed', this.entity);
+		}
+	},
+	GetRate: function() {
+		return this.lastRate;
+	},
+	GetRatePerSec: function() {
+		return this.entity.game.GetRateSecondFromTick(this.GetRate());
 	}
 });
 
@@ -516,9 +549,9 @@ extend(Rewardable, Component, {
 		return this.entity;
 	},
 	GiveRewards: function() {
-		for (var i = 0; i < this.rewards.length; i++) {
-			this.rewards[i].Reward();
-		}
+		each(this.rewards, function(reward) {
+			reward.Reward();
+		});
 		this.entity.trigger('reward', this.entity);
 	}
 });
@@ -532,6 +565,77 @@ var Reward = function(game) {
 extend(Reward, null, {
 	Reward: function() {
 
+	}
+});
+
+/**
+ * Modifiable
+ */
+var Modifiable = function(entity) {
+	Component.call(this, entity);
+	entity.modifiable = this;
+	this.modifiers = {};
+	this.loader.AddElement('modifiers');
+	this.entity.bridge('modifier_add', 'update');
+	this.entity.bridge('modifier_remove', 'update');
+	this.entity.game.on('tick', this.CheckModifiers, this);
+	this.attachedModifiers = {};
+};
+extend(Modifiable, Component, {
+	AddModifier: function(modifier) {
+		modifier.Attach(this.entity, this.modifiers, this.attachedModifiers);
+		this.entity.trigger('modifier_add', this.entity, modifier);
+	},
+	RemoveModifier: function(modifier) {
+		modifier.Detach(this.entity, this.modifiers, this.attachedModifiers);
+		this.entity.trigger('modifier_remove', this.entity, modifier);
+	},
+	CheckModifiers: function() {
+		each(this.attachedModifiers, function(modifier) {
+			if (!modifier.Tick(this.modifiers)) {
+				this.RemoveModifier(modifier);
+			}
+		}, this);
+	},
+	HasModifier: function(modifier) {
+		if (this.attachedModifiers[modifier]) {
+			return this.attachedModifiers[modifier].Check(this.modifiers);
+		}
+		return false;
+	}
+});
+
+/**
+ * Modifier
+ */
+var Modifier = function(game, name, ticks) {
+	this.game = game;
+	this.name = name;
+	this.ticks = ticks;
+};
+extend(Modifier, null, {
+	Attach: function(entity, tracker, attached) {
+		tracker[this.name] = this.ticks;
+		attached[this.name] = this;
+		this.Activate(entity);
+	},
+	Detach: function(entity, tracker, attached) {
+		delete tracker[this.name];
+		delete attached[this.name];
+		this.Deactivate(entity);
+	},
+	Activate: function(entity) {
+
+	},
+	Deactivate: function(entity) {
+
+	},
+	Tick: function(tracker) {
+		tracker[this.name]--;
+		return this.Check(tracker);
+	},
+	Check: function(tracker) {
+		return tracker[this.name] > 0;
 	}
 });
 

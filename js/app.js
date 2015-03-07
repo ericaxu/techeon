@@ -19,37 +19,40 @@ var UI = function(game, config) {
 	this.$notifications = $('.notification-container');
 	this.$codebase = $('#codebase-content');
 	this.lastNumOfLines = 0;
+	this.codebaseTop = 0;
 	this.config = config;
 
 	this.init();
 };
 
 UI.prototype.updateLinesOfCodeStats = function() {
-	var linesOfCode = this.game.GetResource('code').amount.GetApprox();
-	var linesOfCodePerSec = this.game.GetResourceRatesPerSecond('code');
+	var code = this.game.GetResource('code');
+	var linesOfCode = code.amount.GetApprox();
+	var linesOfCodePerSec = code.amount.GetRatePerSec();
 
 	if (linesOfCode > 0) {
-		this.$numLinesOfCode.text(formatLinesOfCode(linesOfCode));
+		this.$numLinesOfCode.html(formatLinesOfCode(linesOfCode));
 		this.scrollCodebase(linesOfCode);
 	}
 
 	if (linesOfCodePerSec > 0) {
-		this.$numLinesOfCodePerSec.text(formatLinesOfCodePerSec(linesOfCodePerSec) + ' / second');
+		this.$numLinesOfCodePerSec.html(formatLinesOfCodePerSec(linesOfCodePerSec) + ' / second');
 	}
 
 	this.lastNumOfLines = linesOfCode;
 };
 
 UI.prototype.updateDollarStats = function() {
-	var dollars = this.game.GetResource('money').amount.GetApprox();
-	var dollarsPerSec = this.game.GetResourceRatesPerSecond('money');
+	var money = this.game.GetResource('money');
+	var dollars = money.amount.GetApprox();
+	var dollarsPerSec = money.amount.GetRatePerSec();
 
 	if (dollars > 0) {
-		this.$numDollars.text(formatDollar(dollars));
+		this.$numDollars.html(formatDollar(dollars));
 	}
 
 	if (dollarsPerSec) {
-		this.$numDollarsPerSec.text(formatDollar(dollarsPerSec) + ' / second');
+		this.$numDollarsPerSec.html(formatDollar(dollarsPerSec) + ' / second');
 	}
 };
 
@@ -153,19 +156,21 @@ UI.prototype.setupPurchasable = function(entity) {
 			$div.find('.price').text(this.formatPrice(entity));
 		}
 
-		//TODO: Fix this
-		var shown = false;
-
 		function updatePurchasableAvailability(entity) {
-			if (!shown && entity.restrictable.GetLevel() >= 2) {
-				shown = true;
-				showPurchasable.call(this, entity);
+			if (entity instanceof Upgrade && entity.obtainable.GetObtained()) {
+				$div.hide();
+			} else if (entity.restrictable.GetLevel() >= 2) {
+				$div.show();
 			} else if (entity.restrictable.GetLevel() >= 1) {
-				//showPurchasable.call(this, entity);
-				//TODO: Show black shadow?
+				$div.hide();
+				//$div.show();
+				//TODO: Show black shadow? IF NOT AN UPGRADE
+			} else {
+				$div.hide();
 			}
 		}
 
+		showPurchasable.call(this, entity);
 		updatePurchasableAvailability.call(this, entity);
 
 		entity.on('available_change', updatePurchasableAvailability, this);
@@ -178,8 +183,8 @@ UI.prototype.setupPurchasable = function(entity) {
 		entity.on('rate_change', updatePurchasable, this);
 
 		if (entity instanceof Upgrade) {
-			entity.on('obtain', function() {
-				$div.hide();
+			entity.on('update', function() {
+				updatePurchasableAvailability(entity);
 			});
 		}
 	}
@@ -250,11 +255,11 @@ UI.prototype.scrollCodebase = function(numOfLines) {
 
 	// scroll at most 1 line every time
 	if (thisNumOfLines > lastNumOfLines) {
-		var newTop = parseInt(this.$codebase.css('top')) - 20;
-		if (newTop <= -6380) {
-			newTop = -380;
+		this.codebaseTop = this.codebaseTop - 20;
+		if (this.codebaseTop <= -6380) {
+			this.codebaseTop = -380;
 		}
-		this.$codebase.css('top', newTop + 'px');
+		this.$codebase[0].style.top = this.codebaseTop + 'px';
 	}
 };
 
