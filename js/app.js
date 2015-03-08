@@ -1,5 +1,5 @@
 var uiConfig = {
-	saveInterval: 10000,
+	saveInterval: 2 * 60 * 1000,
 	updateResourceFrequencyInTicks: 1,
 	updatePurchasablesFrequencyInTicks: 25,
 	pixelsBetweenTooltip: 0,
@@ -244,13 +244,17 @@ UI.prototype.showNotification = function(title, text, icon, sticky) {
 	addEl('span', $notification, 'close-btn').on('click', function() {
 		$notification.remove();
 	});
-	addEl('img', $notification, '', '', {
-		src: icon,
-		alt: title
-	});
+	if (icon) {
+		addEl('img', $notification, '', '', {
+			src: icon,
+			alt: title
+		});
+	}
 	var $achievement = addEl('div', $notification);
 	addEl('h4', $achievement, '', title);
-	addEl('p', $achievement, '', text);
+	if (text) {
+		addEl('p', $achievement, '', text);
+	}
 
 	if (!sticky) {
 		setTimeout(function() {
@@ -384,10 +388,11 @@ UI.prototype.loadGame = function() {
 UI.prototype.saveGame = function() {
 	var saveObject = GAME.loader.Save();
 	localStorage.setItem('techeon-save', JSON.stringify(saveObject));
+	this.showNotification('Game saved');
 };
 
 UI.prototype.setupSaveGame = function() {
-	setInterval(this.saveGame, this.config.saveInterval);
+	setInterval($.proxy(this.saveGame), this.config.saveInterval);
 };
 
 UI.prototype.setupBuyTen = function() {
@@ -396,7 +401,6 @@ UI.prototype.setupBuyTen = function() {
 			this.isCtrlDown = true;
 		}
 	}, this));
-
 	$(document).on('keyup', $.proxy(function(e) {
 		if(e.keyCode === 17 && this.isCtrlDown) {
 			this.isCtrlDown = false
