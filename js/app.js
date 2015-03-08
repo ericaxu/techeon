@@ -397,6 +397,14 @@ UI.prototype.saveGame = function() {
 };
 
 UI.prototype.setupSaveGame = function() {
+	$(document).on('keydown', $.proxy(function(e) {
+		// Ctrl + S to save
+		if (e.keyCode === 83 && this.isCtrlDown) {
+			this.saveGame();
+			e.preventDefault();
+			return false;
+		}
+	}, this));
 	setInterval($.proxy(this.saveGame, this), this.config.saveInterval);
 };
 
@@ -453,7 +461,7 @@ UI.prototype.init = function() {
 	}, this, this.config.updateResourceFrequencyInTicks);
 
 	this.loadGame();
-	//this.setupSaveGame();
+	this.setupSaveGame();
 };
 
 var GAME = CreateGame();
