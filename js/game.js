@@ -499,7 +499,7 @@ extend(AmountAchievement, AutocheckAchievement, {
 	},
 	AddDefaultPurchaseEffect: function() {
 		var name = (this.value > 1 ? this.entity.describable.GetPlural() : this.entity.describable.GetTitle());
-		this.describable.AddEffect('Purchase ' + this.value + ' ' + name + '.');
+		this.describable.AddEffect('Have ' + this.value + ' ' + name + '.');
 		return this;
 	},
 	AddDefaultProduceEffect: function() {
