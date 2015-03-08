@@ -354,9 +354,14 @@ UI.prototype.showAchievement = function(achievement, $container) {
 		this.updateAchievementProgress();
 	}, this);
 	achievement.events.on('obtain', function(achievement) {
+		var text = achievement.describable.GetTitle();
+		var description = achievement.describable.GetDescription();
+		if (description) {
+			text += ': ' + description;
+		}
 		this.showNotification(
 			'Achievement Unlocked',
-			achievement.describable.GetTitle() + ': ' + achievement.describable.GetDescription(),
+			 text,
 			'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg'
 		);
 		$achievementsNav.show();
@@ -392,7 +397,7 @@ UI.prototype.saveGame = function() {
 };
 
 UI.prototype.setupSaveGame = function() {
-	setInterval($.proxy(this.saveGame), this.config.saveInterval);
+	setInterval($.proxy(this.saveGame, this), this.config.saveInterval);
 };
 
 UI.prototype.setupBuyTen = function() {
