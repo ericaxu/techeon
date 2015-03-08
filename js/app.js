@@ -150,7 +150,7 @@ UI.prototype.setupPurchasable = function(entity) {
 			}, this));
 
 			$div.on('mouseleave', function() {
-				$tooltip.offset({left: 0, top: 0}).hide();
+				//$tooltip.offset({left: 0, top: 0}).hide();
 				$div.off('mousemove');
 				entity.off('amount_change', updateTooltip);
 			});
@@ -324,6 +324,20 @@ UI.prototype.fillAchievementInfo = function(achievement, $div) {
 	});
 };
 
+UI.prototype.updateAchievementProgress = function() {
+	function hasObtained(achievement) {
+		return achievement.obtainable.GetObtained();
+	}
+
+	var total = this.game.GetAchievements().length;
+	var obtained = this.game.GetAchievements().filter(hasObtained).length;
+	var progress = Math.floor(obtained * 100 / total) + '%';
+
+	$('#obtained-achievement-count').html(obtained);
+	$('#total-achievement-count').html(total);
+	$('#achievement-progress').html(progress);
+};
+
 UI.prototype.showAchievement = function(achievement, $container) {
 	var $div = addEl('div', $container, 'locked achievement');
 	var $achievementsNav = $('.nav-achievements');
@@ -333,6 +347,7 @@ UI.prototype.showAchievement = function(achievement, $container) {
 			this.fillAchievementInfo(achievement, $div);
 			$achievementsNav.show();
 		}
+		this.updateAchievementProgress();
 	}, this);
 	achievement.events.on('obtain', function(achievement) {
 		this.showNotification(
@@ -350,6 +365,7 @@ UI.prototype.showAchievements = function() {
 	each(this.game.GetAchievements(), function(achievement) {
 		this.showAchievement(achievement, $achievementsList);
 	}, this);
+	this.updateAchievementProgress();
 };
 
 UI.prototype.setupCodeClickListener = function() {
