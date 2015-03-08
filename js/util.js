@@ -149,7 +149,7 @@ var BIG_NUMBER_TABLE = [
 	{factor: 1000000000000000000000, title: 'sixtillion'}
 ];
 
-function readableBigNumber(x, digits, overridedigits) {
+function readableBigNumber(x, digits, overrideDigits) {
 	var million = 1000000;
 	var billion = million * 1000;
 	var trillion = billion * 1000;
@@ -159,8 +159,8 @@ function readableBigNumber(x, digits, overridedigits) {
 		digits = 0;
 	}
 
-	if (overridedigits === undefined) {
-		overridedigits = 2;
+	if (overrideDigits === undefined) {
+		overrideDigits = 2;
 	}
 
 	var factor = Math.pow(10, digits);
@@ -168,7 +168,7 @@ function readableBigNumber(x, digits, overridedigits) {
 
 	for(var i = BIG_NUMBER_TABLE.length - 1; i >= 0; i--) {
 		if(x >= BIG_NUMBER_TABLE[i].factor) {
-			return formatNumWithCommas((x / BIG_NUMBER_TABLE[i].factor).toFixed(overridedigits)) + ' ' + BIG_NUMBER_TABLE[i].title;
+			return formatNumWithCommas((x / BIG_NUMBER_TABLE[i].factor).toFixed(overrideDigits)) + ' ' + BIG_NUMBER_TABLE[i].title;
 		}
 	}
 

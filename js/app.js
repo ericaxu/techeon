@@ -264,8 +264,8 @@ UI.prototype.showNotification = function(title, text, icon, sticky) {
 };
 
 UI.prototype.scrollCodebase = function(numOfLines) {
-	var lastNumOfLines = Math.round(this.lastNumOfLines);
-	var thisNumOfLines = Math.round(numOfLines);
+	var lastNumOfLines = Math.ceil(this.lastNumOfLines);
+	var thisNumOfLines = Math.ceil(numOfLines);
 
 	// scroll at most 1 line every time
 	if (thisNumOfLines > lastNumOfLines) {
