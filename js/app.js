@@ -353,16 +353,6 @@ UI.prototype.showAchievements = function() {
 };
 
 UI.prototype.setupCodeClickListener = function() {
-	//$(document).on('keydown', $.proxy(function (e) {
-	//	this.mostRecentKeydown = e.keyCode;
-	//}, this));
-	//$(document).on('keyup', $.proxy(function (e) {
-	//	if (e.keyCode == this.mostRecentKeydown && isPrintable(e.keyCode)) {
-	//		this.scrollCodebase(1);
-	//		this.game.GetResource('code').amount.Add(1);
-	//		this.updateLinesOfCodeStats(GAME);
-	//	}
-	//}, this));
 	$('#write-code-button').on('click', $.proxy(function() {
 		this.game.GetGenerator('click').Click();
 	}, this));
@@ -375,11 +365,13 @@ UI.prototype.loadGame = function() {
 	}
 };
 
+UI.prototype.saveGame = function() {
+	var saveObject = GAME.loader.Save();
+	localStorage.setItem('techeon-save', JSON.stringify(saveObject));
+};
+
 UI.prototype.setupSaveGame = function() {
-	setInterval(function() {
-		var saveObject = GAME.loader.Save();
-		localStorage.setItem('techeon-save', JSON.stringify(saveObject));
-	}, this.config.saveInterval);
+	setInterval(this.saveGame, this.config.saveInterval);
 };
 
 UI.prototype.setupBuyTen = function() {
@@ -397,7 +389,7 @@ UI.prototype.setupBuyTen = function() {
 };
 
 UI.prototype.setupInternWhippingRelated = function() {
-	this.game.GetGenerator('intern').on('modifier_add', function(entity, modifier) {
+	this.game.GetGenerator('intern').on('modifier_activate', function(entity, modifier) {
 		if (modifier.name == 'whipped') {
 			document.getElementById('whip-sound').play();
 		}
@@ -409,6 +401,15 @@ UI.prototype.setupInternWhippingRelated = function() {
 	}, this);
 };
 
+UI.prototype.setupSettingsScreen = function() {
+	$('#save-button').on('click', $.proxy(function() {
+		this.saveGame();
+	}, this));
+	$('#reset-button').on('click', $.proxy(function() {
+		// TODO: reset game without refreshing
+	}));
+};
+
 UI.prototype.init = function() {
 	this.setupBuyTen();
 	this.setupPopup();
@@ -417,6 +418,7 @@ UI.prototype.init = function() {
 	this.setupGenerators();
 	this.setupUpgrades();
 	this.setupCodeClickListener();
+	this.setupSettingsScreen();
 	this.showAchievements();
 	sh_highlightDocument();
 
