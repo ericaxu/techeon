@@ -68,7 +68,7 @@ var TUNING = {
 	TICKS_PER_ACHIEVEMENT_CHECK: 5,
 
 	PURCHASABLE_DEFAULT_SELL_FACTOR: 0.75,
-	PURCHASABLE_DEFAULT_RESTRICT_FACTOR: 0.8
+	PURCHASABLE_DEFAULT_RESTRICT_FACTOR: 0.5
 };
 
 /**
@@ -121,7 +121,7 @@ extend(Purchasable, Component, {
 		return this.GetBaseBuyPrice();
 	},
 	Buy: function() {
-		if (!this.Affordable()) {
+		if (!this.CanBuy() || !this.Affordable()) {
 			return;
 		}
 		var price = this.GetBuyPrice();
@@ -145,6 +145,9 @@ extend(Purchasable, Component, {
 		this.entity.trigger('sell', this.entity);
 	},
 	CanSell: function() {
+		return true;
+	},
+	CanBuy: function() {
 		return true;
 	}
 });
@@ -206,7 +209,8 @@ var ObtainablePurchasable = function(entity) {
 	entity.AddComponent(Purchasable);
 	entity.obtainablepurchasable = this;
 
-	this.entity.purchasable.CanSell = this.CanSell;
+	this.entity.purchasable.CanSell = bind(this.CanSell, this);
+	this.entity.purchasable.CanBuy = bind(this.CanBuy, this);
 	this.entity.on('buy', this.OnBuy, this);
 	this.entity.on('sell', this.OnSell, this);
 };
@@ -217,8 +221,11 @@ extend(ObtainablePurchasable, Component, {
 	OnSell: function() {
 		this.entity.obtainable.UnObtain();
 	},
+	CanBuy: function() {
+		return !this.entity.obtainable.GetObtained();
+	},
 	CanSell: function() {
-		return this.obtainable.GetObtained();
+		return this.entity.obtainable.GetObtained();
 	}
 });
 
@@ -448,17 +455,17 @@ var ModifierReward = function(game, entity, modifier, upgrade) {
 	this.entity = entity;
 	this.modifier = modifier;
 	this.upgrade = upgrade;
+	this.entity.on('modifier_deactivate', this.ModifierDeactivate, this);
 };
 extend(ModifierReward, Reward, {
 	Reward: function() {
-		this.entity.modifiable.AddModifier(this.modifier);
+		var modifier = this.entity.modifiable.GetModifier(this.modifier);
+		this.entity.modifiable.ActivateModifier(modifier);
 		this.game.trigger('reward_modifier', this, this.entity, this.modifier);
-		if (this.upgrade) {
-			this.entity.on('modifier_remove', function(entity, modifier) {
-				if (modifier === this.modifier) {
-					this.upgrade.obtainable.UnObtain();
-				}
-			}, this);
+	},
+	ModifierDeactivate: function(entity, modifier) {
+		if (modifier.name === this.modifier && this.upgrade) {
+			this.upgrade.obtainable.UnObtain();
 		}
 	}
 });

@@ -582,33 +582,40 @@ var Modifiable = function(entity) {
 	Component.call(this, entity);
 	entity.modifiable = this;
 	entity.loader.AddElement('modifiable');
-	this.modifiers = {};
+	this.ticks = {};
 	this.timecount = {};
-	this.loader.AddElement('modifiers').AddElement('timecount');
+	this.loader.AddElement('ticks').AddElement('timecount');
 	this.entity.bridge('modifier_add', 'update');
-	this.entity.bridge('modifier_remove', 'update');
-	this.entity.game.on('tick', this.CheckModifiers, this);
-	this.attachedModifiers = {};
+	this.entity.bridge('modifier_activate', 'update');
+	this.entity.bridge('modifier_deactivate', 'update');
+	this.entity.game.on('tick', this.TickModifiers, this);
+	this.modifiers = {};
 };
 extend(Modifiable, Component, {
 	AddModifier: function(modifier) {
-		modifier.Attach(this);
+		modifier.Attach(this.entity, this);
 		this.entity.trigger('modifier_add', this.entity, modifier);
+		return this.entity;
 	},
-	RemoveModifier: function(modifier) {
-		modifier.Detach(this);
-		this.entity.trigger('modifier_remove', this.entity, modifier);
+	ActivateModifier: function(modifier) {
+		modifier.Activate(this);
+		this.entity.trigger('modifier_activate', this.entity, modifier);
 	},
-	CheckModifiers: function() {
-		each(this.attachedModifiers, function(modifier) {
-			if (!modifier.Tick(this)) {
-				this.RemoveModifier(modifier);
-			}
+	DeactivateModifier: function(modifier) {
+		modifier.Deactivate(this);
+		this.entity.trigger('modifier_deactivate', this.entity, modifier);
+	},
+	TickModifiers: function() {
+		each(this.modifiers, function(modifier) {
+			modifier.Tick(this);
 		}, this);
 	},
+	GetModifier: function(name) {
+		return this.modifiers[name];
+	},
 	HasModifier: function(modifier) {
-		if (this.attachedModifiers[modifier]) {
-			return this.attachedModifiers[modifier].Check(this);
+		if (this.modifiers[modifier]) {
+			return this.modifiers[modifier].Check(this);
 		}
 		return false;
 	},
@@ -627,35 +634,32 @@ var Modifier = function(game, name, ticks) {
 	this.game = game;
 	this.name = name;
 	this.ticks = ticks;
+	this.entity = null;
 };
 extend(Modifier, null, {
-	Attach: function(modifiable) {
-		modifiable.modifiers[this.name] = this.ticks;
-		modifiable.attachedModifiers[this.name] = this;
-		if (!modifiable.timecount[this.name]) {
-			modifiable.timecount[this.name] = 0;
-		}
+	Attach: function(entity, modifiable) {
+		this.entity = entity;
+		modifiable.ticks[this.name] = -1;
+		modifiable.timecount[this.name] = 0;
+		modifiable.modifiers[this.name] = this;
+	},
+	Activate: function(modifiable) {
+		modifiable.ticks[this.name] = this.ticks;
 		modifiable.timecount[this.name] += 1;
-
-		this.Activate(modifiable.entity);
 	},
-	Detach: function(modifiable) {
-		delete modifiable.modifiers[this.name];
-		delete modifiable.attachedModifiers[this.name];
-		this.Deactivate(modifiable.entity);
-	},
-	Activate: function(entity) {
-
-	},
-	Deactivate: function(entity) {
-
+	Deactivate: function(modifiable) {
+		modifiable.ticks[this.name] = -1;
 	},
 	Tick: function(modifiable) {
-		modifiable.modifiers[this.name]--;
-		return this.Check(modifiable);
+		if (modifiable.ticks[this.name] != -1) {
+			modifiable.ticks[this.name]--;
+			if (!this.Check(modifiable)) {
+				modifiable.DeactivateModifier(this);
+			}
+		}
 	},
 	Check: function(modifiable) {
-		return modifiable.modifiers[this.name] > 0;
+		return modifiable.ticks[this.name] > 0;
 	}
 });
 

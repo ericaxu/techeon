@@ -5,6 +5,7 @@ extend(CodeGenerator, Generator, {});
 
 var InternGenerator = function(game, name) {
 	CodeGenerator.call(this, game, name);
+	this.AddComponent(Modifiable);
 	this.escaped = 0;
 	this.loader.AddElement('escaped');
 	this.on('escape', this.Escaped, this);
@@ -43,7 +44,7 @@ extend(ClickGenerator, Generator, {
 });
 
 var WhippingModifier = function(game, ticks, tickrate, callback) {
-	Modifier.call(this, game, 'whipped', ticks);
+	Modifier.call(this, game, 'whip', ticks);
 	this.multiplier = 1;
 	this.tickrate = tickrate;
 	this.callback = callback;
@@ -53,18 +54,20 @@ extend(WhippingModifier, Modifier, {
 		this.multiplier = multiplier;
 		return this;
 	},
-	Activate: function(entity) {
-		entity.multiplier.Mult(this.multiplier);
+	Activate: function(modifiable) {
+		Modifier.prototype.Activate.call(this, modifiable);
+		this.entity.multiplier.Mult(this.multiplier);
 	},
-	Deactivate: function(entity) {
-		entity.multiplier.Div(this.multiplier);
+	Deactivate: function(modifiable) {
+		Modifier.prototype.Deactivate.call(this, modifiable);
+		this.entity.multiplier.Div(this.multiplier);
 	},
 	Tick: function(modifiable) {
 		var ticks = modifiable.modifiers[this.name];
 		if (this.callback && ticks % this.tickrate == 0) {
 			this.callback(this.game);
 		}
-		return Modifier.prototype.Tick.call(this, modifiable);
+		Modifier.prototype.Tick.call(this, modifiable);
 	}
 });
 
@@ -72,7 +75,7 @@ var WhippingAchievement = function(game, name, entity, count) {
 	Achievement.call(this, game, name);
 	this.entity = entity;
 	this.count = count;
-	this.entity.on('modifier_add', this.Check, this);
+	this.entity.on('modifier_activate', this.Check, this);
 };
 extend(WhippingAchievement, Achievement, {
 	Check: function() {
@@ -86,11 +89,12 @@ var EscapeAchievement = function(game, name, entity, count) {
 	Achievement.call(this, game, name);
 	this.entity = entity;
 	this.count = count;
-	this.entity.on('update', this.Check, this);
+	this.entity.on('escape', this.Check, this);
 };
 extend(EscapeAchievement, Achievement, {
 	Check: function() {
 		if (!this.obtainable.GetObtained() && this.entity.escaped >= this.count) {
+			console.log("Obtained " + this.name);
 			this.obtainable.Obtain();
 		}
 	}
@@ -137,7 +141,13 @@ var GAME = (function() {
 					.purchasable.SetBuyPrice("money", 100)
 					.restrictable.AddRestriction(new AmountRestriction(game, resources.money, 1, 1))
 					.SetRateSecond("code", 0.2)
-					.AddComponent(Modifiable)
+					.modifiable.AddModifier(new WhippingModifier(game, 10 * 60 * game.tps, game.tps * 60, function(game) {
+						var intern = game.data.generators.intern;
+						if (intern.amount.Get() > 0 && randomInt(9) == 0) {
+							intern.amount.Remove(1);
+							intern.trigger('escape', intern);
+						}
+					}).SetMultiplier(20))
 			);
 			generators.newgrad = game.AddGenerator(new CodeGenerator(game, "newgrad")
 					.describable.Set("New Grad", "Fresh out of college, will code for food.")
@@ -486,14 +496,7 @@ var GAME = (function() {
 				}
 			]);
 
-			upgrades.internwhip.rewardable.AddReward(new ModifierReward(game, generators.intern,
-				new WhippingModifier(game, 10 * 60 * game.tps, game.tps * 60, function(game) {
-					var intern = game.data.generators.intern;
-					if (randomInt(9) == 0) {
-						intern.amount.Remove(1);
-						intern.trigger('escape', intern);
-					}
-				}).SetMultiplier(20), upgrades.internwhip));
+			upgrades.internwhip.rewardable.AddReward(new ModifierReward(game, generators.intern, "whip", upgrades.internwhip));
 
 			createMultiplierUpgrades(generators.newgrad, [
 				{
@@ -643,7 +646,7 @@ var GAME = (function() {
 				},
 				{
 					title: "Family Health Insurance",
-					description: "Now that my family is insured.",
+					description: "Now that your family is fully insured... (Hint, the keyword is 'work')",
 					resource: "money",
 					price: 8000000000,
 					restrictamount: 80,
@@ -686,7 +689,7 @@ var GAME = (function() {
 				},
 				{
 					title: "Ergonomic Keyboard",
-					description: "The only place where one keyboard may come in two pieces.",
+					description: "The only kind of keyboard that comes in two pieces.",
 					resource: "money",
 					price: 25000000000,
 					restrictamount: 80,
@@ -832,7 +835,7 @@ var GAME = (function() {
 				{
 					name: "allhires5",
 					title: "In-house Kitchen",
-					description: "Fully .",
+					description: "Gourmet food, three times a day.",
 					effect: "Everyone codes 64% faster.",
 					price: 10000000000000,
 					multiplier: 1.64
@@ -877,7 +880,7 @@ var GAME = (function() {
 				},
 				{
 					title: "DDoS Protection",
-					description: "99.9999 uptime guaranteed!",
+					description: "99.9999% uptime guaranteed.",
 					resource: "code",
 					price: 500000000,
 					restrictamount: 120,
@@ -885,7 +888,7 @@ var GAME = (function() {
 				},
 				{
 					title: "SSL Certificate",
-					description: "Your connection to this website is encrypted with 42-bit encryption",
+					description: "Your connection to this website is encrypted with 42-bit encryption.",
 					resource: "code",
 					price: 130000000000,
 					restrictamount: 160,
@@ -919,7 +922,7 @@ var GAME = (function() {
 					multiplier: 4
 				},
 				{
-					title: "Dedicated Data-Center",
+					title: "Dedicated Data Center",
 					description: "Why pay others when you can host your own?",
 					resource: "code",
 					price: 3000000000,
@@ -928,7 +931,7 @@ var GAME = (function() {
 				},
 				{
 					title: "Hadoop Distributed Computing",
-					description: "Big data is apparently...REALLY BIG.",
+					description: "Big data is apparently... REALLY BIG.",
 					resource: "code",
 					price: 700000000000,
 					restrictamount: 160,
@@ -962,7 +965,7 @@ var GAME = (function() {
 					multiplier: 4
 				},
 				{
-					title: "Birthday/Holiday E-Cards",
+					title: "Holiday E-Cards",
 					description: "A surprising amount of people still use this, even though it sounds so 2000.",
 					resource: "code",
 					price: 20000000000,
@@ -998,7 +1001,7 @@ var GAME = (function() {
 				},
 				{
 					title: "Automatic Updates",
-					description: "You won't even need a restart!",
+					description: "You won't even need to reboot your PC!",
 					resource: "code",
 					price: 300000000,
 					restrictamount: 80,
@@ -1025,7 +1028,7 @@ var GAME = (function() {
 			createMultiplierUpgrades(generators.mobileapp, [
 				{
 					title: "In-App Ads",
-					description: "SomeApp Free (Get the pro version to remove ads)",
+					description: "SomeApp Free (Get the pro version to remove ads).",
 					resource: "code",
 					price: 100000,
 					restrictamount: 10,
