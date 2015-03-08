@@ -129,6 +129,7 @@ extend(Purchasable, Component, {
 			this.entity.game.GetResource(resource).amount.Remove(price[resource]);
 		}
 		this.entity.trigger('buy', this.entity);
+		this.UpdateAffordable();
 	},
 	GetBaseSellPrice: function() {
 		return this.sellPrice;
