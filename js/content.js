@@ -1465,5 +1465,15 @@ var CreateGame = function() {
 		}
 	}
 
+	game.content.upgrades.sort(function(a, b) {
+		var m1 = a.purchasable.GetBuyPrice().money;
+		var c1 = a.purchasable.GetBuyPrice().code;
+		var m2 = b.purchasable.GetBuyPrice().money;
+		var c2 = b.purchasable.GetBuyPrice().code;
+
+
+		return (m1 || c1) - (m2 || c2);
+	});
+
 	return game;
 };
