@@ -378,7 +378,6 @@ UI.prototype.init = function() {
 	this.setupGenerators();
 	this.setupUpgrades();
 	this.setupCodeClickListener();
-	//this.setupSaveGame();
 	this.showAchievements();
 	sh_highlightDocument();
 
@@ -387,7 +386,8 @@ UI.prototype.init = function() {
 		this.updateDollarStats();
 	}, this, this.config.updateResourceFrequencyInTicks);
 
-	//this.loadGame();
+	this.loadGame();
+	this.setupSaveGame();
 };
 
 var ui = new UI(GAME, uiConfig);

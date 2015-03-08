@@ -14,6 +14,8 @@ function extend(child, parent, prototype) {
 	for (var key in prototype) {
 		child.prototype[key] = prototype[key];
 	}
+
+	return child;
 }
 
 function each(obj, func, context) {
@@ -138,6 +140,15 @@ function addEl(tag, parent, className, text, attr) {
 	return $el;
 }
 
+var BIG_NUMBER_TABLE = [
+	{factor: 1000000, title: 'million'},
+	{factor: 1000000000, title: 'billion'},
+	{factor: 1000000000000, title: 'trillion'},
+	{factor: 1000000000000000, title: 'quadrillion'},
+	{factor: 1000000000000000000, title: 'quintillion'},
+	{factor: 1000000000000000000000, title: 'sixtillion'}
+];
+
 function readableBigNumber(x, digits, overridedigits) {
 	var million = 1000000;
 	var billion = million * 1000;
@@ -155,17 +166,10 @@ function readableBigNumber(x, digits, overridedigits) {
 	var factor = Math.pow(10, digits);
 	x = Math.round(x * factor) / factor;
 
-	if (x >= quadrillion) {
-		return formatNumWithCommas((x / quadrillion).toFixed(overridedigits)) + ' quadrillion';
-	}
-	if (x >= trillion) {
-		return formatNumWithCommas((x / trillion).toFixed(overridedigits)) + ' trillion';
-	}
-	if (x >= billion) {
-		return formatNumWithCommas((x / billion).toFixed(overridedigits)) + ' billion';
-	}
-	if (x >= million) {
-		return formatNumWithCommas((x / million).toFixed(overridedigits)) + ' million';
+	for(var i = BIG_NUMBER_TABLE.length - 1; i >= 0; i--) {
+		if(x >= BIG_NUMBER_TABLE[i].factor) {
+			return formatNumWithCommas((x / BIG_NUMBER_TABLE[i].factor).toFixed(overridedigits)) + ' ' + BIG_NUMBER_TABLE[i].title;
+		}
 	}
 
 	return formatNumWithCommas(x.toFixed(digits));
