@@ -429,6 +429,7 @@ UI.prototype.init = function() {
 	this.setupSaveGame();
 };
 
+var GAME = CreateGame();
 var ui = new UI(GAME, uiConfig);
 GAME.Start();
 

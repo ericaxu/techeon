@@ -183,9 +183,9 @@ extend(GameEngine, null, {
 	},
 	Stop: function() {
 		if (this.loopTask) {
-			this.trigger('game_stop', this);
 			clearTimeout(this.loopTask);
 			this.loopTask = null;
+			this.trigger('game_stop', this);
 		}
 	},
 	Loop: function() {

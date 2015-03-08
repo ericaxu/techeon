@@ -100,7 +100,7 @@ extend(EscapeAchievement, Achievement, {
 	}
 });
 
-var GAME = (function() {
+var CreateGame = function() {
 
 	var game = new Game();
 
@@ -1466,4 +1466,4 @@ var GAME = (function() {
 	}
 
 	return game;
-})();
+};
