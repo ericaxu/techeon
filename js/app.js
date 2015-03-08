@@ -396,9 +396,23 @@ UI.prototype.setupBuyTen = function() {
 	}, this));
 };
 
+UI.prototype.setupInternWhippingRelated = function() {
+	this.game.GetGenerator('intern').on('modifier_add', function(entity, modifier) {
+		if (modifier.name == 'whipped') {
+			document.getElementById('whip-sound').play();
+		}
+	}, this);
+
+	this.game.GetGenerator('intern').on('escape', function(entity) {
+		this.showNotification('An intern has escaped', 'Apparently people don\'t like being whipped.',
+			'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg', true);
+	}, this);
+};
+
 UI.prototype.init = function() {
 	this.setupBuyTen();
 	this.setupPopup();
+	this.setupInternWhippingRelated();
 	this.setupNavClickHandlers();
 	this.setupGenerators();
 	this.setupUpgrades();

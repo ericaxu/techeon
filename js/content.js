@@ -1462,15 +1462,5 @@ var GAME = (function() {
 		}
 	}
 
-	game.GetGenerator("intern").on("modifier_add", function(entity, modifier) {
-		if (modifier.name == "whipped") {
-			console.log("Play sound 'whip'");
-		}
-	}, this);
-
-	game.GetGenerator("intern").on("escape", function(entity) {
-		console.log("Notify: An intern has escaped!");
-	}, this);
-
 	return game;
 })();
