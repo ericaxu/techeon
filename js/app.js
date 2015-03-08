@@ -150,7 +150,7 @@ UI.prototype.setupPurchasable = function(entity) {
 			}, this));
 
 			$div.on('mouseleave', function() {
-				//$tooltip.offset({left: 0, top: 0}).hide();
+				$tooltip.offset({left: 0, top: 0}).hide();
 				$div.off('mousemove');
 				entity.off('amount_change', updateTooltip);
 			});
