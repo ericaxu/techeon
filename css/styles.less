@@ -95,7 +95,7 @@ h4 {
 	font-size: 18px;
 }
 
-.navbar, .back {
+.navbar {
 	text-align: center;
 	img {
 		width: 30px;
@@ -103,11 +103,6 @@ h4 {
 		margin-right: 5px;
 	}
 }
-
-.back {
-	display: none;
-}
-
 .navbar li, .back li {
 	display: inline-block;
 }
@@ -155,6 +150,7 @@ h4 {
 #feature-container, #team-container, #upgrade-container {
 	visibility: hidden;
 	width: 300px;
+	overflow-y: auto;
 }
 
 #feature-container {
@@ -170,6 +166,7 @@ h4 {
 #main-screen {
 	margin: 0 602px 0 301px;
 	position: relative;
+	overflow-y: auto;
 }
 
 #write-code-button-container {
@@ -493,7 +490,7 @@ h4 {
 
 /* Notification */
 .notification-container {
-	position: absolute;
+	position: fixed;
 	left: 0;
 	right: 0;
 	bottom: 30px;
