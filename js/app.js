@@ -21,6 +21,7 @@ var UI = function(game, config) {
 	this.lastNumOfLines = 0;
 	this.codebaseTop = 0;
 	this.config = config;
+	this.isCtrlDown = false;
 
 	this.init();
 };
@@ -111,7 +112,14 @@ UI.prototype.setupPurchasable = function(entity) {
 			var $ownedCount = addEl('div', $div, 'purchasable-owned-count');
 			addEl('div', $div, 'price', this.formatPrice(entity));
 			$div.on('click', $.proxy(function() {
-				entity.purchasable.Buy();
+				// Buy ten
+				if (this.isCtrlDown) {
+					for (var i = 0; i < 10; i++) {
+						entity.purchasable.Buy();
+					}
+				} else {
+					entity.purchasable.Buy();
+				}
 			}, this));
 
 			if (entity.amount) {
@@ -374,7 +382,22 @@ UI.prototype.setupSaveGame = function() {
 	}, this.config.saveInterval);
 };
 
+UI.prototype.setupBuyTen = function() {
+	$(document).on('keydown', $.proxy(function(e) {
+		if (e.keyCode === 17) {
+			this.isCtrlDown = true;
+		}
+	}, this));
+
+	$(document).on('keyup', $.proxy(function(e) {
+		if(e.keyCode === 17 && this.isCtrlDown) {
+			this.isCtrlDown = false
+		}
+	}, this));
+};
+
 UI.prototype.init = function() {
+	this.setupBuyTen();
 	this.setupPopup();
 	this.setupNavClickHandlers();
 	this.setupGenerators();
