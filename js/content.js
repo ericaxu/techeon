@@ -107,15 +107,21 @@ var GAME = (function() {
 		resources.money = game.AddResource(new Resource(game, "money")
 				.describable.SetTitle("$")
 				.describable.SetPlural("$")
-				.SetRateFormatter(function(rate) {
+				.SetFormatter("genrate", function(rate) {
 					return "Generates " + formatDollar(rate * game.GetTicksPerSecond()) + " per second.";
+				})
+				.SetFormatter("totalgenrate", function(rate) {
+					return "Together generates " + formatDollar(rate * game.GetTicksPerSecond()) + " per second.";
 				})
 		);
 		resources.code = game.AddResource(new Resource(game, "code")
 				.describable.SetTitle("line of code")
 				.describable.SetPlural("lines of code")
-				.SetRateFormatter(function(rate) {
+				.SetFormatter("genrate", function(rate) {
 					return "Produces " + formatLinesOfCodePerSec(rate * game.GetTicksPerSecond()) + " per second.";
+				})
+				.SetFormatter("totalgenrate", function(rate) {
+					return "Together produces " + formatLinesOfCodePerSec(rate * game.GetTicksPerSecond()) + " per second.";
 				})
 		);
 	}
@@ -308,8 +314,17 @@ var GAME = (function() {
 					effect = entity.describable.GetPlural() + " code " + speed + ".";
 				}
 				else if (entity instanceof MoneyGenerator) {
-					effect = entity.describable.GetPlural() + " generate " +
-					(object.multiplier == 2 ? "twice" : (object.multiplier * 100) + "%") + " their income.";
+					var speed = (object.multiplier * 100) + "%";
+					if (object.multiplier == 2) {
+						speed = "twice";
+					}
+					if (object.multiplier == 3) {
+						speed = "three times";
+					}
+					if (object.multiplier == 4) {
+						speed = "four times";
+					}
+					effect = entity.describable.GetPlural() + " generate " + speed + " their income.";
 				}
 
 				var upgrade = game.AddUpgrade(new Upgrade(game, name)
@@ -345,7 +360,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 1000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Free Chips",
@@ -353,7 +368,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 6000,
 					restrictamount: 20,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Free Soda",
@@ -361,7 +376,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 15000,
 					restrictamount: 30,
-					multiplier: 2
+					multiplier: 4
 				},
 				new Upgrade(game, "internwhip")
 					.describable.Set("Whip the interns", "In reality, you're really just whipping the ground to scare them to work faster.",
@@ -379,7 +394,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 500000,
 					restrictamount: 50,
-					multiplier: 2
+					multiplier: 4
 				},
 				new Upgrade(game, "monthlyhackathon")
 					.describable.Set("Monthly Intern Hackathons", "The panel of judges will give away 3 prizes at the end of each event.",
@@ -395,7 +410,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 4000000,
 					restrictamount: 70,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Lifetime Pro Membership",
@@ -403,7 +418,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 30000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Free Ferrero Rocher",
@@ -411,7 +426,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 90000000,
 					restrictamount: 90,
-					multiplier: 2
+					multiplier: 4
 				},
 				new Upgrade(game, "overtime")
 					.describable.Set("Paid Overtime", "Overtime is paid 1.5x regular wages. Interns have student loans to pay. Win-win?",
@@ -427,7 +442,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 1000000000,
 					restrictamount: 110,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Intern Events",
@@ -435,7 +450,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 5000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				new Upgrade(game, "dedicatedmentors")
 					.describable.Set("Dedicated Mentors", "Intern mentors are now full time mentors.",
@@ -451,7 +466,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 70000000000,
 					restrictamount: 140,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Intern Campus",
@@ -459,7 +474,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 300000000000,
 					restrictamount: 150,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Scholarships",
@@ -467,7 +482,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 2000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -487,7 +502,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 4000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Free Gym Membership",
@@ -495,7 +510,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 300000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Swag T-Shirts",
@@ -503,7 +518,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 100000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Dual Monitor Setup",
@@ -511,7 +526,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 20000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Free Onsite Gym",
@@ -519,7 +534,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 5000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -530,7 +545,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 15000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Free Delivered Lunch",
@@ -538,7 +553,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 1000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Free Dropbox Pro",
@@ -546,7 +561,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 300000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Frequent Flier Program",
@@ -554,7 +569,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 80000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Health Insurance",
@@ -562,7 +577,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 25000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -573,7 +588,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 80000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Free Coffee",
@@ -581,7 +596,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 6000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "IntelliJ Licenses",
@@ -589,7 +604,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 1500000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "SSDs",
@@ -597,7 +612,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 400000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Commuter Stipend",
@@ -605,7 +620,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 100000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -616,7 +631,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 500000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Take Your Kid To Work Days",
@@ -624,7 +639,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 30000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Family Health Insurance",
@@ -632,7 +647,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 8000000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Day Care Program",
@@ -640,7 +655,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 2000000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Pension Plan",
@@ -648,7 +663,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 500000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -659,7 +674,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 1200000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Free Beer",
@@ -667,7 +682,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 100000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Ergonomic Keyboard",
@@ -675,7 +690,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 25000000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Standing Desks",
@@ -683,7 +698,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 6000000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Paid Time Off",
@@ -691,7 +706,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 1500000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -702,7 +717,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 10000000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Onsite Massages",
@@ -710,7 +725,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 600000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Ergonomic Office Chairs",
@@ -718,7 +733,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 150000000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Pet Friendly Workplace",
@@ -726,7 +741,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 40000000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Pet Insurance Policy",
@@ -734,7 +749,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 10000000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -745,7 +760,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 40000000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Themed Office Area",
@@ -753,7 +768,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 2500000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Team trips",
@@ -761,7 +776,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 600000000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Stock Options",
@@ -769,7 +784,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 150000000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Dedicated Project Funding",
@@ -777,7 +792,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 40000000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -842,7 +857,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 120,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "SQL Injection Protection",
@@ -850,7 +865,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 7000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "XSS Detector",
@@ -858,7 +873,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 2000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "DDoS Protection",
@@ -866,7 +881,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 500000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "SSL Certificate",
@@ -874,7 +889,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 130000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -885,7 +900,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 800,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "MySQL Database",
@@ -893,7 +908,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 50000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Oracle Database",
@@ -901,7 +916,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 13000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Dedicated Data-Center",
@@ -909,7 +924,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 3000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Hadoop Distributed Computing",
@@ -917,7 +932,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 700000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -928,7 +943,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 5000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Option to Unsubscribe",
@@ -936,7 +951,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 300000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Promotion Emails",
@@ -944,7 +959,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 75000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Birthday/Holiday E-Cards",
@@ -952,7 +967,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 20000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Targeted Emails",
@@ -960,7 +975,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 5000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -971,7 +986,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 20000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Command-Line Interface",
@@ -979,7 +994,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 1200000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Automatic Updates",
@@ -987,7 +1002,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 300000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Native UI",
@@ -995,7 +1010,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 75000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "C++ rewrite",
@@ -1003,7 +1018,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 20000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -1014,7 +1029,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 100000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "In-App Purchase",
@@ -1022,7 +1037,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 6000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Featured in App Store",
@@ -1030,7 +1045,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 1500000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Press Review",
@@ -1038,7 +1053,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 400000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Preloaded Apps",
@@ -1046,7 +1061,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 100000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -1057,7 +1072,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 400000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Keyword Spamming",
@@ -1065,7 +1080,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 25000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "URL Normalization",
@@ -1073,7 +1088,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 6000000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Paid Ranks",
@@ -1081,7 +1096,7 @@ var GAME = (function() {
 					resource: "money",
 					price: 1500000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Search Engine Partnerships",
@@ -1089,7 +1104,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 350000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -1100,7 +1115,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 1600000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Terabit Internet Access",
@@ -1108,7 +1123,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 100000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Machine Learning Algorithm",
@@ -1116,7 +1131,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 25000000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Genetic Algorithm",
@@ -1124,7 +1139,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 35000000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Neural Networks",
@@ -1132,7 +1147,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 6000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 
@@ -1143,7 +1158,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 8000000,
 					restrictamount: 10,
-					multiplier: 1.5
+					multiplier: 3
 				},
 				{
 					title: "Meow Simulator",
@@ -1151,7 +1166,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 500000000,
 					restrictamount: 40,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Cat Picture Analysis Algorithm",
@@ -1159,7 +1174,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 130000000000,
 					restrictamount: 80,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "Tactile Feedback",
@@ -1167,7 +1182,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 32000000000000,
 					restrictamount: 120,
-					multiplier: 2
+					multiplier: 4
 				},
 				{
 					title: "VR Cat Cafe",
@@ -1175,7 +1190,7 @@ var GAME = (function() {
 					resource: "code",
 					price: 8000000000000000,
 					restrictamount: 160,
-					multiplier: 2
+					multiplier: 4
 				}
 			]);
 

@@ -359,6 +359,7 @@ extend(Describable, Component, {
 var Multiplier = function(entity) {
 	Component.call(this, entity);
 	entity.multiplier = this;
+	entity.loader.AddElement('multiplier');
 	this.multiplier = 1;
 	this.loader.AddElement('multiplier');
 };
@@ -580,6 +581,7 @@ extend(Reward, null, {
 var Modifiable = function(entity) {
 	Component.call(this, entity);
 	entity.modifiable = this;
+	entity.loader.AddElement('modifiable');
 	this.modifiers = {};
 	this.timecount = {};
 	this.loader.AddElement('modifiers').AddElement('timecount');

@@ -269,7 +269,7 @@ var Resource = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Amount);
 	this.AddComponent(Multiplier);
-	this.rateFormatter = null;
+	this.formatters = {};
 	this.amount.StartApprox();
 	this.amount.TrackTickRate();
 };
@@ -280,9 +280,12 @@ extend(Resource, Entity, {
 	Reward: function(amount) {
 		this.amount.Add(amount);
 	},
-	SetRateFormatter: function(rateFormatter) {
-		this.rateFormatter = rateFormatter;
+	SetFormatter: function(name, formatter) {
+		this.formatters[name] = formatter;
 		return this;
+	},
+	GetFormatter: function(name) {
+		return this.formatters[name];
 	}
 });
 
@@ -344,12 +347,11 @@ extend(Generator, Entity, {
 	UpdateEffect: function() {
 		this.describable.ClearEffects();
 		for (var resource in this.rates) {
-			var rateFormatter = this.game.GetResource(resource).rateFormatter;
-			if (rateFormatter) {
-				this.describable.AddEffect(rateFormatter(this.GetSingleRate(resource)));
-				if (this.amount.Get() > 1) {
-					this.describable.AddEffect("Total " + rateFormatter(this.GetRate(resource)));
-				}
+			var genrateFormatter = this.game.GetResource(resource).GetFormatter('genrate');
+			var totalgenrateFormatter = this.game.GetResource(resource).GetFormatter('totalgenrate');
+			this.describable.AddEffect(genrateFormatter(this.GetSingleRate(resource)));
+			if (this.amount.Get() > 1) {
+				this.describable.AddEffect(totalgenrateFormatter(this.GetRate(resource)));
 			}
 		}
 	},
