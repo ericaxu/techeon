@@ -4,7 +4,7 @@ var uiConfig = {
 	updatePurchasablesFrequencyInTicks: 25,
 	pixelsBetweenTooltip: 0,
 	scrollCodebaseLimit: 50,
-	notificationFadeDuration: 2000
+	notificationFadeDuration: 5000
 };
 
 var UI = function(game, config) {
