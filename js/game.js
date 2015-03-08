@@ -12,6 +12,8 @@ var Game = function() {
 
 	this.data.achievements = {};
 	this.content.achievements = [];
+
+	this.stats = {};
 };
 extend(Game, GameEngine, {
 	GetResourceRatesPerSecond: function(resource) {
@@ -61,6 +63,36 @@ extend(Game, GameEngine, {
 	},
 	GetAchievement: function(name) {
 		return this.data.achievements[name];
+	},
+	UpdateStatsUpgrades: function() {
+		var old = this.stats.upgrades;
+		this.stats.upgrades = 0;
+		each(this.content.upgrades, function(upgrade) {
+			if (upgrade.obtainable.GetObtained()) {
+				this.stats.upgrades++;
+			}
+		}, this);
+		if (old != this.stats.upgrades) {
+			this.trigger('stats_upgrades_change', this);
+		}
+	},
+	UpdateStatsAchievements: function() {
+		var old = this.stats.achievements;
+		this.stats.achievements = 0;
+		each(this.content.achievements, function(achievement) {
+			if (achievement.obtainable.GetObtained()) {
+				this.stats.achievements++;
+			}
+		}, this);
+		if (old != this.stats.achievements) {
+			this.trigger('stat_achievements_change', this);
+		}
+	},
+	GetStatsUpgrades: function() {
+		return this.stats.upgrades;
+	},
+	GetStatsAchievements: function() {
+		return this.stats.achievements;
 	}
 });
 
@@ -407,6 +439,7 @@ var Upgrade = function(game, name) {
 	this.AddComponent(ObtainablePurchasable);
 	this.AddComponent(PurchasableRestrictable);
 	this.on('obtain', this.OnObtain, this);
+	this.on('update', this.game.UpdateStatsUpgrades, this.game);
 };
 extend(Upgrade, Entity, {
 	OnObtain: function() {
@@ -477,14 +510,13 @@ extend(ModifierReward, Reward, {
 var Achievement = function(game, name) {
 	Entity.call(this, game, name);
 	this.AddComponent(Obtainable);
+	this.on('update', this.game.UpdateStatsAchievements, this.game);
 };
-extend(Achievement, Entity, {});
-
-var AutocheckAchievement = function(game, name) {
-	Achievement.call(this, game, name);
-	game.on('tick', this.Check, this, TUNING.TICKS_PER_ACHIEVEMENT_CHECK);
-};
-extend(AutocheckAchievement, Achievement, {
+extend(Achievement, Entity, {
+	Init: function() {
+		//Don't init/reset again
+		this.game.off('init', this.OnInit);
+	},
 	Check: function() {
 		if (!this.obtainable.GetObtained()) {
 			this.CheckAchievement();
@@ -494,6 +526,12 @@ extend(AutocheckAchievement, Achievement, {
 
 	}
 });
+
+var AutocheckAchievement = function(game, name) {
+	Achievement.call(this, game, name);
+	game.on('tick', this.Check, this, TUNING.TICKS_PER_ACHIEVEMENT_CHECK);
+};
+extend(AutocheckAchievement, Achievement, {});
 
 var AmountAchievement = function(game, name, entity, value) {
 	AutocheckAchievement.call(this, game, name);
@@ -531,5 +569,31 @@ var ObtainableAchievement = function(game, name, entity) {
 extend(ObtainableAchievement, Achievement, {
 	OnObtain: function() {
 		this.obtainable.Obtain();
+	}
+});
+
+var UpgradeAchievement = function(game, name, count) {
+	Achievement.call(this, game, name);
+	this.count = count;
+	game.on('stats_upgrades_change', this.Check, this);
+};
+extend(UpgradeAchievement, Achievement, {
+	CheckAchievement: function() {
+		if (this.game.GetStatsUpgrades() >= this.count) {
+			this.obtainable.Obtain();
+		}
+	}
+});
+
+var AchievementAchievement = function(game, name, count) {
+	Achievement.call(this, game, name);
+	this.count = count;
+	game.on('stats_achievement_change', this.Check, this);
+};
+extend(AchievementAchievement, Achievement, {
+	CheckAchievement: function() {
+		if (this.game.GetStatsAchievements() >= this.count) {
+			this.obtainable.Obtain();
+		}
 	}
 });

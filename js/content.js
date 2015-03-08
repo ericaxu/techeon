@@ -78,8 +78,8 @@ var WhippingAchievement = function(game, name, entity, count) {
 	this.entity.on('modifier_activate', this.Check, this);
 };
 extend(WhippingAchievement, Achievement, {
-	Check: function() {
-		if (!this.obtainable.GetObtained() && this.entity.modifiable.ModifierTimeCount("whipped") >= this.count) {
+	CheckAchievement: function() {
+		if (this.entity.modifiable.ModifierTimeCount("whipped") >= this.count) {
 			this.obtainable.Obtain();
 		}
 	}
@@ -92,8 +92,8 @@ var EscapeAchievement = function(game, name, entity, count) {
 	this.entity.on('escape', this.Check, this);
 };
 extend(EscapeAchievement, Achievement, {
-	Check: function() {
-		if (!this.obtainable.GetObtained() && this.entity.escaped >= this.count) {
+	CheckAchievement: function() {
+		if (this.entity.escaped >= this.count) {
 			console.log("Obtained " + this.name);
 			this.obtainable.Obtain();
 		}
@@ -1257,10 +1257,7 @@ var CreateGame = function() {
 		var sampleAmountAchievementObject = {
 			amount: 1,
 			title: "Sample Title",
-			description: "Sample description",
-			callback: function(achievementEntity) {
-				achievementEntity.describable.AddEffect("Effect!");
-			}
+			description: "Sample description"
 		};
 		var createAmountAchievements = function(entity, objects, generate) {
 			var name = entity.GetName();
@@ -1272,9 +1269,6 @@ var CreateGame = function() {
 					achievement.AddDefaultProduceEffect();
 				} else {
 					achievement.AddDefaultPurchaseEffect();
-				}
-				if (object.callback) {
-					object.callback(achievement);
 				}
 			});
 		};
@@ -1462,6 +1456,79 @@ var CreateGame = function() {
 				{amount: 150, title: "The Default Screensaver", description: ""}
 			]);
 
+		}
+
+		//Others
+		{
+			var createUpgradeAchievement = function(objects) {
+				each(objects, function(object) {
+					game.AddAchievement(new UpgradeAchievement(game, "upgrade" + object.amount, object.amount)
+							.describable.Set(object.title, object.description, "Purchase " + object.amount + " upgrades.")
+					);
+				});
+			};
+			createUpgradeAchievement([
+				{
+					title: "Level-Up",
+					description: "The first steps towards world domination.",
+					amount: 20
+				},
+				{
+					title: "Powerthrough",
+					description: "Feel the power.",
+					amount: 40
+				},
+				{
+					title: "Kitten Approved",
+					description: "Upgrade some more.",
+					amount: 60
+				},
+				{
+					title: "Fully Equipped",
+					description: "Upgrade your way through.",
+					amount: 80
+				},
+				{
+					title: "Double Rainbow",
+					description: "All the way.",
+					amount: 100
+				}
+			]);
+
+			var createAchievementAchievement = function(objects) {
+				each(objects, function(object) {
+					game.AddAchievement(new AchievementAchievement(game, "achievement" + object.amount, object.amount)
+							.describable.Set(object.title, object.description, "Obtain " + object.amount + " achievements.")
+					);
+				});
+			};
+			createAchievementAchievement([
+				{
+					title: "That Was Quick",
+					description: "If only we could do that in real life.",
+					amount: 20
+				},
+				{
+					title: "Gotta Catch Em All!",
+					description: "Yeah, I know that feel.",
+					amount: 40
+				},
+				{
+					title: "Keep going",
+					description: "This achievement is designed to help you keep playing.",
+					amount: 60
+				},
+				{
+					title: "The Over-Achiever",
+					description: "For you, 'above average' means failure.",
+					amount: 80
+				},
+				{
+					title: "The Perfectionist",
+					description: "You absolutely need all of them.",
+					amount: 100
+				}
+			]);
 		}
 	}
 

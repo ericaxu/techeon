@@ -262,14 +262,15 @@ var Entity = function(game, name) {
 	this.components = [];
 	this.AddComponent(Describable);
 	new Loader(this);
-	this.game.on('init', function() {
-		this.trigger('init', this);
-	}, this);
+	this.game.on('init', this.OnInit, this);
 	this.on('init', this.Init, this);
 	this.bridge('init', 'update');
 	this.bridge('load', 'update');
 };
 extend(Entity, null, {
+	OnInit: function() {
+		this.trigger('init', this);
+	},
 	Init: function() {
 
 	},
