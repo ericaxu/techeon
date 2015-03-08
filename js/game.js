@@ -315,30 +315,31 @@ var Generator = function(game, name, manual) {
 	this.bridge('rate_change', 'update');
 	this.on('rate_change', this.UpdateEffect, this);
 	this.manual = manual;
-	this.rates = {};
-	this.generated = {};
+	this.baseRates = {};
 	game.on('tick', this.OnTick, this);
 	this.loader.AddElement('generated');
 };
 extend(Generator, Entity, {
+	Init: function() {
+		this.rates = cloneSimple(this.baseRates);
+		this.generated = {};
+		each(this.rates, function(rate, key) {
+			this.generated[key] = 0;
+		}, this);
+	},
 	SetRateSecond: function(resource, rate) {
 		return this.SetRate(resource, this.game.GetRateTickFromSecond(rate));
 	},
 	SetRate: function(resource, rate) {
 		if (rate != 0) {
-			this.rates[resource] = rate;
-			if (!this.generated[resource]) {
-				this.generated[resource] = 0;
-			}
+			this.baseRates[resource] = rate;
 			this.game.GetResource(resource).on('multiplier_change', this.RateChanged, this);
 		}
 		else {
-			delete this.rates[resource];
-			if (this.generated[resource] == 0) {
-				delete this.generated[resource];
-			}
+			delete this.baseRates[resource];
 			this.game.GetResource(resource).off('multiplier_change', this.RateChanged);
 		}
+		this.Init();
 		this.RateChanged();
 		return this;
 	},

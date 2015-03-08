@@ -448,7 +448,7 @@ UI.prototype.init = function() {
 	}, this, this.config.updateResourceFrequencyInTicks);
 
 	this.loadGame();
-	this.setupSaveGame();
+	//this.setupSaveGame();
 };
 
 var GAME = CreateGame();

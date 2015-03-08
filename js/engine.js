@@ -206,6 +206,12 @@ extend(GameEngine, null, {
 		this.trigger('post_loop', this);
 		this.loopTask = ctxSetTimeout(this.Loop, this.timePerTick, this);
 	},
+	Reset: function() {
+		this.Stop();
+		this.tick = 0;
+		this.trigger('init', this);
+		this.Start();
+	},
 	Tick: function() {
 		this.trigger('pre_tick', this);
 		this.tick++;
@@ -256,9 +262,17 @@ var Entity = function(game, name) {
 	this.components = [];
 	this.AddComponent(Describable);
 	new Loader(this);
+	this.game.on('init', function() {
+		this.trigger('init', this);
+	}, this);
+	this.on('init', this.Init, this);
+	this.bridge('init', 'update');
 	this.bridge('load', 'update');
 };
 extend(Entity, null, {
+	Init: function() {
+
+	},
 	AddComponent: function(component) {
 		//Don't create same component twice
 		for (var i = 0; i < this.components.length; i++) {
@@ -280,7 +294,14 @@ extend(Entity, null, {
 var Component = function(entity) {
 	this.entity = entity;
 	new Loader(this);
+	this.entity.on('init', this.Init, this);
+	this.Init();
 };
+extend(Component, null, {
+	Init: function() {
+
+	}
+});
 
 /**
  * Describable
@@ -360,10 +381,12 @@ var Multiplier = function(entity) {
 	Component.call(this, entity);
 	entity.multiplier = this;
 	entity.loader.AddElement('multiplier');
-	this.multiplier = 1;
 	this.loader.AddElement('multiplier');
 };
 extend(Multiplier, Component, {
+	Init: function() {
+		this.multiplier = 1;
+	},
 	Set: function(multiplier) {
 		this.multiplier = multiplier;
 		this.entity.trigger('multiplier_change', this.entity);
@@ -396,19 +419,21 @@ var Amount = function(entity) {
 	Component.call(this, entity);
 	entity.amount = this;
 	entity.loader.AddElement('amount');
-	this.amount = 0.0;
-	this.maxAmount = 0.0;
-	this.totalAmount = 0.0;
-	this.rate = 0.0;
-	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount').AddElement('rate');
-	this.entity.bridge('amount_change', 'update');
-	this.prevAmount = 0.0;
-	this.approxAmount = 0.0;
-	this.lastRate = 0.0;
 	this.trackingRate = false;
 	this.approx = false;
+	this.loader.AddElement('amount').AddElement('maxAmount').AddElement('totalAmount').AddElement('rate');
+	this.entity.bridge('amount_change', 'update');
 };
 extend(Amount, Component, {
+	Init: function() {
+		this.amount = 0.0;
+		this.maxAmount = 0.0;
+		this.totalAmount = 0.0;
+		this.rate = 0.0;
+		this.prevAmount = 0.0;
+		this.approxAmount = 0.0;
+		this.lastRate = 0.0;
+	},
 	Get: function() {
 		return this.amount;
 	},
@@ -509,13 +534,15 @@ var Obtainable = function(entity) {
 	Component.call(this, entity);
 	entity.obtainable = this;
 	entity.loader.AddElement('obtainable');
-	this.obtained = false;
-	this.everobtained = false;
 	this.loader.AddElement('obtained').AddElement('everobtained');
 	this.entity.bridge('obtain', 'update');
 	this.entity.bridge('unobtain', 'update');
 };
 extend(Obtainable, Component, {
+	Init: function() {
+		this.obtained = false;
+		this.everobtained = false;
+	},
 	SetObtained: function(value) {
 		this.obtained = value;
 		if (value) {
@@ -592,6 +619,11 @@ var Modifiable = function(entity) {
 	this.modifiers = {};
 };
 extend(Modifiable, Component, {
+	Init: function() {
+		each(this.modifiers, function(modifier) {
+			modifier.Init(this);
+		}, this);
+	},
 	AddModifier: function(modifier) {
 		modifier.Attach(this.entity, this);
 		this.entity.trigger('modifier_add', this.entity, modifier);
@@ -637,11 +669,14 @@ var Modifier = function(game, name, ticks) {
 	this.entity = null;
 };
 extend(Modifier, null, {
-	Attach: function(entity, modifiable) {
-		this.entity = entity;
+	Init: function(modifiable) {
 		modifiable.ticks[this.name] = -1;
 		modifiable.timecount[this.name] = 0;
 		modifiable.modifiers[this.name] = this;
+	},
+	Attach: function(entity, modifiable) {
+		this.entity = entity;
+		this.Init(modifiable);
 	},
 	Activate: function(modifiable) {
 		modifiable.ticks[this.name] = this.ticks;
