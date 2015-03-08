@@ -82,8 +82,10 @@ UI.prototype.formatPrice = function(entity) {
 	} else if (entity instanceof Upgrade) {
 		if ($.isEmptyObject(entity.purchasable.GetBuyPrice())) {
 			var price = 'Free';
-		} else {
+		} else if (entity.purchasable.GetBuyPrice().money) {
 			var price = formatDollar(entity.purchasable.GetBuyPrice().money);
+		} else if (entity.purchasable.GetBuyPrice().code) {
+			var price = formatLinesOfCode(entity.purchasable.GetBuyPrice().code);
 		}
 	}
 
