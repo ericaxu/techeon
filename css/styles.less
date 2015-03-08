@@ -64,6 +64,7 @@ html {
 }
 
 body {
+	position: relative;
 	background: @background;
 	color: @dark-text;
 	width: 100%;
@@ -534,6 +535,20 @@ p {
 
 .close-btn::before {
 	content: "\D7";
+}
+
+#click-count {
+	position: relative;
+	top: 0px;
+	left: 0px;
+	max-width: 300px;
+	max-height: 50px;
+	color: black;
+	-webkit-text-fill-color: black;
+	-webkit-text-stroke-width: 1px;
+	-webkit-text-stroke-color: white;
+	font-size: 24px;
+	z-index: 4;
 }
 
 /* Blinking cursor */

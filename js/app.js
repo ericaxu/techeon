@@ -18,10 +18,12 @@ var UI = function(game, config) {
 	this.$upgradeContainer = $('#upgrade-container');
 	this.$notifications = $('.notification-container');
 	this.$codebase = $('#codebase-content');
+	this.$clickCount = $('#click-count');
 	this.lastNumOfLines = 0;
 	this.codebaseTop = 0;
 	this.config = config;
 	this.isCtrlDown = false;
+	this.clickCountAnimationRunning = false;
 
 	this.init();
 };
@@ -378,8 +380,21 @@ UI.prototype.showAchievements = function() {
 };
 
 UI.prototype.setupCodeClickListener = function() {
-	$('#write-code-button').on('click', $.proxy(function() {
+	$('#write-code-button').on('click', $.proxy(function(e) {
 		this.game.GetGenerator('click').Click();
+		var linesPerClick = this.game.GetGenerator('click').GetRate('code');
+		if (!this.clickCountAnimationRunning) {
+			this.clickCountAnimationRunning = true;
+			this.$clickCount.html('+' + linesPerClick).offset({left: e.pageX + 10, top: e.pageY - 20}).show();
+			this.$clickCount.css('opacity', 1).animate({
+				top: '-=10',
+				opacity: 0
+			}, 150, $.proxy(function() {
+				this.$clickCount.css({left: 0, top: 0, opacity: 0});
+				this.clickCountAnimationRunning = false;
+			}, this));
+		}
+
 	}, this));
 };
 
