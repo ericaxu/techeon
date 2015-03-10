@@ -116,6 +116,8 @@ UI.prototype.setupPurchasable = function(entity) {
 				addEl('div', $div, 'price cash', this.formatPrice(entity));
 			} else if (entity.purchasable.GetBuyPrice().code) {
 				addEl('div', $div, 'price code', this.formatPrice(entity));
+			} else {
+				addEl('div', $div, 'price', this.formatPrice(entity));
 			}
 
 			$div.on('click', $.proxy(function() {
