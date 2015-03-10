@@ -24,6 +24,7 @@ var UI = function(game, config) {
 	this.config = config;
 	this.isCtrlDown = false;
 	this.clickCountAnimationRunning = false;
+	this.playWhipSound = true;
 
 	this.init();
 };
@@ -314,8 +315,9 @@ UI.prototype.setupNavClickHandler = function($link, $toShow) {
 };
 
 UI.prototype.setupNavClickHandlers = function() {
-	this.setupNavClickHandler($('.nav-achievements'), $('#achievements-screen'));
+	this.setupNavClickHandler($('.nav-stats'), $('#stats-screen'));
 	this.setupNavClickHandler($('.nav-settings'), $('#settings-screen'));
+	this.setupNavClickHandler($('.nav-about'), $('#about-screen'));
 };
 
 UI.prototype.fillAchievementInfo = function(achievement, $div) {
@@ -360,7 +362,7 @@ UI.prototype.updateAchievementProgress = function() {
 
 UI.prototype.showAchievement = function(achievement, $container) {
 	var $div = addEl('div', $container, 'locked achievement');
-	var $achievementsNav = $('.nav-achievements');
+	var $achievementsNav = $('.nav-stats');
 	addEl('div', $div, '', '?');
 	achievement.events.on('update', function(achievement) {
 		if (achievement.obtainable.GetObtained()) {
@@ -453,7 +455,7 @@ UI.prototype.setupBuyTen = function() {
 UI.prototype.setupInternWhippingRelated = function() {
 	document.getElementById('whip-sound').volume = 0.1;
 	this.game.GetGenerator('intern').on('modifier_activate', function(entity, modifier) {
-		if (modifier.name == 'whip') {
+		if (modifier.name == 'whip' && this.playWhipSound) {
 			document.getElementById('whip-sound').play();
 		}
 	}, this);
@@ -464,13 +466,17 @@ UI.prototype.setupInternWhippingRelated = function() {
 	}, this);
 };
 
-UI.prototype.setupSettingsScreen = function() {
+UI.prototype.setupSettings = function() {
+	var self = this;
 	$('#save-button').on('click', $.proxy(function() {
 		this.saveGame();
 	}, this));
 	$('#reset-button').on('click', $.proxy(function() {
 		// TODO: reset game without refreshing
 	}));
+	$('#turn-off-whip-sound').on('click', function() {
+		self.playWhipSound = !this.checked;
+	});
 };
 
 UI.prototype.init = function() {
@@ -481,7 +487,7 @@ UI.prototype.init = function() {
 	this.setupGenerators();
 	this.setupUpgrades();
 	this.setupCodeClickListener();
-	this.setupSettingsScreen();
+	this.setupSettings();
 	this.showAchievements();
 	sh_highlightDocument();
 

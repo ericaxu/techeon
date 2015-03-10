@@ -21,11 +21,11 @@
 			<div id="logo"><span>TE</span><span>CHMONOPO</span><span>LY</span></div>
 			<ul class="navbar">
 				<li>
-					<div class="nav-item nav-achievements">
+					<div class="nav-item nav-stats">
 						<div class="nav-overlay"></div>
 						<div class="nav-item-content">
-							<img src="img/trophy.svg" alt="Achievements">
-							Achievements
+							<img src="img/trophy.svg" alt="Stats">
+							Stats
 						</div>
 					</div>
 				</li>
@@ -33,8 +33,17 @@
 					<div class="nav-item nav-settings">
 						<div class="nav-overlay"></div>
 						<div class="nav-item-content">
-							<img src="img/settings.svg" alt="Menu"/>
+							<img src="img/settings.svg" alt="Settings"/>
 							Settings
+						</div>
+					</div>
+				</li>
+				<li>
+					<div class="nav-item nav-about">
+						<div class="nav-overlay"></div>
+						<div class="nav-item-content">
+							<img src="img/about.svg" alt="About"/>
+							About
 						</div>
 					</div>
 				</li>
@@ -386,7 +395,7 @@ struct file *get_mm_exe_file(struct mm_struct *mm)
 				<div id="click-count"></div>
 			</div>
 
-			<div id="achievements-screen" class="screen">
+			<div id="stats-screen" class="screen">
 				<h2>Achievements</h2>
 				<p>Unlocked: <span id="obtained-achievement-count"></span>/<span id="total-achievement-count"></span
 						> (<span id="achievement-progress"></span>)</p>
@@ -397,7 +406,12 @@ struct file *get_mm_exe_file(struct mm_struct *mm)
 					<h2>General</h2>
 					<button id="save-button">Save</button>
 					<button id="reset-button">Reset</button>
+					<br>
+					<input type="checkbox" id="turn-off-whip-sound"/>
+					<label for="turn-off-whip-sound">Turn off sound effect for whipping interns</label>
 				</div>
+			</div>
+			<div id="about-screen" class="screen">
 				<div class="part">
 					<h2>About</h2>
 				</div>
