@@ -18,6 +18,9 @@ extend(MapList, null, {
 			return obj == object;
 		});
 	},
+	clear: function() {
+		this.data = {};
+	},
 	removePredicate: function(name, func) {
 		if (!this.data[name]) {
 			return;
@@ -37,6 +40,13 @@ extend(MapList, null, {
 	},
 	get: function() {
 		return this.data;
+	},
+	isEmpty: function() {
+		var sum = 0;
+		this.each(function(list) {
+			sum += list.length;
+		});
+		return sum == 0;
 	}
 });
 
@@ -711,7 +721,7 @@ extend(Modifier, null, {
 var Restrictable = function(entity) {
 	Component.call(this, entity);
 	entity.restrictable = this;
-	this.restrictions = [];
+	this.restrictions = new MapList();
 	this.level = 0;
 	this.entity.bridge('available_change', 'update');
 	this.entity.bridge('available_change', 'update');
@@ -719,19 +729,30 @@ var Restrictable = function(entity) {
 };
 extend(Restrictable, Component, {
 	UpdateAvailable: function() {
-		var level = Number.MAX_VALUE;
-		each(this.restrictions, function(restriction) {
-			if (!restriction.Check()) {
-				level = Math.min(level, restriction.GetLevel() - 1);
+		var minlevel = 0;
+		var maxlevel = Number.MAX_VALUE;
+		each(this.restrictions.get(), function(list, key) {
+			var thisLevel = parseInt(key);
+			var passes = each(list, function(restriction) {
+				return truefalse(restriction.Check());
+			}, this);
+			if (passes) {
+				minlevel = Math.max(minlevel, thisLevel);
+			} else {
+				maxlevel = Math.min(maxlevel, thisLevel);
 			}
 		}, this);
+		if (maxlevel == Number.MAX_VALUE) {
+			minlevel = maxlevel;
+		}
+		var level = Math.min(minlevel, maxlevel);
 		if (this.level != level) {
 			this.level = level;
 			this.entity.trigger('available_change', this.entity);
 		}
 	},
 	AddRestriction: function(restriction) {
-		this.restrictions.push(restriction);
+		this.restrictions.add(restriction.GetLevel(), restriction);
 		return this.entity;
 	},
 	ClearRestrictions: function() {
