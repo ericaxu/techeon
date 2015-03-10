@@ -110,7 +110,7 @@ UI.prototype.setupPurchasable = function(entity) {
 
 		function showPurchasable(entity) {
 			$container.css('visibility', 'visible');
-			addEl('h4', $div, '', entity.describable.GetTitle());
+			addEl('h4', $div, 'purchasable-title', entity.describable.GetTitle());
 			var $ownedCount = addEl('div', $div, 'purchasable-owned-count');
 			if (entity.purchasable.GetBuyPrice().money) {
 				addEl('div', $div, 'price cash', this.formatPrice(entity));
@@ -168,24 +168,29 @@ UI.prototype.setupPurchasable = function(entity) {
 		}
 
 		function updatePurchasable(entity) {
+			$div.find('.purchasable-title').html(entity.describable.GetTitle());
 			if (entity.amount) {
 				var amount = entity.amount.GetApprox() || '';
-				$div.find('.purchasable-owned-count').text(amount);
+				$div.find('.purchasable-owned-count').html(amount);
 			}
-			$div.find('.price').text(this.formatPrice(entity));
+			if(this == window) {
+				console.log(entity.GetName(), this);
+			}
+			$div.find('.price').html(this.formatPrice(entity));
 		}
 
 		function updatePurchasableAvailability(entity) {
 			if (entity instanceof Upgrade && entity.obtainable.GetObtained()) {
 				$div.hide();
 			} else if (entity.restrictable.GetLevel() >= 2) {
+				updatePurchasable.call(this, entity);
 				$div.show();
 			} else if (entity.restrictable.GetLevel() >= 1) {
 				if (!entity instanceof Upgrade) {
+					$div.find('purchasable-title').html('???');
+					$div.find('.price').html('???');
 					$div.show();
 				}
-
-				//TODO: Show black shadow? IF NOT AN UPGRADE
 			} else {
 				$div.hide();
 			}
@@ -205,8 +210,8 @@ UI.prototype.setupPurchasable = function(entity) {
 
 		if (entity instanceof Upgrade) {
 			entity.on('update', function() {
-				updatePurchasableAvailability(entity);
-			});
+				updatePurchasableAvailability.call(this, entity);
+			}, this);
 		}
 	}
 };
