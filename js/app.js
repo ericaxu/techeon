@@ -323,7 +323,7 @@ UI.prototype.setupNavClickHandlers = function() {
 UI.prototype.fillAchievementInfo = function(achievement, $div) {
 	$div.empty();
 	addEl('img', $div, '', '', {
-		src: 'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg',
+		src: getIcon(achievement),
 		alt: achievement.describable.GetTitle()
 	});
 	var $tooltip = $('.purchasable-tooltip-wrapper');
@@ -377,11 +377,7 @@ UI.prototype.showAchievement = function(achievement, $container) {
 		if (description) {
 			text += ': ' + description;
 		}
-		this.showNotification(
-			'Achievement Unlocked',
-			 text,
-			'http://th08.deviantart.net/fs71/200H/i/2013/355/f/e/doge_by_leftyninja-d6ytne2.jpg'
-		);
+		this.showNotification('Achievement Unlocked', text, getIcon(achievement));
 		$achievementsNav.show();
 	}, this);
 };

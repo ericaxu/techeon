@@ -229,3 +229,15 @@ function isPrintable(keycode) {
 
 	return valid;
 }
+
+function getIcon(entity) {
+	if (entity.describable.GetIcon()) {
+		return 'img/icons/' + entity.describable.GetIcon();
+	} else {
+		return 'img/icons/ribbon-' + random(entity.GetName()) + '.png';
+	}
+}
+
+function random(string) {
+	return parseInt(Math.abs(Math.sin(string.length)) * 100000, 10) % 5 + 1;
+}

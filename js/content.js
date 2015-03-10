@@ -1263,7 +1263,7 @@ var CreateGame = function() {
 			var name = entity.GetName();
 			each(objects, function(object) {
 				var achievement = game.AddAchievement(new AmountAchievement(game, name + object.amount, entity, object.amount)
-						.describable.Set(object.title, object.description)
+						.describable.Set(object.title, object.description).describable.SetIcon(object.icon)
 				);
 				if (generate) {
 					achievement.AddDefaultProduceEffect();
@@ -1276,35 +1276,38 @@ var CreateGame = function() {
 		// Resources
 		{
 			createAmountAchievements(resources.money, [
-				{amount: 1, title: "Barely Profitable", description: "Now go buy some ramen."},
-				{amount: 1000, title: "Running a Business", description: "Moderate income."},
-				{amount: 1000000, title: "Millionaire", description: "Get all the chicks you want."},
-				{amount: 1000000000, title: "Billionaire", description: "Make it rain."},
+				{amount: 1, title: "Barely Profitable", description: "Now go buy some ramen.", icon: "coin-1.png"},
+				{amount: 1000, title: "Running a Business", description: "Moderate income.", icon: "coin-1.png"},
+				{amount: 1000000, title: "Millionaire", description: "Get all the chicks you want.", icon: "cash-1.png"},
+				{amount: 1000000000, title: "Billionaire", description: "Make it rain.", icon: "cash-1.png"},
 				{
 					amount: 1000000000000,
 					title: "The World Bank",
-					description: "Lend money to other countries. Watch out for the US government."
+					description: "Lend money to other countries. Watch out for the US government.",
+					icon: "cash-2.png"
 				}
 			], true);
 
 			createAmountAchievements(resources.code, [
-				{amount: 10, title: "Hello world", description: ""},
-				{amount: 100000, title: "One Hundred-Thousand Lines", description: "Size of Photoshop 1.0."},
-				{amount: 1000000, title: "Lines by the Millions", description: "Size of Age of empires online."},
-				{amount: 10000000, title: "Age of Browsers", description: "Size of Firefox."},
-				{amount: 50000000, title: "Entire Operating Systems", description: "Size of Windows Vista."},
+				{amount: 10, title: "Hello world", description: "", icon: "hello-world.png"},
+				{amount: 100000, title: "One Hundred-Thousand Lines", description: "Size of Photoshop 1.0.", icon: "photoshop1.png"},
+				{amount: 1000000, title: "Lines by the Millions", description: "Size of Age of Empires online.", icon: "aoe-online.png"},
+				{amount: 10000000, title: "Age of Browsers", description: "Size of Firefox.", icon: "firefox.png"},
+				{amount: 50000000, title: "Entire Operating Systems", description: "Size of Windows Vista.", icon: "windows-vista.png"},
 				{
 					amount: 100000000,
 					title: "Self Driving Cars?",
-					description: "Just enough code to fit in a modern car (software)."
+					description: "Just enough code to fit in a modern car (software).",
+					icon: "modern-car.png"
 				},
-				{amount: 1000000000, title: "Monolithic", description: "Largest software on earth."},
+				{amount: 1000000000, title: "Monolithic", description: "Largest software on earth.", icon: "monolith.png"},
 				{
 					amount: 1000000000000,
 					title: "Think Like a Person",
-					description: "Achieve artificial human intelligence."
+					description: "Achieve artificial human intelligence.",
+					icon: "dna.png"
 				},
-				{amount: 3300000000000, title: "Human", description: "Size of the human DNA."}
+				{amount: 3300000000000, title: "Human", description: "Size of the human DNA.", icon: "dna.png"}
 			], true);
 		}
 
@@ -1347,18 +1350,18 @@ var CreateGame = function() {
 			);
 
 			createAmountAchievements(generators.newgrad, [
-				{amount: 1, title: "Fresh Grad", description: ""},
+				{amount: 1, title: "Fresh Grad", description: "", icon: "grad.png"},
 				{amount: 50, title: "Hacky Code", description: ""},
 				{amount: 100, title: "Junior Junior", description: ""},
 				{amount: 150, title: "Young Professionals", description: ""},
 				{amount: 200, title: "Yolo", description: ""}
 			]);
 			createAmountAchievements(generators.contractor, [
-				{amount: 1, title: "Working Remotely", description: ""},
-				{amount: 50, title: "Subcontracting", description: ""},
-				{amount: 100, title: "Outsourcing", description: ""},
-				{amount: 150, title: "Offshore Contracting", description: ""},
-				{amount: 200, title: "Crowdsourcing", description: ""}
+				{amount: 1, title: "Working Remotely", description: "", icon: "vpn.png"},
+				{amount: 50, title: "Subcontracting", description: "", icon: "vpn.png"},
+				{amount: 100, title: "Outsourcing", description: "", icon: "vpn.png"},
+				{amount: 150, title: "Offshore Contracting", description: "", icon: "vpn.png"},
+				{amount: 200, title: "Crowdsourcing", description: "", icon: "vpn.png"}
 			]);
 			createAmountAchievements(generators.programmer, [
 				{amount: 1, title: "Ready to Code", description: ""},
@@ -1368,18 +1371,18 @@ var CreateGame = function() {
 				{amount: 200, title: "Code Merge Disaster", description: ""}
 			]);
 			createAmountAchievements(generators.senior, [
-				{amount: 1, title: "Slow and Steady", description: ""},
-				{amount: 50, title: "Demanding Code Reviews", description: ""},
-				{amount: 100, title: "Reliability First", description: ""},
-				{amount: 150, title: "Rich and Accomplished", description: ""},
-				{amount: 200, title: "Retirement Home", description: ""}
+				{amount: 1, title: "Slow and Steady", description: "", icon: "old-people.png"},
+				{amount: 50, title: "Demanding Code Reviews", description: "", icon: "old-people.png"},
+				{amount: 100, title: "Reliability First", description: "", icon: "old-people.png"},
+				{amount: 150, title: "Rich and Accomplished", description: "", icon: "old-people.png"},
+				{amount: 200, title: "Retirement Home", description: "", icon: "old-people.png"}
 			]);
 			createAmountAchievements(generators.architect, [
-				{amount: 1, title: "Professional Refactorer", description: ""},
-				{amount: 50, title: "Design Document Overflow", description: ""},
-				{amount: 100, title: "Code Modularization", description: ""},
-				{amount: 150, title: "Standardization Conflict", description: ""},
-				{amount: 200, title: "Too Many Library Imports", description: ""}
+				{amount: 1, title: "Professional Refactorer", description: "", icon: "xcode.png"},
+				{amount: 50, title: "Design Document Overflow", description: "", icon: "xcode.png"},
+				{amount: 100, title: "Code Modularization", description: "", icon: "xcode.png"},
+				{amount: 150, title: "Standardization Conflict", description: "", icon: "xcode.png"},
+				{amount: 200, title: "Too Many Library Imports", description: "", icon: "xcode.png"}
 			]);
 			createAmountAchievements(generators.teamlead, [
 				{amount: 1, title: "Leadership", description: ""},
@@ -1421,25 +1424,25 @@ var CreateGame = function() {
 				{amount: 200, title: "SmartSpam\u2122", description: ""} //trademark sign
 			]);
 			createAmountAchievements(generators.desktop, [
-				{amount: 1, title: "Unzip This File", description: ""},
-				{amount: 50, title: "Please do Not Lose Your CD-KEY", description: ""},
+				{amount: 1, title: "Unzip This File", description: "", icon: "winrar.png"},
+				{amount: 50, title: "Please do Not Lose Your CD-KEY", description: "", icon: "cd.png"},
 				{amount: 100, title: "InstallShield Express Installer", description: ""},
 				{amount: 150, title: "Auto-Update", description: ""},
 				{amount: 200, title: "Mass Deployment", description: ""}
 			]);
 			createAmountAchievements(generators.mobileapp, [
-				{amount: 1, title: "iOS & Android!", description: ""},
-				{amount: 50, title: "Internal App Store", description: ""},
+				{amount: 1, title: "iOS & Android!", description: "", icon: "android.png"},
+				{amount: 50, title: "Internal App Store", description: "", icon: "app-store.png"},
 				{amount: 100, title: "App Generator", description: ""},
 				{amount: 150, title: "Out of Phone Memory", description: ""},
 				{amount: 200, title: "Top Rated Apps", description: ""}
 			]);
 			createAmountAchievements(generators.seoalgo, [
-				{amount: 1, title: "Keywords Everywhere", description: ""},
-				{amount: 50, title: "Front Page Results", description: ""},
-				{amount: 100, title: "Advanced Internet Marketing", description: ""},
-				{amount: 150, title: "Fully Automated Internet Marketing", description: ""},
-				{amount: 200, title: "Paid Search Results", description: ""}
+				{amount: 1, title: "Keywords Everywhere", description: "", icon: "aol.png"},
+				{amount: 50, title: "Front Page Results", description: "", icon: "bing.png"},
+				{amount: 100, title: "Advanced Internet Marketing", description: "", icon: "duckduckgo.png"},
+				{amount: 150, title: "Fully Automated Internet Marketing", description: "", icon: "yahoo.png"},
+				{amount: 200, title: "Paid Search Results", description: "", icon: "google.png"}
 			]);
 			createAmountAchievements(generators.aisales, [
 				{amount: 1, title: "Enterprise Targeted", description: ""},
@@ -1449,11 +1452,11 @@ var CreateGame = function() {
 				{amount: 200, title: "Salesforce", description: ""}
 			]);
 			createAmountAchievements(generators.catvidgen, [
-				{amount: 1, title: "Kittens!", description: ""},
-				{amount: 10, title: "Viral Content", description: ""},
-				{amount: 50, title: "View-count Through the roofs", description: ""},
-				{amount: 100, title: "The New Youtube", description: ""},
-				{amount: 150, title: "The Default Screensaver", description: ""}
+				{amount: 1, title: "Kittens!", description: "", icon: "nyan-cat.png"},
+				{amount: 10, title: "Viral Content", description: "", icon: "nyan-cat.png"},
+				{amount: 50, title: "View-count Through the roofs", description: "", icon: "nyan-cat.png"},
+				{amount: 100, title: "The New Youtube", description: "", icon: "nyan-cat.png"},
+				{amount: 150, title: "The Default Screensaver", description: "", icon: "grumpy-cat.png"}
 			]);
 
 		}
