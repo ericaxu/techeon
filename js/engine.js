@@ -189,7 +189,8 @@ var GameEngine = function() {
 	this.tick = 0;
 	this.data = {};
 	this.content = {};
-	new Loader(this).AddElement('tick').AddElement('data');
+	this.settings = {};
+	new Loader(this).AddElement('tick').AddElement('data').AddElement('settings');
 };
 extend(GameEngine, null, {
 	Start: function() {
@@ -238,6 +239,9 @@ extend(GameEngine, null, {
 		this.content[type].push(entity);
 		this.data[type][entity.GetName()] = entity;
 		return entity;
+	},
+	GetSettings: function() {
+		return this.settings;
 	},
 
 	//Helpers
