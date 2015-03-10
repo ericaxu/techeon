@@ -445,12 +445,13 @@ UI.prototype.setupBuyTen = function() {
 	}, this));
 	$(document).on('keyup', $.proxy(function(e) {
 		if(e.keyCode === 17 && this.isCtrlDown) {
-			this.isCtrlDown = false
+			this.isCtrlDown = false;
 		}
 	}, this));
 };
 
 UI.prototype.setupInternWhippingRelated = function() {
+	document.getElementById('whip-sound').volume = 0.1;
 	this.game.GetGenerator('intern').on('modifier_activate', function(entity, modifier) {
 		if (modifier.name == 'whip') {
 			document.getElementById('whip-sound').play();
