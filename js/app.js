@@ -447,7 +447,7 @@ UI.prototype.setupBuyTen = function() {
 
 UI.prototype.setupInternWhippingRelated = function() {
 	this.game.GetGenerator('intern').on('modifier_activate', function(entity, modifier) {
-		if (modifier.name == 'whipped') {
+		if (modifier.name == 'whip') {
 			document.getElementById('whip-sound').play();
 		}
 	}, this);
