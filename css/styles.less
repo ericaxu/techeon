@@ -6,6 +6,9 @@
 @double-border-between: #666666;
 @double-border-content-color: #fafafa;
 
+@cash-price: #50A050;
+@code-price: #2D69BC;
+
 @border-color: #BDBDBD;
 @background: #fafafa;
 
@@ -316,8 +319,12 @@ p {
 		margin-bottom: 10px;
 	}
 
-	.price {
-		color: #50A050;
+	.cash.price {
+		color: @cash-price;
+	}
+
+	.code.price {
+		color: @code-price;
 	}
 }
 
@@ -435,7 +442,7 @@ p {
 	border-color: transparent @double-border-inner-corner;
 }
 
-.unaffordable {
+.unaffordable, .unaffordable.require-cash {
 	background: #DDD;
 	color: #555;
 }

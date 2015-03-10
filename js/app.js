@@ -112,7 +112,12 @@ UI.prototype.setupPurchasable = function(entity) {
 			$container.css('visibility', 'visible');
 			addEl('h4', $div, '', entity.describable.GetTitle());
 			var $ownedCount = addEl('div', $div, 'purchasable-owned-count');
-			addEl('div', $div, 'price', this.formatPrice(entity));
+			if (entity.purchasable.GetBuyPrice().money) {
+				addEl('div', $div, 'price cash', this.formatPrice(entity));
+			} else if (entity.purchasable.GetBuyPrice().code) {
+				addEl('div', $div, 'price code', this.formatPrice(entity));
+			}
+
 			$div.on('click', $.proxy(function() {
 				// Buy ten
 				if (this.isCtrlDown) {
@@ -174,8 +179,10 @@ UI.prototype.setupPurchasable = function(entity) {
 			} else if (entity.restrictable.GetLevel() >= 2) {
 				$div.show();
 			} else if (entity.restrictable.GetLevel() >= 1) {
-				$div.hide();
-				//$div.show();
+				if (!entity instanceof Upgrade) {
+					$div.show();
+				}
+
 				//TODO: Show black shadow? IF NOT AN UPGRADE
 			} else {
 				$div.hide();
