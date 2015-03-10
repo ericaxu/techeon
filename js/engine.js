@@ -95,6 +95,7 @@ extend(Events, null, {
 var Loader = function(owner) {
 	this.owner = owner;
 	this.owner.loader = this;
+	this.loading = false;
 	this.elements = {};
 };
 extend(Loader, null, {
@@ -103,6 +104,7 @@ extend(Loader, null, {
 		return this;
 	},
 	Load: function(data) {
+		this.loading = true;
 		for (var key in this.elements) {
 			var result = this.LoadSingle(data[key], this.owner[key]);
 			if (result !== null) {
@@ -112,6 +114,7 @@ extend(Loader, null, {
 		if (this.owner.events) {
 			this.owner.trigger('load', this.owner);
 		}
+		this.loading = false;
 	},
 	LoadSingle: function(data, dest) {
 		if (data === undefined) {
@@ -157,6 +160,9 @@ extend(Loader, null, {
 			}
 		}
 		return data;
+	},
+	IsLoading: function() {
+		return this.loading;
 	}
 });
 

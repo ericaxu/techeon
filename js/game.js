@@ -65,6 +65,9 @@ extend(Game, GameEngine, {
 		return this.data.achievements[name];
 	},
 	UpdateStatsUpgrades: function() {
+		if(this.loader.IsLoading()) {
+			return;
+		}
 		var old = this.stats.upgrades;
 		this.stats.upgrades = 0;
 		each(this.content.upgrades, function(upgrade) {
@@ -77,6 +80,9 @@ extend(Game, GameEngine, {
 		}
 	},
 	UpdateStatsAchievements: function() {
+		if(this.loader.IsLoading()) {
+			return;
+		}
 		var old = this.stats.achievements;
 		this.stats.achievements = 0;
 		each(this.content.achievements, function(achievement) {
